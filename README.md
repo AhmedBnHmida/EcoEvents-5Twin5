@@ -24,8 +24,8 @@ Un point de rencontre en ligne pour organiser et promouvoir des événements aut
 
 ### 1. Cloner le projet
 ```bash
-git clone https://github.com/votre-username/ecoevents.git
-cd ecoevents
+git clone https://github.com/AhmedBnHmida/EcoEvents-5Twin5.git
+cd EcoEvents-5Twin5
 ```
 ### 2. Installer les dépendances PHP
 ```bash
