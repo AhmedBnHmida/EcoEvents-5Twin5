@@ -17,4 +17,31 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+
+Route::get('/', function () {
+    return view('home');
+});
+
+
+
+
+
+
+
+
+Route::get('/profile', function () {
+    return view('account-pages.profile');
+})->name('profile')->middleware('auth');
+
+
+Route::get('/signin', function () {
+    return view('account-pages.signin');
+})->name('signin');
+
+Route::get('/signup', function () {
+    return view('account-pages.signup');
+})->name('signup')->middleware('guest');
+
+
 require __DIR__.'/auth.php';
