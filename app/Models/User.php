@@ -18,12 +18,18 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role'
+        'name', 'first_name', 'last_name', 'email', 'password', 'role'
     ];
 
+    public function registrations()
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class, 'id_participant');
+    }
 
     // Méthodes pratiques pour vérifier les rôles
     public function isAdmin()
