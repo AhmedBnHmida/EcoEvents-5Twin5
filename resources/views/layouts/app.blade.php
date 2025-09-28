@@ -86,7 +86,10 @@
         <x-app.sidebar />
     @endif
 
-    {{ $slot }}
+    <!-- Main content area -->
+    <main class="main-content">
+        @yield('content')  {{-- This is where page content will be injected --}}
+    </main>
 
     <div class="fixed-plugin">
         <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">

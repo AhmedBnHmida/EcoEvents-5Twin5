@@ -19,7 +19,6 @@ return new class extends Migration
             $table->dateTime('end_date');
             $table->string('location', 255)->nullable();
             $table->integer('capacity_max');
-            $table->unsignedBigInteger('association_id');
             $table->unsignedBigInteger('categorie_id');
             $table->enum('status', ['UPCOMING', 'ONGOING', 'CANCELLED', 'COMPLETED'])->default('UPCOMING');
             $table->dateTime('registration_deadline')->nullable();
@@ -28,7 +27,6 @@ return new class extends Migration
             $table->json('images')->nullable();
             $table->timestamps();
 
-            $table->foreign('association_id')->references('id')->on('associations')->onDelete('cascade');
             $table->foreign('categorie_id')->references('id')->on('categories')->onDelete('cascade');
         });
     }

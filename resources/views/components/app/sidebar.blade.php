@@ -10,7 +10,7 @@
     <div class="collapse navbar-collapse px-4  w-auto " id="sidenav-collapse-main">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link  {{ is_current_route('dashboard') ? 'active' : '' }}"
+                <a class="nav-link  {{ Route::is('dashboard') ? 'active' : '' }}"
                     href="{{ route('dashboard') }}">
                     <div
                         class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
@@ -37,7 +37,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link  {{ is_current_route('tables') ? 'active' : '' }}" href="{{ route('tables') }}">
+                <a class="nav-link  {{ Route::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <div
                         class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
                         <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1"
@@ -66,7 +66,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ is_current_route('wallet') ? 'active' : '' }} " href="{{ route('wallet') }}">
+                <a class="nav-link {{ Route::is('dashboard') ? 'active' : '' }} " href="{{ route('dashboard') }}">
                     <div
                         class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
                         <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1"
@@ -88,7 +88,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link  {{ is_current_route('RTL') ? 'active' : '' }}" href="{{ route('RTL') }}">
+                <a class="nav-link  {{ Route::is('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <div
                         class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
                         <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1"
@@ -124,14 +124,14 @@
                 </div>
             </li>
             <li class="nav-item border-start my-0 pt-2">
-                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ is_current_route('users.profile') ? 'active' : '' }}"
-                    href="{{ route('users.profile') }}">
+                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ Route::is('profile') ? 'active' : '' }}"
+                    href="{{ route('profile') }}">
                     <span class="nav-link-text ms-1">User Profile</span>
                 </a>
             </li>
             <li class="nav-item border-start my-0 pt-2">
-                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ is_current_route('users-management') ? 'active' : '' }}"
-                    href="{{ route('users-management') }}">
+                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ Route::is('profile') ? 'active' : '' }}"
+                    href="{{ route('profile') }}">
                     <span class="nav-link-text ms-1">User Management</span>
                 </a>
             </li>
@@ -147,19 +147,19 @@
                 </div>
             </li>
             <li class="nav-item border-start my-0 pt-2">
-                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ is_current_route('profile') ? 'active' : '' }}"
+                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ Route::is('profile') ? 'active' : '' }}"
                     href="{{ route('profile') }}">
                     <span class="nav-link-text ms-1">Profile</span>
                 </a>
             </li>
             <li class="nav-item border-start my-0 pt-2">
-                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ is_current_route('signin') ? 'active' : '' }}"
+                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ Route::is('signin') ? 'active' : '' }}"
                     href="{{ route('signin') }}">
                     <span class="nav-link-text ms-1">Sign In</span>
                 </a>
             </li>
             <li class="nav-item border-start my-0 pt-2">
-                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ is_current_route('signup') ? 'active' : '' }}"
+                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ Route::is('signup') ? 'active' : '' }}"
                     href="{{ route('signup') }}">
                     <span class="nav-link-text ms-1">Sign Up</span>
                 </a>
@@ -185,7 +185,7 @@
                     <h6 class="font-weight-bold up mb-2">Need help?</h6>
                     <p class="text-sm font-weight-normal">Please check our docs.</p>
                     <a href="https://www.creative-tim.com/learning-lab/bootstrap/installation-guide/corporate-ui-dashboard"
-                        target="_blank" class="font-weight-bold text-sm mb-0 icon-move-right mt-auto w-100 mb-0">
+                        target="_blank" class="font-weight-bold text-sm  icon-move-right mt-auto w-100 ">
                         Documentation
                         <i class="fas fa-arrow-right-long text-sm ms-1" aria-hidden="true"></i>
                     </a>
