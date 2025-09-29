@@ -10,7 +10,7 @@
                     <a class="nav-link" href="/">Accueil</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#evenements">Événements</a>
+                    <a class="nav-link" href="{{ route('events.public') }}">Événements</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#contact">Contact</a>

@@ -97,6 +97,13 @@ Route::get('/laravel-examples/users-management', [UserController::class, 'index'
 // Routes resources pour la gestion des entités du backoffice
 Route::resource('events', App\Http\Controllers\EventController::class);
 Route::resource('categories', App\Http\Controllers\CategoryController::class);
+
+// Public routes - no conflict
+Route::get('/events', [App\Http\Controllers\EventController::class, 'publicIndex'])->name('events.public');
+Route::get('/events/{id}', [App\Http\Controllers\EventController::class, 'publicShow'])->name('events.public.show');
+
+Route::get('/manage/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
+Route::get('/manage/events/{id}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
 Route::resource('feedback', App\Http\Controllers\FeedbackController::class);
 Route::resource('evaluations', App\Http\Controllers\EvaluationController::class);
 Route::resource('ressources', App\Http\Controllers\RessourceController::class);
