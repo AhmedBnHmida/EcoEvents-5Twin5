@@ -94,16 +94,34 @@ Route::post('/reset-password', [ResetPasswordController::class, 'store'])
 Route::get('/laravel-examples/user-profile', [ProfileController::class, 'index'])->name('users.profile')->middleware('auth');
 Route::put('/laravel-examples/user-profile/update', [ProfileController::class, 'update'])->name('users.update')->middleware('auth');
 Route::get('/laravel-examples/users-management', [UserController::class, 'index'])->name('users-management')->middleware('auth');
-// Routes resources pour la gestion des entités du backoffice
-Route::resource('events', App\Http\Controllers\EventController::class);
-Route::resource('categories', App\Http\Controllers\CategoryController::class);
+
 
 // Public routes - no conflict
 Route::get('/events', [App\Http\Controllers\EventController::class, 'publicIndex'])->name('events.public');
 Route::get('/events/{id}', [App\Http\Controllers\EventController::class, 'publicShow'])->name('events.public.show');
 
-Route::get('/manage/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
-Route::get('/manage/events/{id}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
+// ADMIN Routes - Use explicit routes instead of resource to avoid conflicts
+Route::middleware('auth')->group(function () {
+    // Admin Events Routes
+    Route::get('/manage/events', [App\Http\Controllers\EventController::class, 'index'])->name('events.index');
+    Route::get('/manage/events/create', [App\Http\Controllers\EventController::class, 'create'])->name('events.create');
+    Route::post('/manage/events', [App\Http\Controllers\EventController::class, 'store'])->name('events.store');
+    Route::get('/manage/events/{id}', [App\Http\Controllers\EventController::class, 'show'])->name('events.show');
+    Route::get('/manage/events/{id}/edit', [App\Http\Controllers\EventController::class, 'edit'])->name('events.edit');
+    Route::put('/manage/events/{id}', [App\Http\Controllers\EventController::class, 'update'])->name('events.update');
+    Route::delete('/manage/events/{id}', [App\Http\Controllers\EventController::class, 'destroy'])->name('events.destroy');
+
+    // Categories Routes
+    Route::get('/manage/categories', [App\Http\Controllers\CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/manage/categories/create', [App\Http\Controllers\CategoryController::class, 'create'])->name('categories.create');
+    Route::post('/manage/categories', [App\Http\Controllers\CategoryController::class, 'store'])->name('categories.store');
+    Route::get('/manage/categories/{id}', [App\Http\Controllers\CategoryController::class, 'show'])->name('categories.show');
+    Route::get('/manage/categories/{id}/edit', [App\Http\Controllers\CategoryController::class, 'edit'])->name('categories.edit');
+    Route::put('/manage/categories/{id}', [App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/manage/categories/{id}', [App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
+});
+
+
 Route::resource('feedback', App\Http\Controllers\FeedbackController::class);
 Route::resource('evaluations', App\Http\Controllers\EvaluationController::class);
 Route::resource('ressources', App\Http\Controllers\RessourceController::class);
