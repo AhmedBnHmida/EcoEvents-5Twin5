@@ -60,7 +60,7 @@
                     </a>
                 </li>
                 <li class="nav-item mb-1">
-                    <a class="nav-link d-flex align-items-center {{ is_current_route('inscriptions.index') ? 'active' : '' }}" href="{{ route('inscriptions.index') }}">
+                    <a class="nav-link d-flex align-items-center {{ is_current_route('registrations.index') ? 'active' : '' }}" href="{{ route('registrations.index') }}">
                         <i class="fas fa-user-check me-2 text-success"></i>
                         <span>Inscriptions</span>
                     </a>

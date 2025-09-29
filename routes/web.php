@@ -99,6 +99,16 @@ Route::resource('users', App\Http\Controllers\UsersController::class);
 Route::get('/events', [App\Http\Controllers\EventController::class, 'publicIndex'])->name('events.public');
 Route::get('/events/{id}', [App\Http\Controllers\EventController::class, 'publicShow'])->name('events.public.show');
 
+// Participant Registration Routes (create can be accessed by guests, will redirect to login)
+Route::get('/registrations/create', [App\Http\Controllers\RegistrationController::class, 'create'])->name('registrations.create');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/registrations', [App\Http\Controllers\RegistrationController::class, 'store'])->name('registrations.store');
+    Route::get('/registrations/{registration}', [App\Http\Controllers\RegistrationController::class, 'show'])->name('registrations.show');
+    Route::delete('/registrations/{registration}', [App\Http\Controllers\RegistrationController::class, 'destroy'])->name('registrations.destroy');
+    Route::get('/my-registrations', [App\Http\Controllers\RegistrationController::class, 'myRegistrations'])->name('registrations.my');
+});
+
 // ADMIN Routes - Use explicit routes instead of resource to avoid conflicts
 Route::middleware('auth')->group(function () {
     // Admin Events Routes
@@ -118,6 +128,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/manage/categories/{id}/edit', [App\Http\Controllers\CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/manage/categories/{id}', [App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/manage/categories/{id}', [App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Admin Registration Management Routes
+    Route::get('/manage/registrations', [App\Http\Controllers\RegistrationController::class, 'index'])->name('registrations.index');
+    Route::patch('/manage/registrations/{registration}/status', [App\Http\Controllers\RegistrationController::class, 'updateStatus'])->name('registrations.updateStatus');
 });
 
 
