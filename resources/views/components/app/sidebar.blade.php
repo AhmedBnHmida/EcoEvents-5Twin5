@@ -38,32 +38,78 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link  {{ is_current_route('tables') ? 'active' : '' }}" href="{{ route('tables') }}">
-                    <div
-                        class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
+                    <div class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
                         <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1"
                             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                             <title>table</title>
                             <g id="table" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g id="view-grid" transform="translate(12.000000, 12.000000)" fill="#FFFFFF"
-                                    fill-rule="nonzero">
-                                    <path class="color-foreground"
-                                        d="M3.42857143,0 C1.53502286,0 0,1.53502286 0,3.42857143 L0,6.85714286 C0,8.75069143 1.53502286,10.2857143 3.42857143,10.2857143 L6.85714286,10.2857143 C8.75069143,10.2857143 10.2857143,8.75069143 10.2857143,6.85714286 L10.2857143,3.42857143 C10.2857143,1.53502286 8.75069143,0 6.85714286,0 L3.42857143,0 Z"
-                                        id="Path"></path>
-                                    <path class="color-background"
-                                        d="M3.42857143,13.7142857 C1.53502286,13.7142857 0,15.2492571 0,17.1428571 L0,20.5714286 C0,22.4650286 1.53502286,24 3.42857143,24 L6.85714286,24 C8.75069143,24 10.2857143,22.4650286 10.2857143,20.5714286 L10.2857143,17.1428571 C10.2857143,15.2492571 8.75069143,13.7142857 6.85714286,13.7142857 L3.42857143,13.7142857 Z"
-                                        id="Path"></path>
-                                    <path class="color-background"
-                                        d="M13.7142857,3.42857143 C13.7142857,1.53502286 15.2492571,0 17.1428571,0 L20.5714286,0 C22.4650286,0 24,1.53502286 24,3.42857143 L24,6.85714286 C24,8.75069143 22.4650286,10.2857143 20.5714286,10.2857143 L17.1428571,10.2857143 C15.2492571,10.2857143 13.7142857,8.75069143 13.7142857,6.85714286 L13.7142857,3.42857143 Z"
-                                        id="Path"></path>
-                                    <path class="color-foreground"
-                                        d="M13.7142857,17.1428571 C13.7142857,15.2492571 15.2492571,13.7142857 17.1428571,13.7142857 L20.5714286,13.7142857 C22.4650286,13.7142857 24,15.2492571 24,17.1428571 L24,20.5714286 C24,22.4650286 22.4650286,24 20.5714286,24 L17.1428571,24 C15.2492571,24 13.7142857,22.4650286 13.7142857,20.5714286 L13.7142857,17.1428571 Z"
-                                        id="Path"></path>
+                                <g id="view-grid" transform="translate(12.000000, 12.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                                    <path class="color-foreground" d="M3.42857143,0 C1.53502286,0 0,1.53502286 0,3.42857143 L0,6.85714286 C0,8.75069143 1.53502286,10.2857143 3.42857143,10.2857143 L6.85714286,10.2857143 C8.75069143,10.2857143 10.2857143,8.75069143 10.2857143,6.85714286 L10.2857143,3.42857143 C10.2857143,1.53502286 8.75069143,0 6.85714286,0 L3.42857143,0 Z" id="Path"></path>
+                                    <path class="color-background" d="M3.42857143,13.7142857 C1.53502286,13.7142857 0,15.2492571 0,17.1428571 L0,20.5714286 C0,22.4650286 1.53502286,24 3.42857143,24 L6.85714286,24 C8.75069143,24 10.2857143,22.4650286 10.2857143,20.5714286 L10.2857143,17.1428571 C10.2857143,15.2492571 8.75069143,13.7142857 6.85714286,13.7142857 L3.42857143,13.7142857 Z" id="Path"></path>
+                                    <path class="color-background" d="M13.7142857,3.42857143 C13.7142857,1.53502286 15.2492571,0 17.1428571,0 L20.5714286,0 C22.4650286,0 24,1.53502286 24,3.42857143 L24,6.85714286 C24,8.75069143 22.4650286,10.2857143 20.5714286,10.2857143 L17.1428571,10.2857143 C15.2492571,10.2857143 13.7142857,8.75069143 13.7142857,6.85714286 L13.7142857,3.42857143 Z" id="Path"></path>
+                                    <path class="color-foreground" d="M13.7142857,17.1428571 C13.7142857,15.2492571 15.2492571,13.7142857 17.1428571,13.7142857 L20.5714286,13.7142857 C22.4650286,13.7142857 24,15.2492571 24,17.1428571 L24,20.5714286 C24,22.4650286 22.4650286,24 20.5714286,24 L17.1428571,24 C15.2492571,24 13.7142857,22.4650286 13.7142857,20.5714286 L13.7142857,17.1428571 Z" id="Path"></path>
                                 </g>
                             </g>
                         </svg>
                     </div>
                     <span class="nav-link-text ms-1">Tables</span>
                 </a>
+                <ul class="nav flex-column ms-2">
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('events.index') ? 'active' : '' }}" href="{{ route('events.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-calendar-alt"></i></span>
+                            <span>Events</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('categories.index') ? 'active' : '' }}" href="{{ route('categories.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-list-alt"></i></span>
+                            <span>Categories</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('feedback.index') ? 'active' : '' }}" href="{{ route('feedback.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-comment-dots"></i></span>
+                            <span>Feedback</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('evaluations.index') ? 'active' : '' }}" href="{{ route('evaluations.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-star-half-alt"></i></span>
+                            <span>Evaluations</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('ressources.index') ? 'active' : '' }}" href="{{ route('ressources.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-boxes"></i></span>
+                            <span>Ressources</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('fournisseurs.index') ? 'active' : '' }}" href="{{ route('fournisseurs.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-truck"></i></span>
+                            <span>Fournisseurs</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('inscriptions.index') ? 'active' : '' }}" href="{{ route('inscriptions.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-user-edit"></i></span>
+                            <span>Inscriptions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('partenaires.index') ? 'active' : '' }}" href="{{ route('partenaires.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-handshake"></i></span>
+                            <span>Partenaires</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center py-2 px-2 rounded {{ is_current_route('sponsoring.index') ? 'active' : '' }}" href="{{ route('sponsoring.index') }}" style="transition: background 0.2s;">
+                            <span class="me-2"><i class="fas fa-gift"></i></span>
+                            <span>Sponsoring</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ is_current_route('wallet') ? 'active' : '' }} " href="{{ route('wallet') }}">
@@ -152,45 +198,27 @@
                     <span class="nav-link-text ms-1">Profile</span>
                 </a>
             </li>
-            <li class="nav-item border-start my-0 pt-2">
-                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ is_current_route('signin') ? 'active' : '' }}"
-                    href="{{ route('signin') }}">
-                    <span class="nav-link-text ms-1">Sign In</span>
-                </a>
-            </li>
-            <li class="nav-item border-start my-0 pt-2">
-                <a class="nav-link position-relative ms-0 ps-2 py-2 {{ is_current_route('signup') ? 'active' : '' }}"
-                    href="{{ route('signup') }}">
-                    <span class="nav-link-text ms-1">Sign Up</span>
-                </a>
-            </li>
         </ul>
-    </div>
-    <div class="sidenav-footer mx-4 ">
-        <a class="btn bg-gradient-primary inline-block px-5 py-3 mx-auto text-xs align-middle transition-all ease-in border-0 rounded-lg select-none" href="https://www.creative-tim.com/product/corporate-ui-dashboard-pro-laravel" target="_blank">
-            UPGRADE TO PRO
-        </a>
-        <div class="card border-radius-md" id="sidenavCard">
-            <div class="card-body  text-start  p-3 w-100">
-                <div class="mb-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="text-primary"
-                        viewBox="0 0 24 24" fill="currentColor" id="sidenavCardIcon">
-                        <path
-                            d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625z" />
-                        <path
-                            d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" />
-                    </svg>
-                </div>
-                <div class="docs-info">
-                    <h6 class="font-weight-bold up mb-2">Need help?</h6>
-                    <p class="text-sm font-weight-normal">Please check our docs.</p>
-                    <a href="https://www.creative-tim.com/learning-lab/bootstrap/installation-guide/corporate-ui-dashboard"
-                        target="_blank" class="font-weight-bold text-sm mb-0 icon-move-right mt-auto w-100 mb-0">
-                        Documentation
-                        <i class="fas fa-arrow-right-long text-sm ms-1" aria-hidden="true"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+        <ul class="navbar-nav">
+            @auth
+            <li class="nav-item">
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                    </button>
+                </form>
+            </li>
+            @else
+            <li class="nav-item mb-2">
+                <a href="{{ route('login') }}" class="btn btn-dark w-100 mb-2">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+                <a href="{{ route('register') }}" class="btn btn-outline-dark w-100">
+                    <i class="fas fa-user-plus me-2"></i>Signup
+                </a>
+            </li>
+            @endauth
+        </ul>
     </div>
 </aside>
