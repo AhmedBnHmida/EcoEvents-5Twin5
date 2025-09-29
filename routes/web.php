@@ -3,6 +3,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FournisseurController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -129,4 +130,34 @@ Route::resource('fournisseurs', App\Http\Controllers\FournisseurController::clas
 Route::resource('inscriptions', App\Http\Controllers\InscriptionController::class);
 Route::resource('partenaires', App\Http\Controllers\PartenaireController::class);
 Route::resource('sponsoring', App\Http\Controllers\SponsoringController::class);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Route::get('/dashboard-Fournisseur', function () {
+    return view('dashboard-Fournisseur.dashboard');
+})->name('dashboard-Fournisseur');
+
+
+
+
+
+
+
+
+
+
+
 require __DIR__.'/auth.php';

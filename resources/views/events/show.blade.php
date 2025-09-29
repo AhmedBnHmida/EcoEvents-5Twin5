@@ -132,6 +132,43 @@
                                 </div>
                             </div>
 
+                            <!-- Resources Section -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card shadow-xs border-radius-lg">
+                                        <div class="card-header">
+                                            <h6 class="text-sm font-weight-bold mb-0">Resources</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            @if($event->ressources->count() > 0)
+                                                <div class="table-responsive">
+                                                    <table class="table align-items-center mb-0">
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Name</th>
+                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type</th>
+                                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Supplier</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($event->ressources as $resource)
+                                                                <tr>
+                                                                    <td class="text-sm text-dark">{{ $resource->nom }}</td>
+                                                                    <td class="text-sm text-dark">{{ $resource->type->value }}</td>
+                                                                    <td class="text-sm text-dark">{{ $resource->fournisseur->nom_societe }}</td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            @else
+                                                <p class="text-sm text-secondary mb-0">No resources assigned to this event.</p>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Additional Information -->
                             <div class="row mt-4">
                                 <div class="col-12">
