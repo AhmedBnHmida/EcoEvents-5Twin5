@@ -170,6 +170,72 @@
                                     @enderror
                                     <small class="form-text text-muted">Enter image URLs as a JSON array</small>
                                 </div>
+
+                                <div class="card mt-4">
+                                    <div class="card-header">
+                                        <h6 class="font-weight-semibold text-lg mb-0">Resources</h6>
+                                        <p class="text-sm mb-0">Manage resources for the event</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="resources-container">
+                                            @foreach($event->ressources as $index => $resource)
+                                                <div class="resource-row mb-3" data-index="{{ $index }}">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="form-control-label">Resource Name</label>
+                                                                <input type="text" class="form-control @error('resources.'.$index.'.nom') is-invalid @enderror" 
+                                                                       name="resources[{{ $index }}][nom]" value="{{ old('resources.'.$index.'.nom', $resource->nom) }}">
+                                                                @error('resources.'.$index.'.nom')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="form-control-label">Resource Type</label>
+                                                                <select class="form-control @error('resources.'.$index.'.type') is-invalid @enderror" 
+                                                                        name="resources[{{ $index }}][type]">
+                                                                    <option value="">Select Type</option>
+                                                                    @foreach($resourceTypes as $type)
+                                                                        <option value="{{ $type->value }}" {{ old('resources.'.$index.'.type', $resource->type->value) == $type->value ? 'selected' : '' }}>
+                                                                            {{ $type->value }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                                @error('resources.'.$index.'.type')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-group">
+                                                                <label class="form-control-label">Supplier</label>
+                                                                <select class="form-control @error('resources.'.$index.'.fournisseur_id') is-invalid @enderror" 
+                                                                        name="resources[{{ $index }}][fournisseur_id]">
+                                                                    <option value="">Select Supplier</option>
+                                                                    @foreach($fournisseurs as $fournisseur)
+                                                                        <option value="{{ $fournisseur->id }}" {{ old('resources.'.$index.'.fournisseur_id', $resource->fournisseur_id) == $fournisseur->id ? 'selected' : '' }}>
+                                                                            {{ $fournisseur->nom_societe }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                                @error('resources.'.$index.'.fournisseur_id')
+                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                @enderror
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-1">
+                                                            <button type="button" class="btn btn-danger btn-sm remove-resource mt-4">Remove</button>
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" name="resources[{{ $index }}][id]" value="{{ $resource->id }}">
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <button type="button" class="btn btn-secondary btn-sm mt-2" id="add-resource">Add Resource</button>
+                                    </div>
+                                </div>
                                 
                                 <div class="d-flex justify-content-between mt-4">
                                     <a href="{{ route('events.show', $event->id) }}" class="btn btn-white">
@@ -187,4 +253,55 @@
             </div>
         </div>
     </main>
+
+    <script>
+        document.getElementById('add-resource').addEventListener('click', function() {
+            const container = document.getElementById('resources-container');
+            const index = container.querySelectorAll('.resource-row').length;
+            const template = `
+                <div class="resource-row mb-3" data-index="${index}">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-control-label">Resource Name</label>
+                                <input type="text" class="form-control" name="resources[${index}][nom]">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-control-label">Resource Type</label>
+                                <select class="form-control" name="resources[${index}][type]">
+                                    <option value="">Select Type</option>
+                                    @foreach($resourceTypes as $type)
+                                        <option value="{{ $type->value }}">{{ $type->value }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="form-control-label">Supplier</label>
+                                <select class="form-control" name="resources[${index}][fournisseur_id]">
+                                    <option value="">Select Supplier</option>
+                                    @foreach($fournisseurs as $fournisseur)
+                                        <option value="{{ $fournisseur->id }}">{{ $fournisseur->nom_societe }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-danger btn-sm remove-resource mt-4">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', template);
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-resource')) {
+                e.target.closest('.resource-row').remove();
+            }
+        });
+    </script>
 </x-app-layout>

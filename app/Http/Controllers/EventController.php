@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Category;
+use App\Models\Ressource;
+use App\Models\Fournisseur;
 use App\EventStatus;
+use App\TypeRessource;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -52,7 +55,9 @@ class EventController extends Controller
     {
         $categories = Category::all();
         $statuses = EventStatus::cases();
-        return view('events.create', compact('categories', 'statuses'));
+        $fournisseurs = Fournisseur::all();
+        $resourceTypes = TypeRessource::cases();
+        return view('events.create', compact('categories', 'statuses', 'fournisseurs', 'resourceTypes'));
     }
 
     /**
@@ -72,12 +77,28 @@ class EventController extends Controller
             'registration_deadline' => 'required|date|before:start_date',
             'price' => 'required|numeric|min:0',
             'is_public' => 'boolean',
-            'images' => 'nullable|array'
+            'images' => 'nullable|array',
+            'resources' => 'nullable|array',
+            'resources.*.nom' => 'required_with:resources|string|max:255',
+            'resources.*.type' => 'required_with:resources|in:' . implode(',', array_column(TypeRessource::cases(), 'value')),
+            'resources.*.fournisseur_id' => 'required_with:resources|exists:fournisseurs,id',
         ]);
 
-        Event::create($request->all());
+        $eventData = $request->except('resources');
+        $event = Event::create($eventData);
 
-        return redirect()->route('events.index') // UPDATED
+        if ($request->has('resources')) {
+            foreach ($request->resources as $resourceData) {
+                $event->ressources()->create([
+                    'nom' => $resourceData['nom'],
+                    'type' => $resourceData['type'],
+                    'fournisseur_id' => $resourceData['fournisseur_id'],
+                    'event_id' => $event->id,
+                ]);
+            }
+        }
+
+        return redirect()->route('events.index')
             ->with('success', 'Event created successfully.');
     }
 
@@ -86,7 +107,7 @@ class EventController extends Controller
      */
     public function show(string $id)
     {
-        $event = Event::with('category')->findOrFail($id);
+        $event = Event::with(['category', 'ressources.fournisseur'])->findOrFail($id);
         return view('events.show', compact('event'));
     }
 
@@ -95,10 +116,12 @@ class EventController extends Controller
      */
     public function edit(string $id)
     {
-        $event = Event::findOrFail($id);
+        $event = Event::with('ressources')->findOrFail($id);
         $categories = Category::all();
         $statuses = EventStatus::cases();
-        return view('events.edit', compact('event', 'categories', 'statuses'));
+        $fournisseurs = Fournisseur::all();
+        $resourceTypes = TypeRessource::cases();
+        return view('events.edit', compact('event', 'categories', 'statuses', 'fournisseurs', 'resourceTypes'));
     }
 
     /**
@@ -118,13 +141,53 @@ class EventController extends Controller
             'registration_deadline' => 'required|date|before:start_date',
             'price' => 'required|numeric|min:0',
             'is_public' => 'boolean',
-            'images' => 'nullable|array'
+            'images' => 'nullable|array',
+            'resources' => 'nullable|array',
+            'resources.*.nom' => 'required_with:resources|string|max:255',
+            'resources.*.type' => 'required_with:resources|in:' . implode(',', array_column(TypeRessource::cases(), 'value')),
+            'resources.*.fournisseur_id' => 'required_with:resources|exists:fournisseurs,id',
+            'resources.*.id' => 'nullable|exists:ressources,id',
         ]);
 
         $event = Event::findOrFail($id);
-        $event->update($request->all());
+        $event->update($request->except('resources'));
 
-        return redirect()->route('events.index') // UPDATED
+        // Get existing resource IDs
+        $existingResourceIds = $event->ressources()->pluck('id')->toArray();
+        $submittedResourceIds = [];
+
+        // Handle resources
+        if ($request->has('resources')) {
+            foreach ($request->resources as $resourceData) {
+                if (isset($resourceData['id']) && !empty($resourceData['id'])) {
+                    // Update existing resource
+                    $resource = Ressource::findOrFail($resourceData['id']);
+                    $resource->update([
+                        'nom' => $resourceData['nom'],
+                        'type' => $resourceData['type'],
+                        'fournisseur_id' => $resourceData['fournisseur_id'],
+                    ]);
+                    $submittedResourceIds[] = $resourceData['id'];
+                } else {
+                    // Create new resource
+                    $newResource = $event->ressources()->create([
+                        'nom' => $resourceData['nom'],
+                        'type' => $resourceData['type'],
+                        'fournisseur_id' => $resourceData['fournisseur_id'],
+                        'event_id' => $event->id,
+                    ]);
+                    $submittedResourceIds[] = $newResource->id;
+                }
+            }
+        }
+
+        // Delete resources that were removed from the form
+        $resourcesToDelete = array_diff($existingResourceIds, $submittedResourceIds);
+        if (!empty($resourcesToDelete)) {
+            Ressource::whereIn('id', $resourcesToDelete)->delete();
+        }
+
+        return redirect()->route('events.index')
             ->with('success', 'Event updated successfully.');
     }
 
@@ -136,7 +199,7 @@ class EventController extends Controller
         $event = Event::findOrFail($id);
         $event->delete();
 
-        return redirect()->route('events.index') // UPDATED
+        return redirect()->route('events.index')
             ->with('success', 'Event deleted successfully.');
     }
 }
