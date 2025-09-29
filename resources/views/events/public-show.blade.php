@@ -2,6 +2,28 @@
     <x-front-navbar />
     
     <div class="container py-5">
+        <!-- Success/Info/Error Messages -->
+        @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
+        @if(session('info'))
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle me-2"></i>{{ session('info') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        @endif
+
         <div class="row">
             <!-- Event Details -->
             <div class="col-lg-8">
@@ -112,14 +134,33 @@
                             @endif
                         </h4>
                         
-                        @if($event->status->value === 'UPCOMING' && $event->registrations->count() < $event->capacity_max)
-                            <button class="btn btn-dark btn-lg w-100 mb-3">
-                                <i class="fas fa-ticket-alt me-2"></i>S'inscrire
-                            </button>
-                        @elseif($event->status->value === 'UPCOMING' && $event->registrations->count() >= $event->capacity_max)
-                            <button class="btn btn-danger btn-lg w-100 mb-3" disabled>
-                                <i class="fas fa-times me-2"></i>Complet
-                            </button>
+                        @php
+                            $isRegistered = auth()->check() && $event->registrations()->where('user_id', auth()->id())->exists();
+                            $isFull = $event->registrations->count() >= $event->capacity_max;
+                        @endphp
+
+                        @if($event->status->value === 'UPCOMING')
+                            @if($isRegistered)
+                                <button class="btn btn-success btn-lg w-100 mb-3" disabled>
+                                    <i class="fas fa-check-circle me-2"></i>Déjà inscrit
+                                </button>
+                                @php
+                                    $userRegistration = $event->registrations()->where('user_id', auth()->id())->first();
+                                @endphp
+                                @if($userRegistration)
+                                    <a href="{{ route('registrations.show', $userRegistration->id) }}" class="btn btn-outline-dark w-100 mb-3">
+                                        <i class="fas fa-eye me-2"></i>Voir mon inscription
+                                    </a>
+                                @endif
+                            @elseif($isFull)
+                                <button class="btn btn-danger btn-lg w-100 mb-3" disabled>
+                                    <i class="fas fa-times me-2"></i>Complet
+                                </button>
+                            @else
+                                <a href="{{ route('registrations.create', ['event_id' => $event->id]) }}" class="btn btn-dark btn-lg w-100 mb-3">
+                                    <i class="fas fa-ticket-alt me-2"></i>Participer
+                                </a>
+                            @endif
                         @elseif($event->status->value === 'ONGOING')
                             <button class="btn btn-success btn-lg w-100 mb-3" disabled>
                                 <i class="fas fa-play me-2"></i>En cours
