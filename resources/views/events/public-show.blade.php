@@ -1,0 +1,189 @@
+<x-app-layout>
+    <x-front-navbar />
+    
+    <div class="container py-5">
+        <div class="row">
+            <!-- Event Details -->
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('events.public') }}">Événements</a></li>
+                        <li class="breadcrumb-item active">{{ Str::limit($event->title, 30) }}</li>
+                    </ol>
+                </nav>
+
+                <!-- Event Images -->
+                @if($event->images && count($event->images) > 0)
+                <div class="card shadow-xs border mb-4">
+                    <div id="eventCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            @foreach($event->images as $index => $image)
+                            <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                <img src="{{ $image }}" class="d-block w-100" alt="Event image {{ $index + 1 }}" style="height: 400px; object-fit: cover;">
+                            </div>
+                            @endforeach
+                        </div>
+                        @if(count($event->images) > 1)
+                        <button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                        @endif
+                    </div>
+                </div>
+                @else
+                <div class="card shadow-xs border mb-4">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-calendar-alt text-muted fa-5x mb-3"></i>
+                        <h4 class="text-muted">Image de l'événement</h4>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Event Description -->
+                <div class="card shadow-xs border mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title font-weight-bold mb-3">{{ $event->title }}</h2>
+                        <p class="card-text">{{ $event->description }}</p>
+                    </div>
+                </div>
+
+                <!-- Event Details -->
+                <div class="card shadow-xs border">
+                    <div class="card-header">
+                        <h5 class="mb-0">Détails de l'événement</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-calendar-alt text-primary me-3 fa-lg"></i>
+                                    <div>
+                                        <small class="text-muted">Date de début</small>
+                                        <p class="mb-0 font-weight-bold">{{ $event->start_date->format('l, d F Y') }}</p>
+                                        <small class="text-muted">{{ $event->start_date->format('H:i') }}</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-clock text-primary me-3 fa-lg"></i>
+                                    <div>
+                                        <small class="text-muted">Date de fin</small>
+                                        <p class="mb-0 font-weight-bold">{{ $event->end_date->format('l, d F Y') }}</p>
+                                        <small class="text-muted">{{ $event->end_date->format('H:i') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-map-marker-alt text-primary me-3 fa-lg"></i>
+                                    <div>
+                                        <small class="text-muted">Lieu</small>
+                                        <p class="mb-0 font-weight-bold">{{ $event->location }}</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-users text-primary me-3 fa-lg"></i>
+                                    <div>
+                                        <small class="text-muted">Capacité</small>
+                                        <p class="mb-0 font-weight-bold">{{ $event->registrations->count() }}/{{ $event->capacity_max }} participants</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Registration Card -->
+                <div class="card shadow-xs border sticky-top" style="top: 100px;">
+                    <div class="card-body text-center">
+                        <h4 class="text-primary mb-3">
+                            @if($event->price > 0)
+                                ${{ number_format($event->price, 2) }}
+                            @else
+                                Gratuit
+                            @endif
+                        </h4>
+                        
+                        @if($event->status->value === 'UPCOMING' && $event->registrations->count() < $event->capacity_max)
+                            <button class="btn btn-dark btn-lg w-100 mb-3">
+                                <i class="fas fa-ticket-alt me-2"></i>S'inscrire
+                            </button>
+                        @elseif($event->status->value === 'UPCOMING' && $event->registrations->count() >= $event->capacity_max)
+                            <button class="btn btn-danger btn-lg w-100 mb-3" disabled>
+                                <i class="fas fa-times me-2"></i>Complet
+                            </button>
+                        @elseif($event->status->value === 'ONGOING')
+                            <button class="btn btn-success btn-lg w-100 mb-3" disabled>
+                                <i class="fas fa-play me-2"></i>En cours
+                            </button>
+                        @else
+                            <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
+                                <i class="fas fa-ban me-2"></i>Terminé
+                            </button>
+                        @endif
+
+                        <div class="text-start">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Date limite:</span>
+                                <span class="font-weight-bold">{{ $event->registration_deadline->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Catégorie:</span>
+                                <span class="badge bg-gradient-primary">{{ $event->category->name }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Statut:</span>
+                                @php
+                                    $statusColors = [
+                                        'UPCOMING' => 'bg-gradient-warning',
+                                        'ONGOING' => 'bg-gradient-success',
+                                        'COMPLETED' => 'bg-gradient-info',
+                                        'CANCELLED' => 'bg-gradient-danger'
+                                    ];
+                                @endphp
+                                <span class="badge {{ $statusColors[$event->status->value] ?? 'bg-gradient-secondary' }}">
+                                    {{ $event->status->value }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Share Event -->
+                <div class="card shadow-xs border mt-4">
+                    <div class="card-body">
+                        <h6 class="mb-3">Partager cet événement</h6>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm flex-fill">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button class="btn btn-outline-info btn-sm flex-fill">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm flex-fill">
+                                <i class="fab fa-instagram"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Back to Events -->
+                <div class="card shadow-xs border mt-4">
+                    <div class="card-body text-center">
+                        <a href="{{ route('events.public') }}" class="btn btn-outline-dark w-100">
+                            <i class="fas fa-arrow-left me-2"></i>Retour aux événements
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Event extends Model
 {
     protected $fillable = [
-        'title', 'description', 'start_date', 'end_date', 'location', 'capacity_max', 'association_id', 'categorie_id', 'status', 'registration_deadline', 'price', 'is_public', 'images'
+        'title', 'description', 'start_date', 'end_date', 'location', 'capacity_max','categorie_id', 'status', 'registration_deadline', 'price', 'is_public', 'images'
     ];
     protected $casts = [
         'status' => \App\EventStatus::class,
@@ -34,8 +34,5 @@ class Event extends Model
     {
         return $this->belongsTo(Category::class, 'categorie_id');
     }
-    public function association()
-    {
-        return $this->belongsTo(Association::class, 'association_id');
-    }
+
 }
