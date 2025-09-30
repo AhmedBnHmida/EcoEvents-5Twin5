@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Category;
 use App\Models\Ressource;
 use App\Models\Fournisseur;
+use App\Models\User;
 use App\EventStatus;
 use App\TypeRessource;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class EventController extends Controller
      */
     public function publicShow(string $id)
     {
-        $event = Event::with('category')
+        $event = Event::with(['category', 'sponsorings.partner', 'partners'])
             ->where('is_public', true)
             ->findOrFail($id);
 
@@ -42,10 +43,60 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $events = Event::with('category')->latest()->paginate(10);
-        return view('events.index', compact('events'));
+        $query = Event::with('category');
+
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by category
+        if ($request->has('category') && $request->category != '') {
+            $query->where('categorie_id', $request->category);
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by date range
+        if ($request->has('start_date') && $request->start_date != '') {
+            $query->where('start_date', '>=', $request->start_date);
+        }
+
+        if ($request->has('end_date') && $request->end_date != '') {
+            $query->where('end_date', '<=', $request->end_date);
+        }
+
+        // Filter by price range
+        if ($request->has('min_price') && $request->min_price != '') {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->has('max_price') && $request->max_price != '') {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $events = $query->paginate(10)->appends($request->except('page'));
+        
+        // Get categories and statuses for filter dropdowns
+        $categories = Category::all();
+        $statuses = EventStatus::cases();
+
+        return view('events.index', compact('events', 'categories', 'statuses'));
     }
 
     /**
@@ -55,7 +106,7 @@ class EventController extends Controller
     {
         $categories = Category::all();
         $statuses = EventStatus::cases();
-        $fournisseurs = Fournisseur::all();
+        $fournisseurs = User::where('role', 'fournisseur')->get();
         $resourceTypes = TypeRessource::cases();
         return view('events.create', compact('categories', 'statuses', 'fournisseurs', 'resourceTypes'));
     }
@@ -81,7 +132,7 @@ class EventController extends Controller
             'resources' => 'nullable|array',
             'resources.*.nom' => 'required_with:resources|string|max:255',
             'resources.*.type' => 'required_with:resources|in:' . implode(',', array_column(TypeRessource::cases(), 'value')),
-            'resources.*.fournisseur_id' => 'required_with:resources|exists:fournisseurs,id',
+            'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
         ]);
 
         $eventData = $request->except('resources');
@@ -119,7 +170,7 @@ class EventController extends Controller
         $event = Event::with('ressources')->findOrFail($id);
         $categories = Category::all();
         $statuses = EventStatus::cases();
-        $fournisseurs = Fournisseur::all();
+        $fournisseurs = User::where('role', 'fournisseur')->get();
         $resourceTypes = TypeRessource::cases();
         return view('events.edit', compact('event', 'categories', 'statuses', 'fournisseurs', 'resourceTypes'));
     }
@@ -145,7 +196,7 @@ class EventController extends Controller
             'resources' => 'nullable|array',
             'resources.*.nom' => 'required_with:resources|string|max:255',
             'resources.*.type' => 'required_with:resources|in:' . implode(',', array_column(TypeRessource::cases(), 'value')),
-            'resources.*.fournisseur_id' => 'required_with:resources|exists:fournisseurs,id',
+            'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
             'resources.*.id' => 'nullable|exists:ressources,id',
         ]);
 

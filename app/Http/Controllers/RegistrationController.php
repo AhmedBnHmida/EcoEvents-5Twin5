@@ -15,13 +15,46 @@ class RegistrationController extends Controller
     /**
      * Display listing of registrations (Admin)
      */
-    public function index()
+    public function index(Request $request)
     {
-        $registrations = Registration::with(['user', 'event'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $query = Registration::with(['user', 'event']);
 
-        return view('registrations.index', compact('registrations'));
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->whereHas('user', function($q2) use ($search) {
+                    $q2->where('name', 'like', "%{$search}%")
+                       ->orWhere('email', 'like', "%{$search}%");
+                })
+                ->orWhereHas('event', function($q2) use ($search) {
+                    $q2->where('title', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by event
+        if ($request->has('event_id') && $request->event_id != '') {
+            $query->where('event_id', $request->event_id);
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $registrations = $query->paginate(15)->appends($request->except('page'));
+        
+        // Get data for filters
+        $events = Event::all();
+        $statuses = ['pending', 'confirmed', 'cancelled', 'attended'];
+
+        return view('registrations.index', compact('registrations', 'events', 'statuses'));
     }
 
     /**

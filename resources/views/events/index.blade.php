@@ -6,7 +6,7 @@
                 <div class="col-12">
                     <div class="card shadow-xs border mb-4">
                         <div class="card-header pb-0">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <h6 class="font-weight-semibold text-lg mb-0">Events</h6>
                                     <p class="text-sm mb-0">Manage your events</p>
@@ -15,6 +15,65 @@
                                     <i class="fas fa-plus me-2"></i>Add Event
                                 </a>
                             </div>
+
+                            <!-- Search and Filter Form -->
+                            <form method="GET" action="{{ route('events.index') }}" class="mb-3">
+                                <div class="row g-3">
+                                    <!-- Search -->
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                            <input type="text" name="search" class="form-control" placeholder="Search events..." value="{{ request('search') }}">
+                                        </div>
+                                    </div>
+
+                                    <!-- Category Filter -->
+                                    <div class="col-md-2">
+                                        <select name="category" class="form-select">
+                                            <option value="">All Categories</option>
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <!-- Status Filter -->
+                                    <div class="col-md-2">
+                                        <select name="status" class="form-select">
+                                            <option value="">All Status</option>
+                                            @foreach($statuses as $status)
+                                                <option value="{{ $status->value }}" {{ request('status') == $status->value ? 'selected' : '' }}>
+                                                    {{ $status->value }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <!-- Price Range -->
+                                    <div class="col-md-2">
+                                        <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="{{ request('min_price') }}" step="0.01">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="{{ request('max_price') }}" step="0.01">
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="col-md-12">
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-filter me-1"></i>Filter
+                                            </button>
+                                            <a href="{{ route('events.index') }}" class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-redo me-1"></i>Reset
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                         <div class="card-body px-0 py-0">
                             <div class="table-responsive p-0">

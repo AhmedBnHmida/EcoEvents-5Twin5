@@ -6,7 +6,7 @@
                 <div class="col-12">
                     <div class="card shadow-xs border mb-4">
                         <div class="card-header pb-0">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <h6 class="font-weight-semibold text-lg mb-0">Users</h6>
                                     <p class="text-sm mb-0">Manage your users</p>
@@ -15,6 +15,45 @@
                                     <i class="fas fa-plus me-2"></i>Add User
                                 </a>
                             </div>
+
+                            <!-- Search and Filter Form -->
+                            <form method="GET" action="{{ route('users.index') }}" class="mb-3">
+                                <div class="row g-3">
+                                    <!-- Search -->
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                            <input type="text" name="search" class="form-control" placeholder="Search by name or email..." value="{{ request('search') }}">
+                                        </div>
+                                    </div>
+
+                                    <!-- Role Filter -->
+                                    <div class="col-md-4">
+                                        <select name="role" class="form-select">
+                                            <option value="">All Roles</option>
+                                            @foreach($roles as $role)
+                                                <option value="{{ $role }}" {{ request('role') == $role ? 'selected' : '' }}>
+                                                    {{ ucfirst($role) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="col-md-2">
+                                        <div class="d-flex gap-2">
+                                            <button type="submit" class="btn btn-primary btn-sm w-50">
+                                                <i class="fas fa-filter me-1"></i>Filter
+                                            </button>
+                                            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary btn-sm w-50">
+                                                <i class="fas fa-redo me-1"></i>Reset
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                         <div class="card-body px-0 py-0">
                             <div class="table-responsive p-0">

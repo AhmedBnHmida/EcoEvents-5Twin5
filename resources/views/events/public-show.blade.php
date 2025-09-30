@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Event Details -->
-                <div class="card shadow-xs border">
+                <div class="card shadow-xs border mb-4">
                     <div class="card-header">
                         <h5 class="mb-0">Détails de l'événement</h5>
                     </div>
@@ -119,6 +119,103 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Partners Section -->
+                @if($event->partners && $event->partners->count() > 0)
+                <div class="card shadow-xs border mb-4">
+                    <div class="card-header bg-gradient-primary">
+                        <h5 class="mb-0 text-white">
+                            <i class="fas fa-handshake me-2"></i>Nos Partenaires
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach($event->partners as $partner)
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center p-3 border rounded">
+                                    <div class="avatar avatar-lg bg-gradient-primary text-white rounded-circle me-3">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1 font-weight-bold">{{ $partner->nom }}</h6>
+                                        <p class="text-sm text-muted mb-0">
+                                            <i class="fas fa-tag me-1"></i>{{ ucfirst($partner->type) }}
+                                        </p>
+                                        @if($partner->contact_email)
+                                        <p class="text-sm text-muted mb-0">
+                                            <i class="fas fa-envelope me-1"></i>{{ $partner->contact_email }}
+                                        </p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Sponsoring Section -->
+                @if($event->sponsorings && $event->sponsorings->count() > 0)
+                <div class="card shadow-xs border">
+                    <div class="card-header bg-gradient-warning">
+                        <h5 class="mb-0 text-white">
+                            <i class="fas fa-donate me-2"></i>Sponsoring & Support
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach($event->sponsorings as $sponsoring)
+                            <div class="col-md-12 mb-3">
+                                <div class="card border-left-{{ $sponsoring->type_sponsoring->value === 'argent' ? 'success' : ($sponsoring->type_sponsoring->value === 'materiel' ? 'info' : 'warning') }} shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    @if($sponsoring->type_sponsoring->value === 'argent')
+                                                        <i class="fas fa-coins fa-2x text-success"></i>
+                                                    @elseif($sponsoring->type_sponsoring->value === 'materiel')
+                                                        <i class="fas fa-box fa-2x text-info"></i>
+                                                    @elseif($sponsoring->type_sponsoring->value === 'logistique')
+                                                        <i class="fas fa-truck fa-2x text-warning"></i>
+                                                    @else
+                                                        <i class="fas fa-gift fa-2x text-primary"></i>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-1 font-weight-bold">
+                                                        {{ $sponsoring->partner->nom }}
+                                                    </h6>
+                                                    <span class="badge badge-sm bg-gradient-{{ $sponsoring->type_sponsoring->value === 'argent' ? 'success' : ($sponsoring->type_sponsoring->value === 'materiel' ? 'info' : 'warning') }}">
+                                                        {{ $sponsoring->type_sponsoring->label() }}
+                                                    </span>
+                                                    @if($sponsoring->montant)
+                                                    <p class="text-sm text-muted mb-0 mt-1">
+                                                        <i class="fas fa-dollar-sign me-1"></i>{{ number_format($sponsoring->montant, 2) }} DT
+                                                    </p>
+                                                    @endif
+                                                    @if($sponsoring->description)
+                                                    <p class="text-sm text-muted mb-0 mt-1">
+                                                        {{ Str::limit($sponsoring->description, 100) }}
+                                                    </p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar-alt me-1"></i>
+                                                    {{ $sponsoring->date->format('d/m/Y') }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
 
             <!-- Sidebar -->
@@ -152,14 +249,15 @@
                                 \App\Models\Feedback::where('id_evenement', $event->id)
                                     ->where('id_participant', auth()->id())
                                     ->first() : null;
+                            
+                            $userRegistrationAny = auth()->check() ? $event->registrations()->where('user_id', auth()->id())->first() : null;
                         @endphp
-                                    $userRegistrationAny = $event->registrations()->where('user_id', auth()->id())->first();
-                                @endphp
-                                @if($userRegistrationAny)
-                                    <a href="{{ route('registrations.show', $userRegistrationAny->id) }}" class="btn btn-outline-dark w-100 mb-3">
-                                        <i class="fas fa-eye me-2"></i>Voir mon inscription
-                                    </a>
-                                @endif
+
+                        @if($event->status->value === 'UPCOMING')
+                            @if($userRegistrationAny)
+                                <a href="{{ route('registrations.show', $userRegistrationAny->id) }}" class="btn btn-outline-dark w-100 mb-3">
+                                    <i class="fas fa-eye me-2"></i>Voir mon inscription
+                                </a>
                             @elseif($isFull)
                                 <button class="btn btn-danger btn-lg w-100 mb-3" disabled>
                                     <i class="fas fa-times me-2"></i>Complet

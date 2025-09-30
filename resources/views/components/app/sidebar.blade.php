@@ -24,9 +24,9 @@
             </small>
         </div>
     </div>
-    <div class="collapse navbar-collapse px-3 w-auto h-100" id="sidenav-collapse-main" style="overflow-y: auto; max-height: calc(100vh - 100px);">
+    <div class="collapse navbar-collapse px-3 w-auto h-100" id="sidenav-collapse-main">
         @php $user = Auth::user(); @endphp
-        <ul class="navbar-nav">
+        <ul class="navbar-nav pt-3">
             <!-- Dashboard -->
             <li class="nav-item mb-1">
                 <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
@@ -91,22 +91,11 @@
                 <li class="nav-section-header">
                     <span><i class="fas fa-box me-2"></i>Ressources & Logistique</span>
                 </li>
-                <li class="nav-item mb-1">
-                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('ressources.index') ? 'active' : '' }}" href="{{ route('ressources.index') }}">
-                        <i class="fas fa-box-open me-3"></i>
-                        <span>Ressources</span>
-                    </a>
-                </li>
+           
                 <li class="nav-item mb-1">
                     <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('fournisseurs.index') ? 'active' : '' }}" href="{{ route('fournisseurs.index') }}">
                         <i class="fas fa-truck-loading me-3"></i>
                         <span>Fournisseurs</span>
-                    </a>
-                </li>
-                <li class="nav-item mb-1">
-                    <a class="nav-link d-flex align-items-center {{ is_current_route('registrations.index') ? 'active' : '' }}" href="{{ route('registrations.index') }}">
-                        <i class="fas fa-user-check me-2 text-success"></i>
-                        <span>Inscriptions</span>
                     </a>
                 </li>
                 <li class="nav-item mb-1">
@@ -173,15 +162,15 @@
 <style>
     /* Modern Sidebar Styling */
     .modern-sidebar {
-        background: linear-gradient(180deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
-        box-shadow: 2px 0 25px rgba(0,0,0,0.15);
-        border-right: 1px solid rgba(255,255,255,0.1);
+        background: #1e293b !important;
+        box-shadow: 2px 0 25px rgba(0,0,0,0.2);
+        border-right: 1px solid rgba(255,255,255,0.05);
     }
     
     .modern-header {
         padding: 1.5rem 1rem;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        background: rgba(0,0,0,0.1);
+        border-bottom: 2px solid rgba(255,255,255,0.1);
+        background: rgba(0,0,0,0.2);
         text-align: center;
     }
     
@@ -203,13 +192,14 @@
     
     /* Navigation Links */
     .modern-nav-link {
-        color: rgba(255,255,255,0.8) !important;
+        color: #e2e8f0 !important;
         padding: 0.75rem 1rem;
         margin: 0.2rem 0;
         border-radius: 8px;
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
+        font-weight: 500 !important;
     }
     
     .modern-nav-link::before {
@@ -224,10 +214,10 @@
     }
     
     .modern-nav-link:hover {
-        background: rgba(255,255,255,0.1);
+        background: rgba(59, 130, 246, 0.15);
         color: white !important;
         transform: translateX(5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
     }
     
     .modern-nav-link:hover::before {
@@ -256,19 +246,24 @@
     .modern-nav-link i {
         width: 20px;
         text-align: center;
-        opacity: 0.8;
+        opacity: 0.9;
         transition: all 0.3s ease;
+        font-size: 1rem;
     }
     
     .modern-nav-link:hover i,
     .modern-nav-link.active i {
         opacity: 1;
-        transform: scale(1.1);
+        transform: scale(1.15);
     }
     
     .modern-nav-link span {
         font-weight: 500;
-        font-size: 0.9rem;
+        font-size: 0.925rem;
+    }
+    
+    .modern-nav-link.active span {
+        font-weight: 600;
     }
     
     /* User Section */
@@ -336,24 +331,25 @@
     /* Section Headers */
     .nav-section-header {
         margin-top: 1.5rem;
-        margin-bottom: 0.75rem;
-        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.5rem;
+        padding: 0.75rem 0.75rem 0.5rem;
         list-style: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     .nav-section-header span {
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 0.75rem;
+        color: #94a3b8 !important;
+        font-size: 0.7rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
         display: flex;
         align-items: center;
     }
     
     .nav-section-header i {
-        font-size: 0.85rem;
-        opacity: 0.7;
+        font-size: 0.75rem;
+        opacity: 0.8;
     }
     
     /* First section header should have less margin */
@@ -413,7 +409,19 @@
     
     #sidenav-collapse-main {
         flex: 1;
-        display: flex;
+        display: flex !important;
         flex-direction: column;
+        overflow-y: auto;
+        padding-top: 0 !important;
+        visibility: visible !important;
+        position: relative !important;
+    }
+    
+    .navbar-nav:first-child {
+        padding-top: 1rem !important;
+    }
+    
+    .navbar-collapse {
+        display: flex !important;
     }
 </style>

@@ -1,5 +1,7 @@
 <x-app-layout>
-    <div class="container-fluid py-4">
+    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+        <x-app.navbar />
+        <div class="container-fluid py-4 px-5">
         <div class="row">
             <div class="col-12">
                 <!-- Header -->
@@ -18,6 +20,59 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- Search and Filter Form -->
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('feedback.index') }}">
+                            <div class="row g-3">
+                                <!-- Search -->
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                        <input type="text" name="search" class="form-control" placeholder="Rechercher par commentaire, événement, participant..." value="{{ request('search') }}">
+                                    </div>
+                                </div>
+
+                                <!-- Rating Filter -->
+                                <div class="col-md-3">
+                                    <select name="rating" class="form-select">
+                                        <option value="">Toutes les notes</option>
+                                        <option value="5" {{ request('rating') == '5' ? 'selected' : '' }}>⭐⭐⭐⭐⭐ (5 étoiles)</option>
+                                        <option value="4" {{ request('rating') == '4' ? 'selected' : '' }}>⭐⭐⭐⭐ (4 étoiles)</option>
+                                        <option value="3" {{ request('rating') == '3' ? 'selected' : '' }}>⭐⭐⭐ (3 étoiles)</option>
+                                        <option value="2" {{ request('rating') == '2' ? 'selected' : '' }}>⭐⭐ (2 étoiles)</option>
+                                        <option value="1" {{ request('rating') == '1' ? 'selected' : '' }}>⭐ (1 étoile)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Event Filter -->
+                                <div class="col-md-3">
+                                    <select name="event_id" class="form-select">
+                                        <option value="">Tous les événements</option>
+                                        @foreach($events as $event)
+                                            <option value="{{ $event->id }}" {{ request('event_id') == $event->id ? 'selected' : '' }}>
+                                                {{ Str::limit($event->title, 35) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="col-md-2">
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm w-50">
+                                            <i class="fas fa-filter me-1"></i>Filtrer
+                                        </button>
+                                        <a href="{{ route('feedback.index') }}" class="btn btn-outline-secondary btn-sm w-50">
+                                            <i class="fas fa-redo me-1"></i>Reset
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
@@ -316,4 +371,5 @@
             box-shadow: 0 4px 20px 0 rgba(255, 193, 7, 0.15) !important;
         }
     </style>
+    </main>
 </x-app-layout>

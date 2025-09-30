@@ -3,15 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\TypeSponsoring;
 
 class Sponsoring extends Model
 {
     protected $fillable = [
         'montant',
-        'type_sponsoring_id',
+        'type_sponsoring',
         'date',
         'partenaire_id',
         'evenement_id',
+    ];
+
+    protected $casts = [
+        'type_sponsoring' => TypeSponsoring::class,
+        'date' => 'date',
     ];
 
     protected $primaryKey = 'id';
@@ -24,10 +30,5 @@ class Sponsoring extends Model
     public function event()
     {
         return $this->belongsTo(Event::class, 'evenement_id');
-    }
-
-    public function typeSponsoring()
-    {
-        return $this->belongsTo(TypeSponsoring::class, 'type_sponsoring_id');
     }
 }
