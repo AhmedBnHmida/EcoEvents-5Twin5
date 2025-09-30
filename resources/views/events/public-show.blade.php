@@ -139,16 +139,24 @@
                             $isFull = $event->registrations->count() >= $event->capacity_max;
                         @endphp
 
-                        @if($event->status->value === 'UPCOMING')
-                            @if($isRegistered)
-                                <button class="btn btn-success btn-lg w-100 mb-3" disabled>
-                                    <i class="fas fa-check-circle me-2"></i>Déjà inscrit
-                                </button>
-                                @php
-                                    $userRegistration = $event->registrations()->where('user_id', auth()->id())->first();
+                        @php
+                            // Check if user has a confirmed or attended registration
+                            $userRegistration = auth()->check() ? 
+                                $event->registrations()
+                                    ->where('user_id', auth()->id())
+                                    ->whereIn('status', ['confirmed', 'attended'])
+                                    ->first() : null;
+                            
+                            // Check if user already gave feedback
+                            $userFeedback = auth()->check() ? 
+                                \App\Models\Feedback::where('id_evenement', $event->id)
+                                    ->where('id_participant', auth()->id())
+                                    ->first() : null;
+                        @endphp
+                                    $userRegistrationAny = $event->registrations()->where('user_id', auth()->id())->first();
                                 @endphp
-                                @if($userRegistration)
-                                    <a href="{{ route('registrations.show', $userRegistration->id) }}" class="btn btn-outline-dark w-100 mb-3">
+                                @if($userRegistrationAny)
+                                    <a href="{{ route('registrations.show', $userRegistrationAny->id) }}" class="btn btn-outline-dark w-100 mb-3">
                                         <i class="fas fa-eye me-2"></i>Voir mon inscription
                                     </a>
                                 @endif
@@ -170,6 +178,43 @@
                                 <i class="fas fa-ban me-2"></i>Terminé
                             </button>
                         @endif
+
+                        {{-- Feedback Section --}}
+                        @auth
+                            @if($userRegistration && !$userFeedback)
+                                {{-- User can give feedback --}}
+                                <div class="alert alert-info mb-3">
+                                    <i class="fas fa-star me-2"></i>
+                                    <small>Vous pouvez maintenant donner votre avis sur cet événement!</small>
+                                </div>
+                                <a href="{{ route('feedback.create', ['event_id' => $event->id]) }}" 
+                                   class="btn btn-warning btn-lg w-100 mb-3">
+                                    <i class="fas fa-star me-2"></i>Donner mon avis
+                                </a>
+                            @elseif($userFeedback)
+                                {{-- User already gave feedback --}}
+                                <div class="alert alert-success mb-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <small class="font-weight-bold">Vous avez donné votre avis</small>
+                                    </div>
+                                    <div class="text-center mb-2">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            @if ($i <= $userFeedback->note)
+                                                <i class="fas fa-star text-warning"></i>
+                                            @else
+                                                <i class="far fa-star text-warning"></i>
+                                            @endif
+                                        @endfor
+                                        <span class="ms-2 font-weight-bold">{{ $userFeedback->note }}/5</span>
+                                    </div>
+                                    <a href="{{ route('feedback.edit', $userFeedback->id_feedback) }}" 
+                                       class="btn btn-sm btn-outline-warning w-100">
+                                        <i class="fas fa-edit me-1"></i>Modifier mon avis
+                                    </a>
+                                </div>
+                            @endif
+                        @endauth
 
                         <div class="text-start">
                             <div class="d-flex justify-content-between mb-2">

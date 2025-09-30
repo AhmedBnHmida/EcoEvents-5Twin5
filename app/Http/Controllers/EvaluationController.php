@@ -2,63 +2,67 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
+use App\Models\Feedback;
+use App\Models\GlobalEvaluation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EvaluationController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display evaluations for all events (Admin)
      */
     public function index()
     {
-        //
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Accès non autorisé.');
+        }
+
+        $evaluations = GlobalEvaluation::with('event')
+            ->orderBy('moyenne_notes', 'desc')
+            ->paginate(15);
+
+        // Statistics
+        $totalFeedbacks = Feedback::count();
+        $averageRating = Feedback::avg('note');
+        $eventsWithFeedback = GlobalEvaluation::count();
+
+        return view('evaluations.index', compact('evaluations', 'totalFeedbacks', 'averageRating', 'eventsWithFeedback'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show detailed evaluation for a specific event
      */
-    public function create()
+    public function show($eventId)
     {
-        //
-    }
+        if (!Auth::user()->isAdmin()) {
+            abort(403, 'Accès non autorisé.');
+        }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $event = Event::with(['registrations', 'feedbacks.participant'])->findOrFail($eventId);
+        $evaluation = GlobalEvaluation::where('id_evenement', $eventId)->first();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        // Get feedbacks grouped by rating
+        $feedbacksByRating = Feedback::where('id_evenement', $eventId)
+            ->selectRaw('note, count(*) as count')
+            ->groupBy('note')
+            ->pluck('count', 'note')
+            ->toArray();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        // Fill missing ratings with 0
+        for ($i = 1; $i <= 5; $i++) {
+            if (!isset($feedbacksByRating[$i])) {
+                $feedbacksByRating[$i] = 0;
+            }
+        }
+        ksort($feedbacksByRating);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        $feedbacks = Feedback::with('participant')
+            ->where('id_evenement', $eventId)
+            ->orderBy('date_feedback', 'desc')
+            ->get();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return view('evaluations.show', compact('event', 'evaluation', 'feedbacksByRating', 'feedbacks'));
     }
 }

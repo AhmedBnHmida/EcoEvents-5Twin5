@@ -50,6 +50,18 @@
                                     <i class="fas fa-user-edit me-2"></i>Mon Profil
                                 </a>
                             </li>
+                            @if($user->isParticipant() || $user->role === 'participant')
+                            <li>
+                                <a class="dropdown-item" href="{{ route('registrations.my') }}">
+                                    <i class="fas fa-ticket-alt me-2"></i>Mes Inscriptions
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('feedback.my') }}">
+                                    <i class="fas fa-comments me-2"></i>Mes Avis
+                                </a>
+                            </li>
+                            @endif
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="POST" action="{{ route('logout') }}">

@@ -16,6 +16,10 @@ class Feedback extends Model
         'date_feedback',
     ];
 
+    protected $casts = [
+        'date_feedback' => 'datetime',
+    ];
+
     public function event()
     {
         return $this->belongsTo(Event::class, 'id_evenement');
