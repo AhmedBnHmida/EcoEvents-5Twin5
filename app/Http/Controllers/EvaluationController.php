@@ -13,22 +13,49 @@ class EvaluationController extends Controller
     /**
      * Display evaluations for all events (Admin)
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403, 'Accès non autorisé.');
         }
 
-        $evaluations = GlobalEvaluation::with('event')
-            ->orderBy('moyenne_notes', 'desc')
-            ->paginate(15);
+        $query = GlobalEvaluation::with('event');
+
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->whereHas('event', function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by minimum rating
+        if ($request->has('min_rating') && $request->min_rating != '') {
+            $query->where('moyenne_notes', '>=', $request->min_rating);
+        }
+
+        // Filter by event
+        if ($request->has('event_id') && $request->event_id != '') {
+            $query->where('id_evenement', $request->event_id);
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'moyenne_notes');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $evaluations = $query->paginate(15)->appends($request->except('page'));
 
         // Statistics
         $totalFeedbacks = Feedback::count();
         $averageRating = Feedback::avg('note');
         $eventsWithFeedback = GlobalEvaluation::count();
+        
+        // Get events for filter
+        $events = Event::all();
 
-        return view('evaluations.index', compact('evaluations', 'totalFeedbacks', 'averageRating', 'eventsWithFeedback'));
+        return view('evaluations.index', compact('evaluations', 'totalFeedbacks', 'averageRating', 'eventsWithFeedback', 'events'));
     }
 
     /**

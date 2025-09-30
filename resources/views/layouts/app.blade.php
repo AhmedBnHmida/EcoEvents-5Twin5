@@ -71,7 +71,7 @@
 <body class="g-sidenav-show  bg-gray-100">
     @php
         $topSidenavArray = ['wallet', 'profile'];
-        $topSidenavTransparent = ['','signin', 'signup', 'login', 'register', 'home','events.public','events.public.show','dashboard-Fournisseur','feedback.my','feedback.create','feedback.edit'];
+        $topSidenavTransparent = ['','signin', 'signup', 'login', 'register', 'home','events.public','events.public.show','dashboard-Fournisseur','feedback.my','feedback.create','feedback.edit','registrations.create'];
         $topSidenavRTL = ['RTL'];
     @endphp
     @if (in_array(request()->route()->getName(),

@@ -28,17 +28,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Get the authenticated user
-        $user = Auth::user();
-
-        // Redirect based on user role
-        // If user is 'utilisateur' or 'participant', redirect to home page
-        // Otherwise (admin, fournisseur, organisateur), redirect to dashboard
-        if (in_array($user->role, ['utilisateur', 'participant'])) {
-            return redirect()->intended('/');
-        }
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Redirect all users to home page after login
+        return redirect()->intended('/');
     }
 
     /**

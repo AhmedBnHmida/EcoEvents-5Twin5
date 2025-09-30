@@ -223,29 +223,7 @@
   <div class="col-lg-12"  >
                     <div class="card shadow-xs border mb-4">
                         <div class="card-header border-bottom pb-0">
-                            <div class="d-sm-flex align-items-center mb-3">
-                                <div>
-                                    <h6 class="font-weight-semibold text-lg mb-0">Recent transactions</h6>
-                                    <p class="text-sm mb-sm-0 mb-2">These are details about the last transactions</p>
-                                </div>
-                                <div class="ms-auto d-flex">
-                                    <button type="button" class="btn btn-sm btn-white mb-0 me-2">
-                                        View report
-                                    </button>
-                                    <button type="button"
-                                        class="btn btn-sm btn-dark btn-icon d-flex align-items-center mb-0">
-                                        <span class="btn-inner--icon">
-                                            <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg"
-                                                fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                                stroke="currentColor" class="d-block me-2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                            </svg>
-                                        </span>
-                                        <span class="btn-inner--text">Download</span>
-                                    </button>
-                                </div>
-                            </div>
+                 
                             <div class="pb-3 d-sm-flex align-items-center">
                                 <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
                                     <input type="radio" class="btn-check" name="btnradiotable" id="btnradiotable1"

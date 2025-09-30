@@ -35,4 +35,14 @@ class Event extends Model
         return $this->belongsTo(Category::class, 'categorie_id');
     }
 
+    public function sponsorings()
+    {
+        return $this->hasMany(Sponsoring::class, 'evenement_id');
+    }
+
+    public function partners()
+    {
+        return $this->hasManyThrough(Partner::class, Sponsoring::class, 'evenement_id', 'id', 'id', 'partenaire_id');
+    }
+
 }

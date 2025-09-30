@@ -79,4 +79,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function partnerProfile()
+    {
+        return $this->hasOne(Partner::class);
+    }
 }

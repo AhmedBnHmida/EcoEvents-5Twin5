@@ -10,10 +10,35 @@ class UsersController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::latest()->paginate(10);
-        return view('users.index', compact('users'));
+        $query = User::query();
+
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by role
+        if ($request->has('role') && $request->role != '') {
+            $query->where('role', $request->role);
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $users = $query->paginate(10)->appends($request->except('page'));
+        
+        // Get unique roles for filter
+        $roles = ['admin', 'organisateur', 'fournisseur', 'participant', 'utilisateur'];
+
+        return view('users.index', compact('users', 'roles'));
     }
 
     /**

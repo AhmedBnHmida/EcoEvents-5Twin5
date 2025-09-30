@@ -14,17 +14,49 @@ class FeedbackController extends Controller
     /**
      * Display all feedbacks (Admin)
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403, 'Accès non autorisé.');
         }
 
-        $feedbacks = Feedback::with(['event', 'participant'])
-            ->orderBy('date_feedback', 'desc')
-            ->paginate(15);
+        $query = Feedback::with(['event', 'participant']);
 
-        return view('feedback.index', compact('feedbacks'));
+        // Search functionality
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('commentaire', 'like', "%{$search}%")
+                  ->orWhereHas('event', function($q2) use ($search) {
+                      $q2->where('title', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('participant', function($q2) use ($search) {
+                      $q2->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter by rating
+        if ($request->has('rating') && $request->rating != '') {
+            $query->where('note', $request->rating);
+        }
+
+        // Filter by event
+        if ($request->has('event_id') && $request->event_id != '') {
+            $query->where('id_evenement', $request->event_id);
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'date_feedback');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        $feedbacks = $query->paginate(15)->appends($request->except('page'));
+        
+        // Get events for filter
+        $events = Event::all();
+
+        return view('feedback.index', compact('feedbacks', 'events'));
     }
 
     /**
