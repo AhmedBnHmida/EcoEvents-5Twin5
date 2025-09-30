@@ -10,7 +10,7 @@ class Registration extends Model
         'user_id', 'event_id', 'ticket_code', 'qr_code_path', 'status', 'registered_at'
     ];
     protected $casts = [
-        'status' => \App\EventStatus::class,
+        'status' => \App\RegistrationStatus::class,
         'registered_at' => 'datetime',
     ];
     protected $primaryKey = 'id';

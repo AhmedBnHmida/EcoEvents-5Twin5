@@ -89,9 +89,25 @@
                                     <i class="fas fa-users me-1"></i>
                                     {{ $event->registrations->count() }}/{{ $event->capacity_max }} inscrits
                                 </span>
-                                <a href="{{ route('events.public.show', $event->id) }}" class="btn btn-sm btn-dark">
-                                    Voir détails
-                                </a>
+                                <div class="btn-group">
+                                    @php
+                                        $isRegistered = auth()->check() && $event->registrations()->where('user_id', auth()->id())->exists();
+                                        $isFull = $event->registrations->count() >= $event->capacity_max;
+                                    @endphp
+                                    
+                                    @if($event->status->value === 'UPCOMING' && !$isRegistered && !$isFull)
+                                        <a href="{{ route('registrations.create', ['event_id' => $event->id]) }}" class="btn btn-sm btn-dark">
+                                            <i class="fas fa-ticket-alt me-1"></i>Participer
+                                        </a>
+                                    @elseif($isRegistered)
+                                        <button class="btn btn-sm btn-success" disabled>
+                                            <i class="fas fa-check me-1"></i>Inscrit
+                                        </button>
+                                    @endif
+                                    <a href="{{ route('events.public.show', $event->id) }}" class="btn btn-sm btn-outline-dark">
+                                        Détails
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>

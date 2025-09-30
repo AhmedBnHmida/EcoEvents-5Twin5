@@ -99,6 +99,24 @@ Route::resource('users', App\Http\Controllers\UsersController::class);
 Route::get('/events', [App\Http\Controllers\EventController::class, 'publicIndex'])->name('events.public');
 Route::get('/events/{id}', [App\Http\Controllers\EventController::class, 'publicShow'])->name('events.public.show');
 
+// Participant Registration Routes (create can be accessed by guests, will redirect to login)
+Route::get('/registrations/create', [App\Http\Controllers\RegistrationController::class, 'create'])->name('registrations.create');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/registrations', [App\Http\Controllers\RegistrationController::class, 'store'])->name('registrations.store');
+    Route::get('/registrations/{registration}', [App\Http\Controllers\RegistrationController::class, 'show'])->name('registrations.show');
+    Route::delete('/registrations/{registration}', [App\Http\Controllers\RegistrationController::class, 'destroy'])->name('registrations.destroy');
+    Route::get('/my-registrations', [App\Http\Controllers\RegistrationController::class, 'myRegistrations'])->name('registrations.my');
+
+    // Feedback Routes (Participants)
+    Route::get('/feedback/create', [App\Http\Controllers\FeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
+    Route::get('/feedback/{feedback}/edit', [App\Http\Controllers\FeedbackController::class, 'edit'])->name('feedback.edit');
+    Route::put('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'update'])->name('feedback.update');
+    Route::delete('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'destroy'])->name('feedback.destroy');
+    Route::get('/my-feedbacks', [App\Http\Controllers\FeedbackController::class, 'myFeedbacks'])->name('feedback.my');
+});
+
 // ADMIN Routes - Use explicit routes instead of resource to avoid conflicts
 Route::middleware('auth')->group(function () {
     // Admin Events Routes
@@ -118,11 +136,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/manage/categories/{id}/edit', [App\Http\Controllers\CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/manage/categories/{id}', [App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/manage/categories/{id}', [App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
+
+    // Admin Registration Management Routes
+    Route::get('/manage/registrations', [App\Http\Controllers\RegistrationController::class, 'index'])->name('registrations.index');
+    Route::patch('/manage/registrations/{registration}/status', [App\Http\Controllers\RegistrationController::class, 'updateStatus'])->name('registrations.updateStatus');
+
+    // Admin Feedback & Evaluation Routes
+    Route::get('/manage/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
+    Route::get('/manage/evaluations', [App\Http\Controllers\EvaluationController::class, 'index'])->name('evaluations.index');
+    Route::get('/manage/evaluations/{event}', [App\Http\Controllers\EvaluationController::class, 'show'])->name('evaluations.show');
 });
 
 
-Route::resource('feedback', App\Http\Controllers\FeedbackController::class);
-Route::resource('evaluations', App\Http\Controllers\EvaluationController::class);
+// Feedback and evaluations are now managed via custom routes above
 Route::resource('ressources', App\Http\Controllers\RessourceController::class);
 Route::resource('fournisseurs', App\Http\Controllers\FournisseurController::class);
 Route::resource('inscriptions', App\Http\Controllers\InscriptionController::class);
