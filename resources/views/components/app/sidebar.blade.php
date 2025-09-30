@@ -103,10 +103,11 @@
                         <span>Fournisseurs</span>
                     </a>
                 </li>
-
-                <!-- Partners Section -->
-                <li class="nav-section-header">
-                    <span><i class="fas fa-handshake me-2"></i>Partenaires & Sponsors</span>
+                <li class="nav-item mb-1">
+                    <a class="nav-link d-flex align-items-center {{ is_current_route('registrations.index') ? 'active' : '' }}" href="{{ route('registrations.index') }}">
+                        <i class="fas fa-user-check me-2 text-success"></i>
+                        <span>Inscriptions</span>
+                    </a>
                 </li>
                 <li class="nav-item mb-1">
                     <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('partenaires.index') ? 'active' : '' }}" href="{{ route('partenaires.index') }}">

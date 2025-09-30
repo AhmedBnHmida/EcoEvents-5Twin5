@@ -153,13 +153,6 @@
                                     ->where('id_participant', auth()->id())
                                     ->first() : null;
                         @endphp
-
-                        @if($event->status->value === 'UPCOMING')
-                            @if($isRegistered)
-                                <button class="btn btn-success btn-lg w-100 mb-3" disabled>
-                                    <i class="fas fa-check-circle me-2"></i>Déjà inscrit
-                                </button>
-                                @php
                                     $userRegistrationAny = $event->registrations()->where('user_id', auth()->id())->first();
                                 @endphp
                                 @if($userRegistrationAny)

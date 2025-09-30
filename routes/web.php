@@ -115,6 +115,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'update'])->name('feedback.update');
     Route::delete('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'destroy'])->name('feedback.destroy');
     Route::get('/my-feedbacks', [App\Http\Controllers\FeedbackController::class, 'myFeedbacks'])->name('feedback.my');
+
 });
 
 // ADMIN Routes - Use explicit routes instead of resource to avoid conflicts
@@ -145,6 +146,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/manage/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
     Route::get('/manage/evaluations', [App\Http\Controllers\EvaluationController::class, 'index'])->name('evaluations.index');
     Route::get('/manage/evaluations/{event}', [App\Http\Controllers\EvaluationController::class, 'show'])->name('evaluations.show');
+
 });
 
 
