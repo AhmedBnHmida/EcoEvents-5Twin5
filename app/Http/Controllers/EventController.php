@@ -10,6 +10,7 @@ use App\Models\User;
 use App\EventStatus;
 use App\TypeRessource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage; 
 
 class EventController extends Controller
 {
@@ -21,7 +22,7 @@ class EventController extends Controller
         $events = Event::with('category')
             ->where('is_public', true)
             ->where('status', '!=', \App\EventStatus::CANCELLED)
-            ->where('start_date', '>', now())
+            //->where('start_date', '>', now())
             ->orderBy('start_date')
             ->paginate(9);
 
@@ -128,14 +129,24 @@ class EventController extends Controller
             'registration_deadline' => 'required|date|before:start_date',
             'price' => 'required|numeric|min:0',
             'is_public' => 'boolean',
-            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'resources' => 'nullable|array',
             'resources.*.nom' => 'required_with:resources|string|max:255',
             'resources.*.type' => 'required_with:resources|in:' . implode(',', array_column(TypeRessource::cases(), 'value')),
             'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
         ]);
 
-        $eventData = $request->except('resources');
+        $eventData = $request->except(['resources', 'images']);
+
+        // Handle multiple images upload - store in images array
+        $uploadedImages = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $uploadedImages[] = $image->store('events/images', 'public');
+            }
+            $eventData['images'] = $uploadedImages;
+        }
+
         $event = Event::create($eventData);
 
         if ($request->has('resources')) {
@@ -192,7 +203,7 @@ class EventController extends Controller
             'registration_deadline' => 'required|date|before:start_date',
             'price' => 'required|numeric|min:0',
             'is_public' => 'boolean',
-            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'resources' => 'nullable|array',
             'resources.*.nom' => 'required_with:resources|string|max:255',
             'resources.*.type' => 'required_with:resources|in:' . implode(',', array_column(TypeRessource::cases(), 'value')),
@@ -201,7 +212,32 @@ class EventController extends Controller
         ]);
 
         $event = Event::findOrFail($id);
-        $event->update($request->except('resources'));
+        $eventData = $request->except(['resources', 'images', 'remove_images']);
+
+        // Handle image removal
+        $currentImages = $event->images ?? [];
+        if ($request->has('remove_images')) {
+            foreach ($request->remove_images as $imageToRemove) {
+                // Delete file from storage
+                if (Storage::disk('public')->exists($imageToRemove)) {
+                    Storage::disk('public')->delete($imageToRemove);
+                }
+                // Remove from array
+                $currentImages = array_filter($currentImages, function($image) use ($imageToRemove) {
+                    return $image !== $imageToRemove;
+                });
+            }
+        }
+
+        // Handle new image uploads
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $currentImages[] = $image->store('events/images', 'public');
+            }
+        }
+
+        $eventData['images'] = $currentImages;
+        $event->update($eventData);
 
         // Get existing resource IDs
         $existingResourceIds = $event->ressources()->pluck('id')->toArray();
@@ -252,5 +288,29 @@ class EventController extends Controller
 
         return redirect()->route('events.index')
             ->with('success', 'Event deleted successfully.');
+    }
+
+
+    // Add method to delete individual images
+    public function deleteImage(Request $request, $eventId)
+    {
+        $event = Event::findOrFail($eventId);
+        $imageToDelete = $request->image_path;
+
+        $currentImages = $event->images ?? [];
+        
+        // Remove image from array
+        $updatedImages = array_filter($currentImages, function($image) use ($imageToDelete) {
+            return $image !== $imageToDelete;
+        });
+
+        // Delete file from storage
+        if (Storage::disk('public')->exists($imageToDelete)) {
+            Storage::disk('public')->delete($imageToDelete);
+        }
+
+        $event->update(['images' => array_values($updatedImages)]);
+
+        return response()->json(['success' => true]);
     }
 }
