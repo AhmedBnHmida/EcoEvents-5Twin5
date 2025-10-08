@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -17,6 +18,29 @@ class Event extends Model
         'is_public' => 'boolean',
         'images' => 'array',
     ];
+
+
+    // Get all image URLs
+    public function getImageUrlsAttribute()
+    {
+        if (!$this->images) {
+            return [asset('images/default-event.jpg')];
+        }
+
+        return array_map(function($image) {
+            return asset('storage/' . $image);
+        }, $this->images);
+    }
+
+    // Get first image as featured
+    public function getFeaturedImageUrlAttribute()
+    {
+        if ($this->images && count($this->images) > 0) {
+            return asset('storage/' . $this->images[0]);
+        }
+        return asset('images/default-event.jpg');
+    }
+
 
     public function registrations()
     {

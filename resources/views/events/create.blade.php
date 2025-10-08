@@ -17,7 +17,7 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <form action="{{ route('events.store') }}" method="POST">
+                            <form action="{{ route('events.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-6">
@@ -155,6 +155,30 @@
                                     </div>
                                 </div>
 
+                                <!-- Image Upload Section -->
+                                <div class="card mt-4">
+                                    <div class="card-header">
+                                        <h6 class="font-weight-semibold text-lg mb-0">Event Images</h6>
+                                        <p class="text-sm mb-0">Upload images for the event</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label for="images" class="form-control-label">Event Images</label>
+                                            <input type="file" class="form-control @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror" 
+                                                   id="images" name="images[]" multiple accept="image/*">
+                                            @error('images')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            @error('images.*')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            <small class="form-text text-muted">You can select multiple images (JPEG, PNG, JPG, GIF, WebP, max: 2MB each)</small>
+                                        </div>
+                                        
+                                        <div id="images-preview" class="mt-3 d-flex flex-wrap gap-2"></div>
+                                    </div>
+                                </div>
+
                                 <div class="card mt-4">
                                     <div class="card-header">
                                         <h6 class="font-weight-semibold text-lg mb-0">Resources</h6>
@@ -277,6 +301,26 @@
             if (e.target.classList.contains('remove-resource')) {
                 e.target.closest('.resource-row').remove();
             }
+        });
+
+        // Image preview functionality
+        document.getElementById('images').addEventListener('change', function(e) {
+            const previewContainer = document.getElementById('images-preview');
+            previewContainer.innerHTML = '';
+
+            Array.from(this.files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const col = document.createElement('div');
+                    col.className = 'position-relative';
+                    col.innerHTML = `
+                        <img src="${e.target.result}" class="img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+                        <small class="d-block text-center text-xs mt-1">${file.name}</small>
+                    `;
+                    previewContainer.appendChild(col);
+                }
+                reader.readAsDataURL(file);
+            });
         });
     </script>
 </x-app-layout>

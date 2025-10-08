@@ -169,42 +169,69 @@
                                 </div>
                             </div>
 
-                            <!-- Additional Information -->
-                            <div class="row mt-4">
-                                <div class="col-12">
-                                    <div class="card shadow-xs border-radius-lg">
-                                        <div class="card-header">
-                                            <h6 class="text-sm font-weight-bold mb-0">Additional Information</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <span class="text-sm text-secondary">Created At:</span>
-                                                        <p class="text-dark mb-0">{{ $event->created_at->format('M d, Y H:i') }}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <span class="text-sm text-secondary">Last Updated:</span>
-                                                        <p class="text-dark mb-0">{{ $event->updated_at->format('M d, Y H:i') }}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            @if($event->images)
-                                            <div class="mb-3">
-                                                <span class="text-sm text-secondary">Images:</span>
-                                                <div class="mt-2">
-                                                    @foreach($event->images as $image)
-                                                        <span class="badge badge-sm bg-gradient-info me-2">{{ $image }}</span>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                            @endif
-                                        </div>
-                                    </div>
+<!-- Images Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-xs border-radius-lg">
+            <div class="card-header">
+                <h6 class="text-sm font-weight-bold mb-0">Event Images</h6>
+            </div>
+            <div class="card-body">
+                @if($event->images && count($event->images) > 0)
+                    <div class="row">
+                        @foreach($event->images as $index => $imagePath)
+                            <div class="col-md-3 mb-3">
+                                <div class="text-center">
+                                    <img src="{{ asset('storage/' . $imagePath) }}" 
+                                         alt="Event Image {{ $index + 1 }}" 
+                                         class="img-fluid rounded shadow-xs mb-2"
+                                         style="height: 200px; object-fit: cover; width: 100%;"
+                                         onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'">
+                                    <small class="text-muted">Image {{ $index + 1 }}</small>
                                 </div>
                             </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-sm text-secondary mb-0">No images uploaded for this event.</p>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Information -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-xs border-radius-lg">
+            <div class="card-header">
+                <h6 class="text-sm font-weight-bold mb-0">Additional Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <span class="text-sm text-secondary">Created At:</span>
+                            <p class="text-dark mb-0">{{ $event->created_at->format('M d, Y H:i') }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <span class="text-sm text-secondary">Last Updated:</span>
+                            <p class="text-dark mb-0">{{ $event->updated_at->format('M d, Y H:i') }}</p>
+                        </div>
+                    </div>
+                </div>
+                @if($event->images)
+                <div class="mb-3">
+                    <span class="text-sm text-secondary">Total Images:</span>
+                    <p class="text-dark mb-0">{{ count($event->images) }} images</p>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
                         </div>
                     </div>
                 </div>
