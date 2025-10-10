@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ressources', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            $table->enum('type', ['ARGENT', 'MATERIEL', 'LOGISTIQUE']);
+            $table->string('type');
             $table->unsignedBigInteger('fournisseur_id');
             $table->unsignedBigInteger('event_id');
             $table->timestamps();

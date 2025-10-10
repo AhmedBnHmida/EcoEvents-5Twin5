@@ -8,7 +8,7 @@ use App\Models\Ressource;
 use App\Models\Fournisseur;
 use App\Models\User;
 use App\EventStatus;
-use App\TypeRessource;
+use App\Models\TypeRessource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage; 
 
@@ -103,14 +103,17 @@ class EventController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        $categories = Category::all();
-        $statuses = EventStatus::cases();
-        $fournisseurs = User::where('role', 'fournisseur')->get();
-        $resourceTypes = TypeRessource::cases();
-        return view('events.create', compact('categories', 'statuses', 'fournisseurs', 'resourceTypes'));
-    }
+  public function create()
+{
+    $categories = Category::all();
+    $statuses = EventStatus::cases();
+    $fournisseurs = Fournisseur::all(); // fetch from fournisseur table
+     $resourceTypes = TypeRessource::allTypes(); // <-- ici
+
+    return view('events.create', compact('categories', 'statuses', 'fournisseurs', 'resourceTypes'));
+}
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -132,7 +135,7 @@ class EventController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'resources' => 'nullable|array',
             'resources.*.nom' => 'required_with:resources|string|max:255',
-            'resources.*.type' => 'required_with:resources|in:' . implode(',', array_column(TypeRessource::cases(), 'value')),
+           'resources.*.type' => 'required_with:resources|in:' . implode(',', TypeRessource::allTypes()),
             'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
         ]);
 
