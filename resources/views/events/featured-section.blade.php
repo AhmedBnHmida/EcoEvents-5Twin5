@@ -3,7 +3,7 @@
     $featuredEvents = \App\Models\Event::with('category')
         ->where('is_public', true)
         ->where('status', '!=', \App\EventStatus::CANCELLED)
-        ->where('start_date', '>', now())
+       <!-- ->where('start_date', '>', now())-->
         ->orderBy('start_date')
         ->take(6)
         ->get();
@@ -20,7 +20,10 @@
     <div class="col-lg-4 col-md-6 mb-4">
         <div class="card shadow-xs border h-100 hover-scale">
             @if($event->images && count($event->images) > 0)
-                <img src="{{ $event->images[0] }}" class="card-img-top" alt="{{ $event->title }}" style="height: 200px; object-fit: cover;">
+                <img src="{{ asset('storage/' . $event->images[0]) }}" 
+                    class="card-img-top" 
+                    alt="{{ $event->title }}" 
+                    style="height: 250px; object-fit: cover; transition: transform 0.3s ease;">
             @else
                 <div class="card-img-top bg-gradient-dark d-flex align-items-center justify-content-center" style="height: 200px;">
                     <i class="fas fa-calendar-alt text-white fa-3x"></i>

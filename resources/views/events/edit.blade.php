@@ -237,8 +237,8 @@
                                                                         name="resources[{{ $index }}][type]">
                                                                     <option value="">Select Type</option>
                                                                     @foreach($resourceTypes as $type)
-                                                                        <option value="{{ $type->value }}" {{ old('resources.'.$index.'.type', $resource->type->value) == $type->value ? 'selected' : '' }}>
-                                                                            {{ $type->value }}
+                                                                        <option value="{{ $type }}" {{ old('resources.0.type') == $type ? 'selected' : '' }}>
+                                                                            {{ $type }}
                                                                         </option>
                                                                     @endforeach
                                                                 </select>
@@ -312,7 +312,7 @@
                                 <select class="form-control" name="resources[${index}][type]">
                                     <option value="">Select Type</option>
                                     @foreach($resourceTypes as $type)
-                                        <option value="{{ $type->value }}">{{ $type->value }}</option>
+                                        <option value="{{ $type }}">{{ $type }}</option>
                                     @endforeach
                                 </select>
                             </div>
