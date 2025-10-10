@@ -15,18 +15,63 @@ use Illuminate\Support\Facades\Storage;
 class EventController extends Controller
 {
     /**
-     * Display events for public website
+     * Display events for public website with real-time filters
      */
-    public function publicIndex()
+    public function publicIndex(Request $request)
     {
-        $events = Event::with('category')
+        $query = Event::with('category')
             ->where('is_public', true)
-            ->where('status', '!=', \App\EventStatus::CANCELLED)
-            //->where('start_date', '>', now())
-            ->orderBy('start_date')
-            ->paginate(9);
+            ->where('status', '!=', \App\EventStatus::CANCELLED);
 
-        return view('events.public-index', compact('events'));
+        // Search functionality - title, category only (location is separate)
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                ->orWhereHas('category', function($categoryQuery) use ($search) {
+                    $categoryQuery->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Filter by location
+        if ($request->has('location') && !empty($request->location)) {
+            $location = $request->location;
+            $query->where('location', 'like', "%{$location}%");
+        }
+
+        // Filter by category
+        if ($request->has('category') && !empty($request->category)) {
+            $query->where('categorie_id', $request->category);
+        }
+
+        // Filter by price range
+        if ($request->has('min_price') && !empty($request->min_price)) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->has('max_price') && !empty($request->max_price)) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Filter by date range (BETWEEN)
+        if ($request->has('start_date') && !empty($request->start_date)) {
+            $query->whereDate('start_date', '>=', $request->start_date);
+        }
+
+        if ($request->has('end_date') && !empty($request->end_date)) {
+            $query->whereDate('start_date', '<=', $request->end_date);
+        }
+
+        // Sort by start date (default)
+        $query->orderBy('start_date', 'asc');
+
+        $events = $query->paginate(9)->appends($request->except('page'));
+        
+        // Get categories for filter dropdown
+        $categories = Category::all();
+
+        return view('events.public-index', compact('events', 'categories'));
     }
 
     /**
@@ -185,7 +230,7 @@ class EventController extends Controller
         $categories = Category::all();
         $statuses = EventStatus::cases();
         $fournisseurs = User::where('role', 'fournisseur')->get();
-        $resourceTypes = TypeRessource::cases();
+        $resourceTypes = TypeRessource::allTypes();
         return view('events.edit', compact('event', 'categories', 'statuses', 'fournisseurs', 'resourceTypes'));
     }
 
@@ -209,7 +254,7 @@ class EventController extends Controller
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'resources' => 'nullable|array',
             'resources.*.nom' => 'required_with:resources|string|max:255',
-            'resources.*.type' => 'required_with:resources|in:' . implode(',', array_column(TypeRessource::cases(), 'value')),
+            'resources.*.type' => 'required_with:resources|in:' . implode(',', TypeRessource::allTypes()),
             'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
             'resources.*.id' => 'nullable|exists:ressources,id',
         ]);
