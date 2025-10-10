@@ -154,7 +154,7 @@
                                                             @foreach($event->ressources as $resource)
                                                                 <tr>
                                                                     <td class="text-sm text-dark">{{ $resource->nom }}</td>
-                                                                    <td class="text-sm text-dark">{{ $resource->type->value }}</td>
+                                                                    <td class="text-sm text-dark">{{ $resource->type }}</td>
                                                                     <td class="text-sm text-dark">{{ $resource->fournisseur->nom_societe }}</td>
                                                                 </tr>
                                                             @endforeach
