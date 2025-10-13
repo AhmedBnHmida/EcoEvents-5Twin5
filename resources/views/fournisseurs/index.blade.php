@@ -1,4 +1,25 @@
 <x-app-layout>
+    <head>
+        <!-- Add FontAwesome for icons if not already included -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+        <style>
+            .bg-gradient-primary    { background: linear-gradient(90deg, #007bff 0%, #00c6ff 100%) !important; }
+            .bg-gradient-success    { background: linear-gradient(90deg, #28a745 0%, #85ffbd 100%) !important; }
+            .bg-gradient-warning    { background: linear-gradient(90deg, #ffc107 0%, #ffecd2 100%) !important; }
+            .bg-gradient-info       { background: linear-gradient(90deg, #17a2b8 0%, #b2fefa 100%) !important; }
+            .stat-card-icon {
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                font-size: 1.7rem;
+                width: 56px;
+                height: 56px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                margin: 0 auto 12px auto;
+            }
+        </style>
+    </head>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
         <x-app.navbar />
         <div class="container-fluid py-4 px-5">
@@ -9,6 +30,101 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
+
+            <!-- Enhanced Statistics Section -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm bg-light h-100">
+                        <div class="card-body text-center">
+                            <div class="stat-card-icon bg-gradient-primary text-white">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h6 class="font-weight-bold text-uppercase text-primary mb-1">Fournisseurs</h6>
+                            <h2 class="font-weight-bold text-dark mb-0">{{ $totalFournisseurs }}</h2>
+                            <span class="text-muted small">Total inscrits</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm bg-light h-100">
+                        <div class="card-body text-center">
+                            <div class="stat-card-icon bg-gradient-success text-white">
+                                <i class="fas fa-cubes"></i>
+                            </div>
+                            <h6 class="font-weight-bold text-uppercase text-success mb-1">Ressources</h6>
+                            <h2 class="font-weight-bold text-dark mb-0">{{ $totalRessources }}</h2>
+                            <span class="text-muted small">Total disponibles</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm bg-light h-100">
+                        <div class="card-body text-center">
+                            <div class="stat-card-icon bg-gradient-warning text-white">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <h6 class="font-weight-bold text-uppercase text-warning mb-1">Moyenne/R.</h6>
+                            <h2 class="font-weight-bold text-dark mb-0">{{ $averageRessourcesPerFournisseur }}</h2>
+                            <span class="text-muted small">Ressources par fournisseur</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm bg-light h-100">
+                        <div class="card-body text-center">
+                            <div class="stat-card-icon bg-gradient-info text-white">
+                                <i class="fas fa-tags"></i>
+                            </div>
+                            <h6 class="font-weight-bold text-uppercase text-info mb-1">Types</h6>
+                            <h2 class="font-weight-bold text-dark mb-0">{{ $totalTypes }}</h2>
+                            <span class="text-muted small">Types de ressources</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Statistics Section -->
+
+            <!-- Filter Section -->
+            <div class="card border-0 shadow-xs mb-4">
+                <div class="card-body py-3">
+                    <form method="GET" action="{{ route('fournisseurs.index') }}">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label for="filter_nom" class="form-label mb-1">Nom Société</label>
+                                <input type="text" class="form-control" id="filter_nom" name="nom_societe" value="{{ request('nom_societe') }}" placeholder="Nom...">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filter_domaine" class="form-label mb-1">Domaine Service</label>
+                                <select class="form-select" id="filter_domaine" name="domaine_service">
+                                    <option value="" {{ request('domaine_service') ? '' : 'selected' }}>Tous</option>
+                                    @foreach([
+                                        'Décoration', 'Nourriture', 'Matériel', 'Transport',
+                                        'Électronique', 'Hygiène', 'Communication', 'Papeterie',
+                                        'Énergie', 'Nettoyage', 'Sécurité', 'Autre'
+                                    ] as $type)
+                                        <option value="{{ $type }}" {{ request('domaine_service') == $type ? 'selected' : '' }}>
+                                            {{ $type }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filter_adresse" class="form-label mb-1">Adresse</label>
+                                <input type="text" class="form-control" id="filter_adresse" name="adresse" value="{{ request('adresse') }}" placeholder="Adresse...">
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-filter me-1"></i> Filtrer
+                                </button>
+                                <a href="{{ route('fournisseurs.index') }}" class="btn btn-outline-secondary">
+                                    Réinitialiser
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- End Filter Section -->
 
             <!-- Card for Table Header and Add Button -->
             <div class="row">
@@ -36,20 +152,6 @@
                             </div>
                         </div>
                         <div class="card-body px-0 py-0">
-                            <!-- Search and Filter -->
-                            <div class="border-bottom py-3 px-3 d-sm-flex align-items-center">
-                                <div class="input-group w-sm-25 ms-auto">
-                                    <span class="input-group-text text-body">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px"
-                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z">
-                                            </path>
-                                        </svg>
-                                    </span>
-                                    <input type="text" class="form-control" placeholder="Rechercher">
-                                </div>
-                            </div>
                             <!-- Supplier Table -->
                             <div class="table-responsive p-0">
                                 <table class="table align-items-center mb-0">
