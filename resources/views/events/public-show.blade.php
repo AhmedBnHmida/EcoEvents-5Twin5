@@ -53,12 +53,12 @@
                     <div id="eventCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner rounded-3">
                             @foreach($event->images as $index => $image)
-                            <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                <img src="{{ asset('storage/' . $image) }}" 
-                                     class="d-block w-100" 
-                                     alt="Event image {{ $index + 1 }}" 
-                                     style="height: 450px; object-fit: cover;">
-                            </div>
+                                <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                    <img src="{{ str_starts_with($image, 'http') ? $image : asset('storage/' . $image) }}" 
+                                        class="d-block w-100" 
+                                        alt="Event image {{ $index + 1 }}" 
+                                        style="height: 450px; object-fit: cover;">
+                                </div>
                             @endforeach
                         </div>
                         @if(count($event->images) > 1)

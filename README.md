@@ -56,9 +56,13 @@ npm install
 npm run dev
 ```
 
-### 6. Exécuter les migrations
+### 6. Exécuter les migrations et seeders
 ```bash
-php artisan migrate
+# Exécuter les migrations et peupler la base de données
+php artisan migrate --seed
+
+# Ou pour réinitialiser complètement
+php artisan migrate:fresh --seed
 ```
 
 ### 7. Démarrer le serveur
