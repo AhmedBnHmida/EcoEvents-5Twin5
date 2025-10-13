@@ -69,4 +69,13 @@ class Event extends Model
         return $this->hasManyThrough(Partner::class, Sponsoring::class, 'evenement_id', 'id', 'id', 'partenaire_id');
     }
 
+    
+
+
+    public function interactions()
+{
+    return $this->hasMany(\App\Models\Interaction::class, 'event_id');
+}
+
+
 }

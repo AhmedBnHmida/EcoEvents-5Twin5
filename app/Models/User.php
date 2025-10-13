@@ -84,4 +84,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(Partner::class);
     }
+
+
+    public function interactions()
+{
+    return $this->hasMany(\App\Models\Interaction::class);
+}
+
 }
