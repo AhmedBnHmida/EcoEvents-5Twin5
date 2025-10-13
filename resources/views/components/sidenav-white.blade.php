@@ -38,7 +38,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center me-2 " href="{{ route('profile') }}">
+                    <a class="nav-link d-flex align-items-center me-2 " href="">
                         <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                             fill="currentColor" class="opacity-6 me-1">
                             <path fill-rule="evenodd"

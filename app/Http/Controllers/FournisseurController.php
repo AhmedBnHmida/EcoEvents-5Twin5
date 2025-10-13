@@ -10,12 +10,38 @@ class FournisseurController extends Controller
     /**
      * Display a listing of the resource.
      */
-  public function index()
-    {
-        // Replace ::all() with ::paginate()
-        $fournisseurs = Fournisseur::paginate(10); // Adjust the number per page as needed (e.g., 10 items per page)
-        return view('fournisseurs.index', compact('fournisseurs'));
+ public function index(Request $request)
+{
+    $query = Fournisseur::query();
+
+    // Filters
+    if ($request->filled('nom_societe')) {
+        $query->where('nom_societe', 'like', '%' . $request->nom_societe . '%');
     }
+    if ($request->filled('domaine_service')) {
+        $query->where('domaine_service', $request->domaine_service);
+    }
+    if ($request->filled('adresse')) {
+        $query->where('adresse', 'like', '%' . $request->adresse . '%');
+    }
+
+    // Paginate and keep filters in pagination links
+    $fournisseurs = $query->paginate(10)->appends($request->except('page'));
+
+    // Stats
+    $totalFournisseurs = Fournisseur::count();
+    $totalRessources = \App\Models\Ressource::count();
+    $averageRessourcesPerFournisseur = $totalFournisseurs ? round($totalRessources / $totalFournisseurs, 2) : 0;
+    $totalTypes = count(\App\Models\TypeRessource::allTypes());
+
+    return view('fournisseurs.index', compact(
+        'fournisseurs',
+        'totalFournisseurs',
+        'totalRessources',
+        'averageRessourcesPerFournisseur',
+        'totalTypes'
+    ));
+}
 
     /**
      * Show the form for creating a new resource.
@@ -35,7 +61,7 @@ class FournisseurController extends Controller
             'domaine_service' => 'required|string|max:255',
             'adresse'         => 'required|string|max:255',
             'email'           => 'required|email|unique:fournisseurs,email',
-            'telephone'       => 'required|string|max:20',
+            'telephone'       => 'required|string|max:9|min:8',
         ]);
 
         Fournisseur::create($validated);
