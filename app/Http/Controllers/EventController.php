@@ -11,6 +11,7 @@ use App\EventStatus;
 use App\Models\TypeRessource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\Log; // Ajouté pour logging
 
 class EventController extends Controller
 {
@@ -182,6 +183,7 @@ class EventController extends Controller
             'resources.*.nom' => 'required_with:resources|string|max:255',
            'resources.*.type' => 'required_with:resources|in:' . implode(',', TypeRessource::allTypes()),
             'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
+            'resources.*.quantite' => 'required_with:resources|integer|min:1',
         ]);
 
         $eventData = $request->except(['resources', 'images']);
@@ -203,6 +205,7 @@ class EventController extends Controller
                     'nom' => $resourceData['nom'],
                     'type' => $resourceData['type'],
                     'fournisseur_id' => $resourceData['fournisseur_id'],
+                    'quantite' => $resourceData['quantite'] ?? 1,
                     'event_id' => $event->id,
                 ]);
             }
@@ -256,6 +259,7 @@ class EventController extends Controller
             'resources.*.nom' => 'required_with:resources|string|max:255',
             'resources.*.type' => 'required_with:resources|in:' . implode(',', TypeRessource::allTypes()),
             'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
+            'resources.*.quantite' => 'required_with:resources|integer|min:1',
             'resources.*.id' => 'nullable|exists:ressources,id',
         ]);
 
@@ -301,6 +305,7 @@ class EventController extends Controller
                         'nom' => $resourceData['nom'],
                         'type' => $resourceData['type'],
                         'fournisseur_id' => $resourceData['fournisseur_id'],
+                        'quantite' => $resourceData['quantite'] ?? 1,
                     ]);
                     $submittedResourceIds[] = $resourceData['id'];
                 } else {
@@ -309,6 +314,7 @@ class EventController extends Controller
                         'nom' => $resourceData['nom'],
                         'type' => $resourceData['type'],
                         'fournisseur_id' => $resourceData['fournisseur_id'],
+                        'quantite' => $resourceData['quantite'] ?? 1,
                         'event_id' => $event->id,
                     ]);
                     $submittedResourceIds[] = $newResource->id;
@@ -361,4 +367,100 @@ class EventController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+
+
+
+
+
+
+
+    // Other methods for managing resources can be added here
+    public function exportHistory()
+{
+    $events = \App\Models\Event::with('ressources')->get();
+    \Storage::put('events_history.json', $events->toJson(JSON_PRETTY_PRINT));
+    return response()->json(['status' => 'ok']);
+}
+
+    /**
+     * Suggest resources based on category and capacity using Python script.
+     */
+   /**
+ * Suggest resources based on category and capacity using Python script.
+ */
+/**
+ * Suggest resources based on category and capacity using Python script.
+ */
+public function suggestResources(Request $request)
+{
+    try {
+        Log::info('SuggestResources called with:', $request->all());
+
+        $request->validate([
+            'categorie_id' => 'required|integer|exists:categories,id',
+            'capacity_max' => 'required|integer|min:1',
+        ]);
+
+        $historyFile = storage_path('app/events_history.json');
+        Log::info('History file path: ' . $historyFile);
+
+        if (!file_exists($historyFile)) {
+            Log::info('History file not found, generating...');
+            $events = Event::with('ressources')->get();
+            $json = $events->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE); // Fix UTF-8: unescape unicode
+            Storage::put('events_history.json', $json);
+            Log::info('Generated history JSON length: ' . strlen($json) . ' | Preview: ' . substr($json, 0, 200));
+        } else {
+            $json = Storage::get('events_history.json');
+            Log::info('Existing history JSON length: ' . strlen($json) . ' | Preview: ' . substr($json, 0, 200));
+        }
+
+        // Chemin précis pour le script
+        $scriptPath = base_path('app/Http/Scripts/suggest_ressources.py');
+        Log::info('Script path: ' . $scriptPath);
+        if (!file_exists($scriptPath)) {
+            Log::error('Python script not found at: ' . $scriptPath);
+            return response()->json(['error' => 'Script Python introuvable. Vérifiez le chemin: ' . $scriptPath], 500);
+        }
+
+        // Force cwd au root Laravel pour cohérence
+        $command = sprintf('cd %s && python3 %s %d %d 2>&1', escapeshellarg(base_path()), escapeshellarg($scriptPath), $request->categorie_id, $request->capacity_max);
+        Log::info('Executing command: ' . $command);
+
+        $output = shell_exec($command);
+        Log::info('Shell exec raw output: ' . ($output ? substr($output, 0, 500) : 'empty'));
+
+        if ($output === null || empty(trim($output))) {
+            Log::error('Empty output from script');
+            return response()->json(['error' => 'Erreur lors de l\'exécution du script (output vide)'], 500);
+        }
+
+        // Fix UTF-8 pour decode: force encoding si besoin
+        $decoded = json_decode($output, true, 512, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Log::error('JSON decode error: ' . json_last_error_msg() . ' | Raw output: ' . $output);
+            // Fallback si JSON invalide: renvoie defaults manuellement
+        $suggestions = [
+'resources' => [
+['nom' => 'Chaise', 'type' => 'Chaise', 'quantite' => $request->capacity_max],
+['nom' => 'Table', 'type' => 'Table', 'quantite' => max(1, (int) ($request->capacity_max / 10))]
+]
+];
+            Log::info('Fallback suggestions due to JSON error: ', $suggestions);
+        } else {
+            $suggestions = $decoded;
+        }
+
+        return response()->json($suggestions);
+
+    } catch (\Exception $e) {
+        Log::error('Exception in suggestResources: ' . $e->getMessage());
+        return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
+    } catch (\Throwable $t) {
+        Log::error('Throwable in suggestResources: ' . $t->getMessage());
+        return response()->json(['error' => 'Erreur inattendue'], 500);
+    }
+}
+
 }

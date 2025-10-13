@@ -185,10 +185,11 @@ Route::get('/dashboard-Fournisseur', function () {
 
 
 
-
-
-
-
-
+// Routes pour suggestions et export (déplacées ici pour être définies tôt, avant tout Blade qui les référence)
+Route::post('/events/suggest-resources', [\App\Http\Controllers\EventController::class, 'suggestResources'])->name('events.suggest-resources');
+Route::get('/events/suggest-resources', function() {
+    return response()->json(['error' => 'Use POST method with JSON body: {"categorie_id":1,"capacity_max":180}']);
+});
+Route::get('/events/export-history', [\App\Http\Controllers\EventController::class, 'exportHistory']);
 
 require __DIR__.'/auth.php';
