@@ -175,7 +175,7 @@
                                                     @foreach($event->images as $index => $imagePath)
                                                         <div class="col-md-3 mb-3">
                                                             <div class="position-relative">
-                                                                <img src="{{ asset('storage/' . $imagePath) }}" 
+                                                                <img src="{{ str_starts_with($imagePath, 'http') ? $imagePath : asset('storage/' . $imagePath) }}" 
                                                                      class="img-thumbnail w-100" style="height: 150px; object-fit: cover;">
                                                                 <div class="form-check mt-2">
                                                                     <input class="form-check-input" type="checkbox" 

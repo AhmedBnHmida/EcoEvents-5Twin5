@@ -241,10 +241,10 @@
                         <!-- Image Section with Overlay -->
                         <div class="card-image position-relative">
                             @if($event->images && count($event->images) > 0)
-                                <img src="{{ asset('storage/' . $event->images[0]) }}" 
-                                     class="card-img-top" 
-                                     alt="{{ $event->title }}" 
-                                     style="height: 250px; object-fit: cover; transition: transform 0.3s ease;">
+                                <img src="{{ str_starts_with($event->images[0], 'http') ? $event->images[0] : asset('storage/' . $event->images[0]) }}" 
+                                    class="card-img-top" 
+                                    alt="{{ $event->title }}" 
+                                    style="height: 250px; object-fit: cover; transition: transform 0.3s ease;">
                             @else
                                 <div class="card-img-top bg-gradient-dark d-flex align-items-center justify-content-center position-relative" 
                                      style="height: 250px;">

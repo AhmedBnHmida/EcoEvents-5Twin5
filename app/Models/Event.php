@@ -28,6 +28,11 @@ class Event extends Model
         }
 
         return array_map(function($image) {
+            // Check if it's a full URL (starts with http)
+            if (str_starts_with($image, 'http')) {
+                return $image;
+            }
+            // Otherwise, it's a local storage file
             return asset('storage/' . $image);
         }, $this->images);
     }
@@ -36,7 +41,13 @@ class Event extends Model
     public function getFeaturedImageUrlAttribute()
     {
         if ($this->images && count($this->images) > 0) {
-            return asset('storage/' . $this->images[0]);
+            $firstImage = $this->images[0];
+            // Check if it's a full URL
+            if (str_starts_with($firstImage, 'http')) {
+                return $firstImage;
+            }
+            // Otherwise, it's a local storage file
+            return asset('storage/' . $firstImage);
         }
         return asset('images/default-event.jpg');
     }

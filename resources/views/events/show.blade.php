@@ -182,7 +182,7 @@
                         @foreach($event->images as $index => $imagePath)
                             <div class="col-md-3 mb-3">
                                 <div class="text-center">
-                                    <img src="{{ asset('storage/' . $imagePath) }}" 
+                                    <img src="{{ str_starts_with($imagePath, 'http') ? $imagePath : asset('storage/' . $imagePath) }}" 
                                          alt="Event Image {{ $index + 1 }}" 
                                          class="img-fluid rounded shadow-xs mb-2"
                                          style="height: 200px; object-fit: cover; width: 100%;"
