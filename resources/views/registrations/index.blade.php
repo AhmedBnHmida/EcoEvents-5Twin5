@@ -93,17 +93,9 @@
                                                 </span>
                                             </td>
                                             <td class="text-center">
-                                                <form action="{{ route('registrations.updateStatus', $registration->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <select name="status" class="form-select form-select-sm badge bg-{{ $registration->status->color() }} border-0 text-white" 
-                                                            onchange="this.form.submit()" style="cursor: pointer;">
-                                                        <option value="pending" {{ $registration->status->value === 'pending' ? 'selected' : '' }}>En attente</option>
-                                                        <option value="confirmed" {{ $registration->status->value === 'confirmed' ? 'selected' : '' }}>Confirmé</option>
-                                                        <option value="canceled" {{ $registration->status->value === 'canceled' ? 'selected' : '' }}>Annulé</option>
-                                                        <option value="attended" {{ $registration->status->value === 'attended' ? 'selected' : '' }}>Présent</option>
-                                                    </select>
-                                                </form>
+                                                <span class="badge bg-gradient-{{ $registration->status->color() }} text-white shadow-sm" style="opacity: 0.9;">
+                                                    <i class="fas fa-circle me-1 opacity-75"></i>{{ $registration->status->label() }}
+                                                </span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex gap-2 justify-content-center">
