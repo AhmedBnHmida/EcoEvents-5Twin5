@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Event;
 use App\Models\Feedback;
+use App\Models\FeedbackCategory;
 use App\Models\Registration;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -40,10 +41,14 @@ class FeedbackSeeder extends Seeder
             foreach ($eventParticipants as $participant) {
                 $note = rand(3, 5); // Mostly positive feedback for testing
                 $comment = $comments[array_rand($comments)];
+                
+                // Get random category or null (30% chance of no category)
+                $categoryId = rand(1, 10) <= 7 ? FeedbackCategory::inRandomOrder()->first()->id : null;
 
                 Feedback::create([
                     'id_evenement' => $event->id,
                     'id_participant' => $participant->id,
+                    'category_id' => $categoryId,
                     'note' => $note,
                     'commentaire' => $comment,
                     'date_feedback' => $event->end_date->addDays(rand(1, 7)),

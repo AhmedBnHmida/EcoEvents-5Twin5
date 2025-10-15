@@ -11,6 +11,7 @@ class Feedback extends Model
     protected $fillable = [
         'id_evenement',
         'id_participant',
+        'category_id',
         'note',
         'commentaire',
         'date_feedback',
@@ -28,5 +29,10 @@ class Feedback extends Model
     public function participant()
     {
         return $this->belongsTo(User::class, 'id_participant');
+    }
+    
+    public function category()
+    {
+        return $this->belongsTo(FeedbackCategory::class, 'category_id');
     }
 }

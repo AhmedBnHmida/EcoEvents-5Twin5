@@ -6,6 +6,7 @@ use App\Models\Feedback;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\GlobalEvaluation;
+use App\Models\FeedbackCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -45,6 +46,11 @@ class FeedbackController extends Controller
         if ($request->has('event_id') && $request->event_id != '') {
             $query->where('id_evenement', $request->event_id);
         }
+        
+        // Filter by category
+        if ($request->has('category_id') && $request->category_id != '') {
+            $query->where('category_id', $request->category_id);
+        }
 
         // Sort
         $sortBy = $request->get('sort_by', 'date_feedback');
@@ -53,10 +59,11 @@ class FeedbackController extends Controller
 
         $feedbacks = $query->paginate(15)->appends($request->except('page'));
         
-        // Get events for filter
+        // Get events and categories for filter
         $events = Event::all();
+        $categories = FeedbackCategory::where('active', true)->orderBy('display_order')->get();
 
-        return view('feedback.index', compact('feedbacks', 'events'));
+        return view('feedback.index', compact('feedbacks', 'events', 'categories'));
     }
 
     /**
@@ -104,7 +111,8 @@ class FeedbackController extends Controller
                 ->with('info', 'Vous avez déjà donné un avis sur cet événement. Vous pouvez le modifier ici.');
         }
 
-        return view('feedback.create', compact('event'));
+        $categories = FeedbackCategory::where('active', true)->orderBy('display_order')->get();
+        return view('feedback.create', compact('event', 'categories'));
     }
 
     /**
@@ -114,6 +122,7 @@ class FeedbackController extends Controller
     {
         $request->validate([
             'event_id' => 'required|exists:events,id',
+            'category_id' => 'nullable|exists:feedback_categories,id',
             'note' => 'required|integer|min:1|max:5',
             'commentaire' => 'nullable|string|max:1000',
         ]);
@@ -145,6 +154,7 @@ class FeedbackController extends Controller
         $feedback = Feedback::create([
             'id_evenement' => $event->id,
             'id_participant' => Auth::id(),
+            'category_id' => $request->category_id,
             'note' => $request->note,
             'commentaire' => $request->commentaire,
             'date_feedback' => now(),
@@ -170,8 +180,9 @@ class FeedbackController extends Controller
         }
 
         $feedback->load('event');
+        $categories = FeedbackCategory::where('active', true)->orderBy('display_order')->get();
 
-        return view('feedback.edit', compact('feedback'));
+        return view('feedback.edit', compact('feedback', 'categories'));
     }
 
     /**
@@ -187,11 +198,13 @@ class FeedbackController extends Controller
         }
 
         $request->validate([
+            'category_id' => 'nullable|exists:feedback_categories,id',
             'note' => 'required|integer|min:1|max:5',
             'commentaire' => 'nullable|string|max:1000',
         ]);
 
         $feedback->update([
+            'category_id' => $request->category_id,
             'note' => $request->note,
             'commentaire' => $request->commentaire,
         ]);

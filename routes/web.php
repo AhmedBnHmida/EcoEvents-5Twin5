@@ -155,6 +155,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/manage/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
     Route::get('/manage/evaluations', [App\Http\Controllers\EvaluationController::class, 'index'])->name('evaluations.index');
     Route::get('/manage/evaluations/{event}', [App\Http\Controllers\EvaluationController::class, 'show'])->name('evaluations.show');
+    
+    // Feedback Categories Routes
+    Route::get('/manage/feedback/categories', [App\Http\Controllers\FeedbackCategoryController::class, 'index'])->name('feedback.categories.index');
+    Route::get('/manage/feedback/categories/create', [App\Http\Controllers\FeedbackCategoryController::class, 'create'])->name('feedback.categories.create');
+    Route::post('/manage/feedback/categories', [App\Http\Controllers\FeedbackCategoryController::class, 'store'])->name('feedback.categories.store');
+    Route::get('/manage/feedback/categories/{id}', [App\Http\Controllers\FeedbackCategoryController::class, 'show'])->name('feedback.categories.show');
+    Route::get('/manage/feedback/categories/{id}/edit', [App\Http\Controllers\FeedbackCategoryController::class, 'edit'])->name('feedback.categories.edit');
+    Route::put('/manage/feedback/categories/{id}', [App\Http\Controllers\FeedbackCategoryController::class, 'update'])->name('feedback.categories.update');
+    Route::delete('/manage/feedback/categories/{id}', [App\Http\Controllers\FeedbackCategoryController::class, 'destroy'])->name('feedback.categories.destroy');
+    
+    // Feedback AI Recommendations API
+    Route::post('/api/feedback/recommendations', [App\Http\Controllers\FeedbackRecommendationController::class, 'generateRecommendation'])->name('api.feedback.recommendations');
 
 });
 
