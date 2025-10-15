@@ -102,6 +102,42 @@
                                 @enderror
                             </div>
 
+                            <!-- Category -->
+                            <div class="mb-4">
+                                <label class="form-label h5">
+                                    <i class="fas fa-tag me-2"></i>Catégorie
+                                </label>
+                                <p class="text-muted text-sm mb-3">Sélectionnez une catégorie pour votre avis (optionnel)</p>
+                                <div class="category-container bg-light rounded-3 border p-3">
+                                    <select id="feedback-category" name="category_id" class="form-control @error('category_id') is-invalid @enderror">
+                                        <option value="">-- Sélectionnez une catégorie --</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" 
+                                                {{ old('category_id', $feedback->category_id) == $category->id ? 'selected' : '' }}
+                                                data-color="{{ $category->color }}" 
+                                                data-icon="{{ $category->icon }}">
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id')
+                                        <span class="text-danger text-sm mt-2 d-block">{{ $message }}</span>
+                                    @enderror
+                                    
+                                    <div class="mt-3">
+                                        <button type="button" id="ai-suggest-btn" class="btn btn-sm btn-ai-suggest" {{ !$feedback->category_id ? 'disabled' : '' }}>
+                                            <i class="fas fa-robot me-1"></i>Suggérer un commentaire avec l'IA
+                                        </button>
+                                        <div id="ai-loading" class="d-none">
+                                            <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <span>Génération en cours...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Comment -->
                             <div class="mb-4">
                                 <label class="form-label h5">
@@ -110,12 +146,28 @@
                                 <p class="text-muted text-sm mb-3">Partagez votre expérience (optionnel)</p>
                                 <div class="comment-container bg-light rounded-3 border p-3">
                                     <textarea 
+                                        id="feedback-comment"
                                         name="commentaire" 
                                         class="form-control border-0 shadow-none @error('commentaire') is-invalid @enderror" 
                                         rows="6" 
                                         maxlength="1000"
                                         style="background: transparent; resize: vertical;"
                                         placeholder="Qu'avez-vous pensé de cet événement ? Qu'est-ce qui vous a plu ou déplu ? Vos suggestions pour améliorer l'expérience sont les bienvenues...">{{ old('commentaire', $feedback->commentaire) }}</textarea>
+                                    
+                                    <!-- AI Suggestion Result -->
+                                    <div id="ai-suggestion-container" class="ai-suggestion-container d-none">
+                                        <div class="ai-suggestion-header">
+                                            <i class="fas fa-robot me-2"></i>Suggestion IA
+                                            <button type="button" class="btn-close btn-sm" aria-label="Close" id="close-suggestion"></button>
+                                        </div>
+                                        <div id="ai-suggestion-content" class="ai-suggestion-content"></div>
+                                        <div class="ai-suggestion-footer">
+                                            <button type="button" id="use-suggestion-btn" class="btn btn-sm btn-ai-use">
+                                                <i class="fas fa-check me-1"></i>Utiliser cette suggestion
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <small class="text-muted">
                                             <i class="fas fa-info-circle me-1"></i>
@@ -233,6 +285,84 @@
                     ratingText.classList.add('font-weight-bold');
                 }
             }
+            
+            // AI Recommendation System
+            const categorySelect = document.getElementById('feedback-category');
+            const aiSuggestBtn = document.getElementById('ai-suggest-btn');
+            const aiLoading = document.getElementById('ai-loading');
+            const aiSuggestionContainer = document.getElementById('ai-suggestion-container');
+            const aiSuggestionContent = document.getElementById('ai-suggestion-content');
+            const useSuggestionBtn = document.getElementById('use-suggestion-btn');
+            const closeSuggestionBtn = document.getElementById('close-suggestion');
+            const feedbackComment = document.getElementById('feedback-comment');
+            
+            // Enable/disable AI suggestion button based on category selection
+            categorySelect.addEventListener('change', function() {
+                if (this.value) {
+                    aiSuggestBtn.disabled = false;
+                } else {
+                    aiSuggestBtn.disabled = true;
+                    aiSuggestionContainer.classList.add('d-none');
+                }
+            });
+            
+            // Handle AI suggestion button click
+            aiSuggestBtn.addEventListener('click', function() {
+                const categoryId = categorySelect.value;
+                if (!categoryId) return;
+                
+                // Show loading indicator
+                aiSuggestBtn.disabled = true;
+                aiSuggestBtn.classList.add('d-none');
+                aiLoading.classList.remove('d-none');
+                
+                // Make API request to get recommendation
+                fetch('{{ route('api.feedback.recommendations') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        category_id: categoryId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading indicator
+                    aiLoading.classList.add('d-none');
+                    aiSuggestBtn.classList.remove('d-none');
+                    aiSuggestBtn.disabled = false;
+                    
+                    if (data.success && data.data && data.data.suggestion) {
+                        // Show suggestion
+                        aiSuggestionContent.textContent = data.data.suggestion;
+                        aiSuggestionContainer.classList.remove('d-none');
+                    } else {
+                        // Show error
+                        alert('Désolé, nous n\'avons pas pu générer une suggestion. Veuillez réessayer plus tard.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    aiLoading.classList.add('d-none');
+                    aiSuggestBtn.classList.remove('d-none');
+                    aiSuggestBtn.disabled = false;
+                    alert('Une erreur s\'est produite. Veuillez réessayer plus tard.');
+                });
+            });
+            
+            // Handle use suggestion button click
+            useSuggestionBtn.addEventListener('click', function() {
+                const suggestion = aiSuggestionContent.textContent;
+                feedbackComment.value = suggestion;
+                aiSuggestionContainer.classList.add('d-none');
+            });
+            
+            // Handle close suggestion button click
+            closeSuggestionBtn.addEventListener('click', function() {
+                aiSuggestionContainer.classList.add('d-none');
+            });
         });
     </script>
     
@@ -241,6 +371,30 @@
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border: 2px solid #dee2e6;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* AI Suggestion Button */
+        .btn-ai-suggest {
+            background: linear-gradient(135deg, #6c5ce7 0%, #8e44ad 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+        
+        .btn-ai-suggest:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+            color: white;
+        }
+        
+        .btn-ai-suggest:disabled {
+            background: linear-gradient(135deg, #a29bfe 0%, #cda7dd 100%);
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         
         .star-label:hover {
@@ -288,10 +442,63 @@
             animation: pulse 0.3s ease-in-out;
         }
         
+        .category-container,
         .comment-container {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border: 2px solid #dee2e6 !important;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* AI Suggestion Container */
+        .ai-suggestion-container {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f0fd 100%);
+            border: 2px solid #c9deff;
+            border-radius: 12px;
+            margin: 1rem 0;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .ai-suggestion-header {
+            background: linear-gradient(135deg, #6c5ce7 0%, #8e44ad 100%);
+            color: white;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ai-suggestion-content {
+            padding: 1rem;
+            font-style: italic;
+            color: #495057;
+            line-height: 1.6;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .ai-suggestion-footer {
+            padding: 0.75rem 1rem;
+            text-align: right;
+            background-color: rgba(108, 92, 231, 0.05);
+        }
+        
+        .btn-ai-use {
+            background: linear-gradient(135deg, #6c5ce7 0%, #8e44ad 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0.4rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-ai-use:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+            color: white;
         }
         
         .comment-container textarea:focus {

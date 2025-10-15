@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             SponsoringSeeder::class,
             RessourceSeeder::class,
             RegistrationSeeder::class,
+            FeedbackCategorySeeder::class,
             FeedbackSeeder::class,
             GlobalEvaluationSeeder::class,
             InteractionSeeder::class,

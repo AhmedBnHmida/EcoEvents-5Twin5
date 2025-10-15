@@ -85,9 +85,20 @@
                                             ];
                                             $currentRating = $ratingLabels[$feedback->note] ?? ['text' => 'Non évalué', 'color' => 'secondary'];
                                         @endphp
-                                        <span class="badge bg-{{ $currentRating['color'] }} rating-label-badge">
+                                        <span class="badge bg-{{ $currentRating['color'] }} rating-label-badge me-2">
                                             {{ $currentRating['text'] }}
                                         </span>
+                                        
+                                        @if($feedback->category)
+                                            <span class="badge category-badge" style="background-color: {{ $feedback->category->color }}">
+                                                @if($feedback->category->icon)
+                                                    <i class="{{ $feedback->category->icon }} me-1"></i>
+                                                @else
+                                                    <i class="fas fa-tag me-1"></i>
+                                                @endif
+                                                {{ $feedback->category->name }}
+                                            </span>
+                                        @endif
                                     </div>
                                     
                                     <!-- Comment -->
@@ -303,7 +314,8 @@
             line-height: 1.3;
         }
         
-        .rating-label-badge {
+        .rating-label-badge, 
+        .category-badge {
             font-size: 0.9rem;
             padding: 0.5rem 1rem;
             border-radius: 20px;

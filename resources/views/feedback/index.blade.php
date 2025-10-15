@@ -49,27 +49,46 @@
                                 </div>
 
                                 <!-- Event Filter -->
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <select name="event_id" class="form-select">
                                         <option value="">Tous les événements</option>
                                         @foreach($events as $event)
                                             <option value="{{ $event->id }}" {{ request('event_id') == $event->id ? 'selected' : '' }}>
-                                                {{ Str::limit($event->title, 35) }}
+                                                {{ Str::limit($event->title, 25) }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Category Filter -->
+                                <div class="col-md-2">
+                                    <select name="category_id" class="form-select">
+                                        <option value="">Toutes les catégories</option>
+                                        <option value="null" {{ request('category_id') == 'null' ? 'selected' : '' }}>Sans catégorie</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->name }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
 
                                 <!-- Buttons -->
-                                <div class="col-md-2">
+                                <div class="col-md-1">
                                     <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary btn-sm w-50">
+                                        <button type="submit" class="btn btn-primary btn-sm w-100">
                                             <i class="fas fa-filter me-1"></i>Filtrer
                                         </button>
-                                        <a href="{{ route('feedback.index') }}" class="btn btn-outline-secondary btn-sm w-50">
-                                            <i class="fas fa-redo me-1"></i>Reset
-                                        </a>
                                     </div>
+                                </div>
+                                
+                                <div class="col-md-12 mt-2 text-end">
+                                    <a href="{{ route('feedback.index') }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-redo me-1"></i>Réinitialiser les filtres
+                                    </a>
+                                    <a href="{{ route('feedback.categories.index') }}" class="btn btn-info btn-sm ms-2">
+                                        <i class="fas fa-tags me-1"></i>Gérer les catégories
+                                    </a>
                                 </div>
                             </div>
                         </form>
@@ -200,7 +219,7 @@
                                                 <i class="fas fa-user me-1"></i>
                                                 {{ $feedback->participant->name }}
                                             </span>
-                                            <span class="badge bg-gradient-info">
+                                            <span class="badge bg-gradient-info me-2">
                                                 <i class="fas fa-calendar me-1"></i>
                                                 @if($feedback->date_feedback)
                                                     {{ $feedback->date_feedback->format('d/m/Y à H:i') }}
@@ -208,6 +227,16 @@
                                                     Date non définie
                                                 @endif
                                             </span>
+                                            @if($feedback->category)
+                                                <span class="badge" style="background-color: {{ $feedback->category->color }}">
+                                                    @if($feedback->category->icon)
+                                                        <i class="{{ $feedback->category->icon }} me-1"></i>
+                                                    @else
+                                                        <i class="fas fa-tag me-1"></i>
+                                                    @endif
+                                                    {{ $feedback->category->name }}
+                                                </span>
+                                            @endif
                                         </div>
                                         
                                         <!-- Rating -->
