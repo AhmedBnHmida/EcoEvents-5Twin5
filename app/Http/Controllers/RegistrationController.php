@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Registration;
 use App\Models\Event;
 use App\RegistrationStatus;
+use App\Notifications\RegistrationConfirmation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class RegistrationController extends Controller
@@ -134,7 +136,7 @@ class RegistrationController extends Controller
         $ticketCode = strtoupper(Str::random(8));
 
         // Generate QR code
-        $qrCodePath = 'qrcodes/' . $ticketCode . '.png';
+        $qrCodePath = 'qrcodes/' . $ticketCode . '.svg';
         $qrCodeFullPath = storage_path('app/public/' . $qrCodePath);
         
         // Create directory if it doesn't exist
@@ -149,21 +151,51 @@ class RegistrationController extends Controller
             'user_id' => Auth::id(),
         ]);
 
-        // Create QR code (using simple text for now, you can install simplesoftwareio/simple-qrcode for better QR)
-        file_put_contents($qrCodeFullPath, "QR Code: " . $qrData);
+        // Create QR code using SimpleSoftwareIO/simple-qrcode with SVG format (doesn't require Imagick)
+        $qrCode = QrCode::format('svg')
+            ->size(300)
+            ->errorCorrection('H')
+            ->generate($qrData);
+            
+        // Save QR code to storage
+        Storage::disk('public')->put($qrCodePath, $qrCode);
 
-        // Create registration with PENDING status (admin must confirm)
+        // Determine initial status based on event price
+        // Free events are automatically confirmed, paid events require payment
+        $initialStatus = $event->price <= 0 ? RegistrationStatus::CONFIRMED->value : RegistrationStatus::PENDING->value;
+        
         $registration = Registration::create([
             'user_id' => Auth::id(),
             'event_id' => $event->id,
             'ticket_code' => $ticketCode,
             'qr_code_path' => $qrCodePath,
-            'status' => RegistrationStatus::PENDING->value,
+            'status' => $initialStatus,
             'registered_at' => now(),
         ]);
+        
+        // Send confirmation email immediately if free event
+        if ($initialStatus === RegistrationStatus::CONFIRMED->value) {
+            $user = Auth::user();
+            $user->notify(new RegistrationConfirmation($registration));
+            
+            // Change user role to participant for free events
+            if ($user->role !== 'participant' && $user->role !== 'admin') {
+                $user->role = 'participant';
+                $user->save();
+            }
+        }
 
+        $successMessage = $initialStatus === RegistrationStatus::CONFIRMED->value
+            ? 'Votre inscription a été confirmée avec succès! Vous recevrez un email de confirmation.'
+            : 'Votre inscription a été enregistrée avec succès! Votre inscription est en attente de paiement.';
+            
+        // If payment is required, redirect to payment page
+        if ($event->price > 0) {
+            return redirect()->route('payment.checkout', $registration->id);
+        }
+            
         return redirect()->route('registrations.show', $registration->id)
-            ->with('success', 'Votre inscription a été enregistrée avec succès! Votre inscription est en attente de confirmation par l\'administrateur.');
+            ->with('success', $successMessage);
     }
 
     /**
@@ -222,6 +254,7 @@ class RegistrationController extends Controller
         // CHANGE USER ROLE TO PARTICIPANT when admin CONFIRMS the registration
         if ($newStatus === 'confirmed' && $oldStatus !== 'confirmed') {
             $user = $registration->user;
+            
             if ($user->role !== 'participant' && $user->role !== 'admin') {
                 $user->role = 'participant';
                 $user->save();
@@ -229,6 +262,9 @@ class RegistrationController extends Controller
                 return redirect()->back()
                     ->with('success', 'Inscription confirmée! L\'utilisateur ' . $user->name . ' est maintenant un participant.');
             }
+            
+            return redirect()->back()
+                ->with('success', 'Inscription confirmée!');
         }
 
         return redirect()->back()
@@ -248,7 +284,8 @@ class RegistrationController extends Controller
         $eventTitle = $registration->event->title;
         $registration->delete();
 
-        return redirect()->back()
+        // Redirection vers la page d'accueil avec message de succès
+        return redirect('/')
             ->with('success', 'Inscription à "' . $eventTitle . '" annulée avec succès.');
     }
 }

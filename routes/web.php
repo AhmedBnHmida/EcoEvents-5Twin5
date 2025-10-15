@@ -112,6 +112,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/registrations/{registration}', [App\Http\Controllers\RegistrationController::class, 'show'])->name('registrations.show');
     Route::delete('/registrations/{registration}', [App\Http\Controllers\RegistrationController::class, 'destroy'])->name('registrations.destroy');
     Route::get('/my-registrations', [App\Http\Controllers\RegistrationController::class, 'myRegistrations'])->name('registrations.my');
+    
+    // Payment Routes
+    Route::get('/payment/checkout/{registration}', [App\Http\Controllers\PaymentController::class, 'checkout'])->name('payment.checkout');
+    Route::get('/payment/success/{registration}', [App\Http\Controllers\PaymentController::class, 'success'])->name('payment.success');
+    Route::get('/payment/cancel/{registration}', [App\Http\Controllers\PaymentController::class, 'cancel'])->name('payment.cancel');
 
     // Feedback Routes (Participants)
     Route::get('/feedback/create', [App\Http\Controllers\FeedbackController::class, 'create'])->name('feedback.create');
@@ -145,7 +150,6 @@ Route::middleware('auth')->group(function () {
 
     // Admin Registration Management Routes
     Route::get('/manage/registrations', [App\Http\Controllers\RegistrationController::class, 'index'])->name('registrations.index');
-    Route::patch('/manage/registrations/{registration}/status', [App\Http\Controllers\RegistrationController::class, 'updateStatus'])->name('registrations.updateStatus');
 
     // Admin Feedback & Evaluation Routes
     Route::get('/manage/feedback', [App\Http\Controllers\FeedbackController::class, 'index'])->name('feedback.index');
@@ -191,5 +195,8 @@ Route::get('/events/suggest-resources', function() {
     return response()->json(['error' => 'Use POST method with JSON body: {"categorie_id":1,"capacity_max":180}']);
 });
 Route::get('/events/export-history', [\App\Http\Controllers\EventController::class, 'exportHistory']);
+
+// Stripe Webhook Route (no CSRF protection)
+Route::post('/stripe/webhook', [App\Http\Controllers\PaymentController::class, 'webhook'])->name('stripe.webhook');
 
 require __DIR__.'/auth.php';
