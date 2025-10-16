@@ -301,23 +301,22 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'location' => 'required|string|max:255',
+            'title' => 'required|string|min:5|max:255',
+            'description' => 'required|string|min:50|max:2000',
+            'location' => 'required|string',
             'capacity_max' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0|max:10000',
             'categorie_id' => 'required|exists:categories,id',
-            'status' => 'required|in:' . implode(',', array_column(EventStatus::cases(), 'value')),
+            'status' => 'required|in:UPCOMING,ONGOING,COMPLETED,CANCELLED',
+            'start_date' => 'required|date|after:now',
+            'end_date' => 'required|date|after:start_date',
             'registration_deadline' => 'required|date|before:start_date',
-            'price' => 'required|numeric|min:0',
             'is_public' => 'boolean',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'resources' => 'nullable|array',
-            'resources.*.nom' => 'required_with:resources|string|max:255',
-            'resources.*.type' => 'required_with:resources|in:' . implode(',', TypeRessource::allTypes()),
-            'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
-            'resources.*.quantite' => 'required_with:resources|integer|min:1',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ], [
+            'start_date.after' => 'The start date must be in the future.',
+            'end_date.after' => 'The end date must be after the start date.',
+            'registration_deadline.before' => 'The registration deadline must be before the start date.',
         ]);
 
         $eventData = $request->except(['resources', 'images']);

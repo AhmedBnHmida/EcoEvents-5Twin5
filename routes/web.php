@@ -64,44 +64,6 @@ Route::post('/events/generate-description', [App\Http\Controllers\EventControlle
 Route::post('/events/generate-complete-event', [App\Http\Controllers\EventController::class, 'generateCompleteEvent'])->name('events.generate-complete-event');
 Route::post('/events/predict-success', [App\Http\Controllers\EventController::class, 'predictEventSuccess'])->name('events.predict-success');
 
-// Add this to your routes/web.php
-Route::get('/test-ai-fixed', function () {
-    $aiService = new App\Services\OpenRouterAiService();
-    
-    // Test with a simple prompt first
-    try {
-        $response = Http::withOptions([
-            'verify' => false,
-            'timeout' => 30,
-        ])->withHeaders([
-            'Authorization' => 'Bearer ' . env('OPENROUTER_API_KEY'),
-            'HTTP-Referer' => 'http://localhost:8000',
-            'X-Title' => 'Eco Event Platform',
-            'Content-Type' => 'application/json',
-        ])->post('https://openrouter.ai/api/v1/chat/completions', [
-            'model' => 'deepseek/deepseek-chat-v3.1:free',
-            'messages' => [
-                [
-                    'role' => 'user',
-                    'content' => 'Respond with just: "API Working"'
-                ]
-            ],
-            'max_tokens' => 20,
-        ]);
-
-        return response()->json([
-            'status' => $response->status(),
-            'success' => $response->successful(),
-            'response' => $response->successful() ? $response->json() : $response->body()
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => $e->getMessage()
-        ]);
-    }
-});
 
 Route::get('/signin', function () {
     return view('account-pages.signin');
