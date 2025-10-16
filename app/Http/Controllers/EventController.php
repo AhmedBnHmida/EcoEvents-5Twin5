@@ -279,18 +279,7 @@ public function generateEvent(Request $request)
         return view('events.index', compact('events', 'categories', 'statuses'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $categories = Category::all();
-        $statuses = EventStatus::cases();
-        $fournisseurs = Fournisseur::all();
-        $resourceTypes = TypeRessource::allTypes();
-
-        return view('events.create', compact('categories', 'statuses', 'fournisseurs', 'resourceTypes'));
-    }
+  
 
     /**
      * Store a newly created resource in storage.
@@ -517,69 +506,150 @@ public function generateEvent(Request $request)
         return response()->json(['status' => 'ok']);
     }
 
-    public function suggestResources(Request $request)
+
+      /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
     {
-        try {
-            Log::info('SuggestResources called with:', $request->all());
+        $categories = Category::all();
+        $statuses = EventStatus::cases();
+        $fournisseurs = Fournisseur::all();
+        $resourceTypes = TypeRessource::allTypes();
 
-            $request->validate([
-                'categorie_id' => 'required|integer|exists:categories,id',
-                'capacity_max' => 'required|integer|min:1',
-            ]);
+        return view('events.create', compact('categories', 'statuses', 'fournisseurs', 'resourceTypes'));
+    }
 
-            $historyFile = storage_path('app/events_history.json');
-            if (!file_exists($historyFile)) {
-                $events = Event::with('ressources')->get();
-                $json = $events->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                Storage::put('events_history.json', $json);
-                Log::info('Generated history JSON length: ' . strlen($json));
-            } else {
-                $json = Storage::get('events_history.json');
-                Log::info('Existing history JSON length: ' . strlen($json));
+
+
+public function suggestResources(Request $request)
+{
+    try {
+        Log::info('SuggestResources called with:', $request->all());
+
+        $request->validate([
+            'categorie_id' => 'required|integer|exists:categories,id',
+            'capacity_max' => 'required|integer|min:1',
+        ]);
+
+        $categorieId = $request->categorie_id;
+        $capacityMax = $request->capacity_max;
+
+        // Query DB pour events similaires (catégorie exacte + capacité ±25%)
+        $similarEvents = Event::with('ressources.fournisseur')
+            ->where('categorie_id', $categorieId)
+            ->where('capacity_max', '>=', $capacityMax * 0.75)  // Min 75% de capacity_max
+            ->where('capacity_max', '<=', $capacityMax * 1.25)  // Max 125%
+            ->get();
+
+        Log::info('Similar events found: ' . $similarEvents->count());
+
+        // Fallback : tous les events de la catégorie si aucun similaire
+        if ($similarEvents->isEmpty()) {
+            $similarEvents = Event::with('ressources.fournisseur')
+                ->where('categorie_id', $categorieId)
+                ->get();
+            Log::info('Fallback - All events in category: ' . $similarEvents->count());
+        }
+
+        // Agrège ressources par type : sums, counts, ET fournisseurs par type (pour recommandation)
+        $resourceSums = [];
+        $resourceCounts = [];
+        $representativeNoms = [];  // Noms descriptifs
+        $supplierCounts = [];  // Comptage fournisseurs par type (pour le plus utilisé)
+
+        foreach ($similarEvents as $event) {
+            $eventResources = [];  // Par type pour cet event
+            foreach ($event->ressources as $res) {
+                $nom = $res->nom ?? 'Inconnu';
+                $type = $res->type ?? '';
+                $qty = (int) ($res->quantite ?? 1);
+                $fournisseurId = $res->fournisseur_id ?? null;
+
+                if ($type && $nom) {
+                    $eventResources[$type] = ($eventResources[$type] ?? 0) + $qty;
+
+                    // Nom représentatif (comme avant)
+                    if (!isset($representativeNoms[$type])) {
+                        $representativeNoms[$type] = $nom;
+                    } elseif ($representativeNoms[$type] === 'Test' && $nom !== 'Test') {
+                        $representativeNoms[$type] = $nom;
+                    } elseif ($nom !== 'Test' && $representativeNoms[$type] !== 'Test') {
+                        if (strlen($nom) > strlen($representativeNoms[$type])) {
+                            $representativeNoms[$type] = $nom;
+                        }
+                    } elseif ($nom === 'Test' && $representativeNoms[$type] !== 'Test') {
+                        // Garde non-Test
+                    } elseif (strlen($nom) > strlen($representativeNoms[$type])) {
+                        $representativeNoms[$type] = $nom;
+                    }
+
+                    // Comptage fournisseurs par type
+                    if ($fournisseurId) {
+                        $supplierCounts[$type][$fournisseurId] = ($supplierCounts[$type][$fournisseurId] ?? 0) + 1;
+                    }
+                }
             }
 
-            $scriptPath = base_path('app/Http/Scripts/suggest_ressources.py');
-            if (!file_exists($scriptPath)) {
-                Log::error('Python script not found at: ' . $scriptPath);
-                return response()->json(['error' => 'Script Python introuvable'], 500);
+            // Ajoute à totaux quantités
+            foreach ($eventResources as $type => $eventQty) {
+                $resourceSums[$type] = ($resourceSums[$type] ?? 0) + $eventQty;
+                $resourceCounts[$type] = ($resourceCounts[$type] ?? 0) + 1;
             }
+        }
 
-            $command = sprintf('cd %s && python3 %s %d %d 2>&1',
-                escapeshellarg(base_path()), escapeshellarg($scriptPath),
-                $request->categorie_id, $request->capacity_max
-            );
-            Log::info('Executing command: ' . $command);
+        Log::info('Resource types found: ' . json_encode(array_keys($resourceSums)));
 
-            $output = shell_exec($command);
-            Log::info('Shell exec raw output: ' . ($output ? substr($output, 0, 500) : 'empty'));
+        $suggestions = [];
+        foreach ($resourceSums as $type => $totalQty) {
+            $avgQty = (int) ($totalQty / $resourceCounts[$type]);
+            if ($avgQty > 0) {
+                $repNom = $representativeNoms[$type] ?? $type;
 
-            if ($output === null || empty(trim($output))) {
-                Log::error('Empty output from script');
-                return response()->json(['error' => 'Erreur lors de l\'exécution du script (output vide)'], 500);
-            }
+                // Recommandation fournisseur : le plus utilisé pour ce type
+                $recommendedSupplierId = null;
+                $recommendedSupplierName = 'Non spécifié';
+                if (isset($supplierCounts[$type])) {
+                    arsort($supplierCounts[$type]);  // Trie par count descendant
+                    $topSupplierId = key($supplierCounts[$type]);
+                    $recommendedSupplierId = $topSupplierId;
+                    $recommendedSupplierName = Fournisseur::find($topSupplierId)->nom_societe ?? 'Inconnu';
+                }
 
-            $decoded = json_decode($output, true, 512, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                Log::error('JSON decode error: ' . json_last_error_msg());
-                $suggestions = [
-                    'resources' => [
-                        ['nom' => 'Chaise', 'type' => 'Chaise', 'quantite' => $request->capacity_max],
-                        ['nom' => 'Table', 'type' => 'Table', 'quantite' => max(1, (int)($request->capacity_max / 10))]
+                $suggestions[] = [
+                    'nom' => $repNom,
+                    'type' => $type,
+                    'quantite' => $avgQty,
+                    'fournisseur' => [
+                        'id' => $recommendedSupplierId,
+                        'nom_societe' => $recommendedSupplierName
                     ]
                 ];
-                Log::info('Fallback suggestions due to JSON error', $suggestions);
-            } else {
-                $suggestions = $decoded;
+                Log::info("Suggesting {$avgQty} of '{$repNom}' (type: {$type}) with supplier {$recommendedSupplierName}");
             }
-
-            return response()->json($suggestions);
-
-        } catch (\Exception $e) {
-            Log::error('Exception in suggestResources: ' . $e->getMessage());
-            return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
-        } catch (\Throwable $t) {
-            Log::error('Throwable in suggestResources: ' . $t->getMessage());
-            return response()->json(['error' => 'Erreur inattendue'], 500);
         }
+
+        Log::info('Total suggestions generated: ' . count($suggestions));
+
+        // Fallback seulement si zéro events dans catégorie
+        if (empty($suggestions)) {
+            Log::info('No suggestions from data - using defaults');
+            $suggestions = [
+                ['nom' => 'Chaise', 'type' => 'Chaise', 'quantite' => $capacityMax, 'fournisseur' => ['id' => 1, 'nom_societe' => 'Défaut']],
+                ['nom' => 'Table', 'type' => 'Table', 'quantite' => max(1, (int) ($capacityMax / 10)), 'fournisseur' => ['id' => 1, 'nom_societe' => 'Défaut']]
+            ];
+        }
+
+        $response = ['resources' => $suggestions];
+
+        return response()->json($response);
+
+    } catch (\Exception $e) {
+        Log::error('Exception in suggestResources: ' . $e->getMessage());
+        return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
     }
+}
+
+
+
 }

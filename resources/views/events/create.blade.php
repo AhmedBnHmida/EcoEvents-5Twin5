@@ -333,6 +333,10 @@
     </main>
 
     <script>
+        // Variables JS depuis Blade
+        const resourceTypes = @json($resourceTypes);
+        const fournisseurs = @json($fournisseurs->map(function ($f) { return ['id' => $f->id, 'nom_societe' => $f->nom_societe]; }));
+
         // Token CSRF
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -599,6 +603,21 @@
 
             resources.forEach((resource, index) => {
                 console.log(`Adding resource ${index}:`, resource); // Debug: Each resource
+
+                // Génère options pour type
+                let typeOptions = '<option value="">Select Type</option>';
+                resourceTypes.forEach(type => {
+                    const selected = resource.type === type ? 'selected' : '';
+                    typeOptions += `<option value="${type}" ${selected}>${type}</option>`;
+                });
+
+                // Génère options pour fournisseur (pré-sélectionné)
+                let supplierOptions = '<option value="">Select Supplier</option>';
+                fournisseurs.forEach(f => {
+                    const selected = (resource.fournisseur && resource.fournisseur.id == f.id) ? 'selected' : '';
+                    supplierOptions += `<option value="${f.id}" ${selected}>${f.nom_societe}</option>`;
+                });
+
                 const row = document.createElement('div');
                 row.className = 'resource-row mb-3';
                 row.dataset.index = index;
@@ -607,18 +626,13 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label class="form-control-label">Resource Name</label>
-                                <input type="text" class="form-control" name="resources[${index}][nom]" value="${resource.nom || resource.type}">
+                                <input type="text" class="form-control" name="resources[${index}][nom]" value="${resource.nom || ''}">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label class="form-control-label">Resource Type</label>
-                                <select class="form-control" name="resources[${index}][type]">
-                                    <option value="">Select Type</option>
-                                    @foreach($resourceTypes as $type)
-                                        <option value="{{ $type }}" ${resource.type === '{{ $type }}' ? 'selected' : ''}>{{ $type }}</option>
-                                    @endforeach
-                                </select>
+                                <select class="form-control" name="resources[${index}][type]">${typeOptions}</select>
                             </div>
                         </div>
                         <div class="col-md-2">
@@ -630,12 +644,7 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label class="form-control-label">Supplier</label>
-                                <select class="form-control" name="resources[${index}][fournisseur_id]">
-                                    <option value="">Select Supplier</option>
-                                    @foreach($fournisseurs as $fournisseur)
-                                        <option value="{{ $fournisseur->id }}">{{ $fournisseur->nom_societe }}</option>
-                                    @endforeach
-                                </select>
+                                <select class="form-control" name="resources[${index}][fournisseur_id]">${supplierOptions}</select>
                             </div>
                         </div>
                         <div class="col-md-1 d-flex align-items-center">
@@ -658,6 +667,19 @@
         // Fonction pour ajouter une row vide (comme avant)
         function addEmptyResourceRow(index = document.querySelectorAll('.resource-row').length) {
             const container = document.getElementById('resources-container');
+
+            // Génère options pour type (vide)
+            let typeOptions = '<option value="">Select Type</option>';
+            resourceTypes.forEach(type => {
+                typeOptions += `<option value="${type}">${type}</option>`;
+            });
+
+            // Génère options pour fournisseur (vide)
+            let supplierOptions = '<option value="">Select Supplier</option>';
+            fournisseurs.forEach(f => {
+                supplierOptions += `<option value="${f.id}">${f.nom_societe}</option>`;
+            });
+
             const template = `
                 <div class="resource-row mb-3" data-index="${index}">
                     <div class="row">
@@ -670,12 +692,7 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label class="form-control-label">Resource Type</label>
-                                <select class="form-control" name="resources[${index}][type]">
-                                    <option value="">Select Type</option>
-                                    @foreach($resourceTypes as $type)
-                                        <option value="{{ $type }}">{{ $type }}</option>
-                                    @endforeach
-                                </select>
+                                <select class="form-control" name="resources[${index}][type]">${typeOptions}</select>
                             </div>
                         </div>
                         <div class="col-md-2">
@@ -687,12 +704,7 @@
                         <div class="col-md-3">
                             <div class="form-group">
                                 <label class="form-control-label">Supplier</label>
-                                <select class="form-control" name="resources[${index}][fournisseur_id]">
-                                    <option value="">Select Supplier</option>
-                                    @foreach($fournisseurs as $fournisseur)
-                                        <option value="{{ $fournisseur->id }}">{{ $fournisseur->nom_societe }}</option>
-                                    @endforeach
-                                </select>
+                                <select class="form-control" name="resources[${index}][fournisseur_id]">${supplierOptions}</select>
                             </div>
                         </div>
                         <div class="col-md-1 d-flex align-items-center">
@@ -751,5 +763,7 @@
         });
 
         console.log('Script loaded successfully'); // Debug: Script init
+        console.log('Resource Types:', resourceTypes); // Debug
+        console.log('Fournisseurs:', fournisseurs); // Debug
     </script>
 </x-app-layout>
