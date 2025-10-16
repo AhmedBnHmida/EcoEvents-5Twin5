@@ -143,6 +143,10 @@ Route::middleware('auth')->group(function () {
 
 // ADMIN Routes - Use explicit routes instead of resource to avoid conflicts
 Route::middleware('auth')->group(function () {
+    // QR Code Scanning Routes
+    Route::get('/qrscan', [App\Http\Controllers\QrScanController::class, 'showScanPage'])->name('qrscan.show');
+    Route::post('/qrscan/process', [App\Http\Controllers\QrScanController::class, 'processScan'])->name('qrscan.process');
+    Route::post('/qrscan/mark-attended', [App\Http\Controllers\QrScanController::class, 'markAsAttended'])->name('qrscan.mark-attended');
     // Admin Events Routes
     Route::get('/manage/events', [EventController::class, 'index'])->name('events.index');
     Route::get('/manage/events/create', [EventController::class, 'create'])->name('events.create');

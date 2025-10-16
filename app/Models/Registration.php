@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Registration extends Model
 {
     protected $fillable = [
-        'user_id', 'event_id', 'ticket_code', 'qr_code_path', 'status', 'registered_at'
+        'user_id', 'event_id', 'ticket_code', 'qr_code_path', 'status', 'registered_at', 'attended_at'
     ];
     protected $casts = [
         'status' => \App\RegistrationStatus::class,
         'registered_at' => 'datetime',
+        'attended_at' => 'datetime',
     ];
     protected $primaryKey = 'id';
 

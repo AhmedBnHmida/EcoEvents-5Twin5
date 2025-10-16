@@ -69,6 +69,12 @@
                         <span>Inscriptions</span>
                     </a>
                 </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('qrscan.show') ? 'active' : '' }}" href="{{ route('qrscan.show') }}">
+                        <i class="fas fa-qrcode me-3"></i>
+                        <span>Scanner QR</span>
+                    </a>
+                </li>
 
                 <!-- Feedback Section -->
                 <li class="nav-section-header">
@@ -132,6 +138,18 @@
                     <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('events.index') ? 'active' : '' }}" href="{{ route('events.index') }}">
                         <i class="fas fa-calendar-check me-3"></i>
                         <span>Événements</span>
+                    </a>
+                </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('registrations.index') ? 'active' : '' }}" href="{{ route('registrations.index') }}">
+                        <i class="fas fa-user-check me-3"></i>
+                        <span>Inscriptions</span>
+                    </a>
+                </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('qrscan.show') ? 'active' : '' }}" href="{{ route('qrscan.show') }}">
+                        <i class="fas fa-qrcode me-3"></i>
+                        <span>Scanner QR</span>
                     </a>
                 </li>
                 <li class="nav-item mb-1">
