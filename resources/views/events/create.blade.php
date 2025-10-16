@@ -22,13 +22,35 @@
                         <div class="card-body">
                             <form action="{{ route('events.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
+                                
+                                <!-- AI Assistant Section -->
+                                <div class="alert alert-info mb-4">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-robot fa-2x me-3"></i>
+                                        <div>
+                                            <h6 class="alert-heading mb-1">AI Event Assistant</h6>
+                                            <p class="mb-0">Let AI help you create a professional event quickly</p>
+                                            <button type="button" class="btn btn-outline-primary" id="generate-complete-event-btn">
+                                                <i class="fas fa-robot me-1"></i> Generate Complete Event
+                                        </button>
+                                        </div>
+                                        <!-- Add AI Loading Indicator -->
+                                <div id="ai-loading" class="alert alert-info" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin me-2"></i> AI is generating content...
+                                </div>
+                                    </div>
+                                </div>
+
                                 <!-- Title & Category -->
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="title" class="form-control-label">Title</label>
-                                            <input type="text" class="form-control @error('title') is-invalid @enderror" 
-                                                   id="title" name="title" value="{{ old('title') }}" required>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control @error('title') is-invalid @enderror" 
+                                                       id="title" name="title" value="{{ old('title') }}" required>
+                                                
+                                            </div>
                                             @error('title')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -56,8 +78,13 @@
                                 <!-- Description -->
                                 <div class="form-group">
                                     <label for="description" class="form-control-label">Description</label>
-                                    <textarea class="form-control @error('description') is-invalid @enderror" 
-                                              id="description" name="description" rows="3" required>{{ old('description') }}</textarea>
+                                    <div class="input-group">
+                                        <textarea class="form-control @error('description') is-invalid @enderror" 
+                                                  id="description" name="description" rows="3" required>{{ old('description') }}</textarea>
+                                        <button type="button" class="btn btn-outline-secondary" id="generate-description-btn">
+                                            <i class="fas fa-magic me-1"></i> AI Generate
+                                        </button>
+                                    </div>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -262,6 +289,38 @@
                                     </div>
                                 </div>
 
+                                <!-- Event Success Prediction -->
+                                <div class="card mt-4">
+                                    <div class="card-header bg-gradient-success text-white">
+                                        <h6 class="font-weight-semibold text-lg mb-0">
+                                            <i class="fas fa-chart-line me-2"></i>AI Success Prediction
+                                        </h6>
+                                        <p class="text-sm mb-0 opacity-8">Professional analysis of your event's success potential</p>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label class="form-control-label text-success">Professional Analysis</label>
+                                                    <textarea class="form-control bg-light" id="success-prediction" rows="4" readonly 
+                                                              placeholder="Fill in event details and click 'Analyze Success' to get AI-powered professional insights..."></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 d-flex align-items-end">
+                                                <button type="button" class="btn btn-success w-100" id="predict-success-btn">
+                                                    <i class="fas fa-brain me-1"></i> Analyze Success
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-lightbulb me-1"></i>
+                                                Our AI analyzes your event details and provides professional recommendations for success.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="d-flex justify-content-end mt-4">
                                     <button type="submit" class="btn btn-dark">Create Event</button>
                                 </div>
@@ -280,7 +339,184 @@
 
         // Token CSRF
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        console.log('CSRF Token:', csrfToken); // Debug: Check if token is loaded
+
+        // AI Generation Functions
+        document.getElementById('generate-description-btn').addEventListener('click', function() {
+            const title = document.getElementById('title').value;
+            const categoryId = document.getElementById('categorie_id').value;
+            const loading = document.getElementById('ai-loading');
+            
+            if (!title || !categoryId) {
+                alert('Please enter a title and select a category first');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            fetch('{{ route("events.generate-description") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    category_id: categoryId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success) {
+                    document.getElementById('description').value = data.description;
+                } else {
+                    alert('Failed to generate description: ' + data.message);
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Error:', error);
+                alert('Error generating description');
+            });
+        });
+
+        // Enhanced Generate Complete Event Function
+        document.getElementById('generate-complete-event-btn').addEventListener('click', function() {
+            const title = document.getElementById('title').value;
+            const categoryId = document.getElementById('categorie_id').value;
+            const capacity = document.getElementById('capacity_max').value;
+            const loading = document.getElementById('ai-loading');
+            
+            if (!title || !categoryId || !capacity) {
+                alert('Please enter title, category, and capacity first');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            fetch('{{ route("events.generate-complete-event") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    category_id: categoryId,
+                    capacity: capacity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success) {
+                    const event = data.event;
+                    
+                    // Fill ALL form fields with generated data
+                    if (event.title) {
+                        document.getElementById('title').value = event.title;
+                    }
+                    if (event.description) {
+                        document.getElementById('description').value = event.description;
+                    }
+                    if (event.location) {
+                        document.getElementById('location').value = event.location;
+                    }
+                    if (event.capacity_max) {
+                        document.getElementById('capacity_max').value = event.capacity_max;
+                    }
+                    if (event.price) {
+                        document.getElementById('price').value = event.price;
+                    }
+                    if (event.status) {
+                        document.getElementById('status').value = event.status;
+                    }
+                    if (event.is_public !== undefined) {
+                        document.getElementById('is_public').checked = event.is_public;
+                    }
+                    
+                    // Fill date fields
+                    if (event.start_date) {
+                        document.getElementById('start_date').value = formatDateForInput(event.start_date);
+                    }
+                    if (event.end_date) {
+                        document.getElementById('end_date').value = formatDateForInput(event.end_date);
+                    }
+                    if (event.registration_deadline) {
+                        document.getElementById('registration_deadline').value = formatDateForInput(event.registration_deadline);
+                    }
+                    
+                    // Fill success prediction
+                    if (event.success_prediction) {
+                        document.getElementById('success-prediction').value = event.success_prediction;
+                    }
+                    
+                    alert('🎉 Complete event generated successfully! All fields have been populated with AI suggestions.');
+                } else {
+                    alert('Failed to generate complete event: ' + data.message);
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Error:', error);
+                alert('Error generating complete event');
+            });
+        });
+
+        // Event Success Prediction
+        document.getElementById('predict-success-btn').addEventListener('click', function() {
+            const title = document.getElementById('title').value;
+            const categoryId = document.getElementById('categorie_id').value;
+            const capacity = document.getElementById('capacity_max').value;
+            const loading = document.getElementById('ai-loading');
+            
+            if (!title || !categoryId || !capacity) {
+                alert('Please enter title, category, and capacity first');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            fetch('{{ route("events.predict-success") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    category_id: categoryId,
+                    capacity: capacity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success) {
+                    document.getElementById('success-prediction').value = data.prediction;
+                } else {
+                    alert('Failed to generate prediction: ' + data.message);
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Error:', error);
+                alert('Error generating prediction');
+            });
+        });
+
+        // Helper function to format dates for datetime-local input
+        function formatDateForInput(dateString) {
+            const date = new Date(dateString);
+            return date.toISOString().slice(0, 16);
+        }
+
+        // Remove the old generate-event-btn function since we're using generate-complete-event-btn now
+        // Keep your existing resource suggestion code as it is
+        // ... [Your existing resource suggestion code remains unchanged] ...
 
         // Debounce pour éviter les appels multiples
         function debounce(func, wait) {

@@ -194,10 +194,9 @@
                                         <small class="text-muted d-block fw-semibold text-uppercase small">CAPACITÉ</small>
                                         <p class="mb-2 fw-bold text-dark h6">{{ $event->registrations->count() }}/{{ $event->capacity_max }} participants</p>
                                         <div class="progress" style="height: 8px;">
-                                            @php
-                                                $progress = $event->capacity_max > 0 ? ($event->registrations->count() / $event->capacity_max) * 100 : 0;
-                                            @endphp
-                                            <div class="progress-bar bg-warning" style="width: {{ $progress }}%"></div>
+                                            <div class="progress-bar bg-warning" 
+                                                style="--progress-width: {{ $event->capacity_max > 0 ? ($event->registrations->count() / $event->capacity_max) * 100 : 0 }}%; width: var(--progress-width);">
+                                            </div>
                                         </div>
                                         <small class="text-muted mt-1 d-block">
                                             {{ $event->capacity_max - $event->registrations->count() }} places restantes

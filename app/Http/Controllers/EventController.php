@@ -14,9 +14,157 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EventFournisseurNotification; // Assure-toi que ton Mailable existe
+use App\Services\AiService;
+use App\Services\OpenRouterAiService;
+
 
 class EventController extends Controller
 {
+
+
+
+
+/**
+ * Generate complete event with ALL fields
+ */
+public function generateCompleteEvent(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'category_id' => 'required|exists:categories,id',
+        'capacity' => 'required|integer|min:1'
+    ]);
+
+    try {
+        $category = Category::findOrFail($request->category_id);
+        $aiService = new OpenRouterAiService();
+        
+        $eventData = [
+            'title' => $request->title,
+            'category' => $category->name,
+            'capacity' => $request->capacity
+        ];
+
+        $completeEvent = $aiService->generateCompleteEvent($eventData);
+
+        return response()->json([
+            'success' => true,
+            'event' => $completeEvent,
+            'source' => 'openrouter-ai-complete'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Complete Event generation error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error generating complete event: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Predict event success
+ */
+public function predictEventSuccess(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'category_id' => 'required|exists:categories,id',
+        'capacity' => 'required|integer|min:1'
+    ]);
+
+    try {
+        $category = Category::findOrFail($request->category_id);
+        $aiService = new OpenRouterAiService();
+        
+        $eventData = [
+            'title' => $request->title,
+            'category' => $category->name,
+            'capacity' => $request->capacity
+        ];
+
+        $prediction = $aiService->predictEventSuccess($eventData);
+
+        return response()->json([
+            'success' => true,
+            'prediction' => $prediction,
+            'source' => 'openrouter-ai-prediction'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Event prediction error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error generating prediction: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function generateDescription(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'category_id' => 'required|exists:categories,id'
+    ]);
+
+    try {
+        $category = Category::findOrFail($request->category_id);
+        $aiService = new OpenRouterAiService();
+        
+        $description = $aiService->generateEventDescription(
+            $request->title, 
+            $category->name
+        );
+
+        return response()->json([
+            'success' => true,
+            'description' => $description,
+            'source' => 'openrouter-ai'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('OpenRouter Description generation error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error generating description: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function generateEvent(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'category_id' => 'required|exists:categories,id',
+        'capacity' => 'required|integer|min:1'
+    ]);
+
+    try {
+        $category = Category::findOrFail($request->category_id);
+        $aiService = new OpenRouterAiService();
+        
+        $eventData = [
+            'title' => $request->title,
+            'category' => $category->name,
+            'capacity' => $request->capacity
+        ];
+
+        $generatedEvent = $aiService->generateCompleteEvent($eventData);
+
+        return response()->json([
+            'success' => true,
+            'event' => $generatedEvent,
+            'source' => 'openrouter-ai'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('OpenRouter Event generation error: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error generating event: ' . $e->getMessage()
+        ], 500);
+    }
+}
     /**
      * Display events for public website with real-time filters
      */

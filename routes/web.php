@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FournisseurController;
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\EventController;  // Ajoute ce use pour EventController
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\LoginController;
@@ -58,6 +59,14 @@ Route::get('/home', function () {
     return view('home');
 });
 
+
+
+Route::post('/events/generate-description', [App\Http\Controllers\EventController::class, 'generateDescription'])->name('events.generate-description');
+Route::post('/events/generate-complete-event', [App\Http\Controllers\EventController::class, 'generateCompleteEvent'])->name('events.generate-complete-event');
+Route::post('/events/predict-success', [App\Http\Controllers\EventController::class, 'predictEventSuccess'])->name('events.predict-success');
+
+
+
 Route::get('/signin', function () {
     return view('account-pages.signin');
 })->name('signin');
@@ -65,7 +74,7 @@ Route::get('/signin', function () {
 Route::get('/signup', function () {
     return view('account-pages.signup');
 })->name('signup')->middleware('guest');
-
+/*
 Route::get('/sign-up', [RegisterController::class, 'create'])
     ->middleware('guest')
     ->name('sign-up');
@@ -102,7 +111,7 @@ Route::post('/reset-password', [ResetPasswordController::class, 'store'])
 Route::get('/laravel-examples/user-profile', [ProfileController::class, 'index'])->name('users.profile')->middleware('auth');
 Route::put('/laravel-examples/user-profile/update', [ProfileController::class, 'update'])->name('user-profile.update')->middleware('auth');
 Route::get('/laravel-examples/users-management', [UserController::class, 'index'])->name('users-management')->middleware('auth');
-
+*/
 // Routes resources pour la gestion des entités du backoffice
 Route::resource('users', UsersController::class);
 
