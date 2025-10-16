@@ -8,18 +8,22 @@ if len(sys.argv) != 3:
 categorie_id = int(sys.argv[1])
 capacity_max = int(sys.argv[2])
 
-# Chemin absolu pour Windows (adapte si besoin)
-json_path = r'C:\Users\melek\Desktop\ECOEVENTS-2\EcoEvents-5Twin5\storage\app\events_history.json'
-with open(json_path, encoding='utf-8') as f:
-    events = json.load(f)
+debug_mode = len(sys.argv) > 3 and sys.argv[3] == 'quiet'  # No debug if 'quiet' arg
 
-print(f"DEBUG: Total events loaded: {len(events)}")
-if events:
-    print("DEBUG: First event structure:")
-    print(json.dumps(events[0], indent=2, ensure_ascii=False))
-    print("DEBUG: Keys in first event:", list(events[0].keys()))
+if not debug_mode:
+    print(f"DEBUG: Looking for category {categorie_id} with capacity {capacity_max}")
 
-print(f"DEBUG: Looking for category {categorie_id} with capacity {capacity_max}")
+json_path = 'storage/app/events_history.json'
+try:
+    with open(json_path, encoding='utf-8') as f:
+        events = json.load(f)
+except FileNotFoundError:
+    if not debug_mode:
+        print("DEBUG: JSON file not found - using defaults")
+    events = []
+
+if not debug_mode and events:
+    print(f"DEBUG: Total events loaded: {len(events)}")
 
 # First, try to find similar events by category and capacity (±25%)
 similar_events = [
@@ -28,9 +32,8 @@ similar_events = [
        abs(event.get('capacity_max', 0) - capacity_max) <= capacity_max * 0.25
 ]
 
-print(f"DEBUG: Similar events by capacity (±25%): {len(similar_events)}")
-for event in similar_events:
-    print(f"DEBUG: Similar event ID: {event.get('id')}, capacity: {event.get('capacity_max')}")
+if not debug_mode:
+    print(f"DEBUG: Similar events by capacity (±25%): {len(similar_events)}")
 
 # If no similar events by capacity, fall back to all events in the same category
 if not similar_events:
@@ -38,11 +41,11 @@ if not similar_events:
         event for event in events
         if event.get('categorie_id') == categorie_id
     ]
-    print(f"DEBUG: Fallback - All events in category: {len(similar_events)}")
-    for event in similar_events:
-        print(f"DEBUG: Fallback event ID: {event.get('id')}, capacity: {event.get('capacity_max')}")
+    if not debug_mode:
+        print(f"DEBUG: Fallback - All events in category: {len(similar_events)}")
 
-print(f"DEBUG: Processing {len(similar_events)} events for resources...")
+if not debug_mode:
+    print(f"DEBUG: Processing {len(similar_events)} events for resources...")
 
 resource_sums = {}
 resource_counts = {}
@@ -50,9 +53,8 @@ representative_noms = {}  # To store a descriptive 'nom' for each type
 for i, event in enumerate(similar_events):
     # Try both 'ressources' and 'resources' keys
     ressources = event.get('ressources', event.get('resources', []))
-    print(f"DEBUG: Event {i+1} (ID {event.get('id')}) resources array length: {len(ressources)}")
-    if len(ressources) > 0:
-        print(f"DEBUG: First 2 resources in event {i+1}: {json.dumps(ressources[:2], ensure_ascii=False)}")
+    if not debug_mode:
+        print(f"DEBUG: Event {i+1} (ID {event.get('id')}) resources array length: {len(ressources)}")
     
     event_resources = {}
     for res in ressources:
@@ -62,7 +64,7 @@ for i, event in enumerate(similar_events):
             qty = int(res.get('quantite', 1))
             key = res_type  # Group by type, but use nom for display
             event_resources[key] = event_resources.get(key, 0) + qty
-            # Improved logic for representative nom: prefer non-"Test" names, longest among them
+            # Logic for representative nom: prefer non-"Test" names, longest among them
             current_nom = representative_noms.get(key, '')
             if not current_nom:
                 representative_noms[key] = nom
@@ -75,14 +77,16 @@ for i, event in enumerate(similar_events):
                 pass  # keep non-Test
             elif len(nom) > len(current_nom):  # both Test, longer
                 representative_noms[key] = nom
-    print(f"DEBUG: Event {i+1} aggregated by type: {event_resources}")
+    if not debug_mode:
+        print(f"DEBUG: Event {i+1} aggregated by type: {event_resources}")
     
     for res_type, event_qty in event_resources.items():
         resource_sums[res_type] = resource_sums.get(res_type, 0) + event_qty
         resource_counts[res_type] = resource_counts.get(res_type, 0) + 1
 
-print(f"DEBUG: Resource types found: {list(resource_sums.keys())}")
-print(f"DEBUG: Representative noms per type: {representative_noms}")
+if not debug_mode:
+    print(f"DEBUG: Resource types found: {list(resource_sums.keys())}")
+    print(f"DEBUG: Representative noms per type: {representative_noms}")
 
 suggestions = []
 for res_type, total_qty in resource_sums.items():
@@ -94,6 +98,19 @@ for res_type, total_qty in resource_sums.items():
             "type": res_type,
             "quantite": avg_qty
         })
-        print(f"DEBUG: Suggesting {avg_qty} of '{rep_nom}' (type: {res_type})")
+        if not debug_mode:
+            print(f"DEBUG: Suggesting {avg_qty} of '{rep_nom}' (type: {res_type})")
 
-print(f"DEBUG: Total suggestions generated: {len(suggestions)}")
+if not debug_mode:
+    print(f"DEBUG: Total suggestions generated: {len(suggestions)}")
+
+# Only if no events in the category at all, use hardcoded defaults
+if not suggestions:
+    if not debug_mode:
+        print("DEBUG: No suggestions from data - using defaults")
+    suggestions = [
+        {"nom": "Chaise", "type": "Chaise", "quantite": capacity_max},
+        {"nom": "Table", "type": "Table", "quantite": max(1, capacity_max // 10)}
+    ]
+
+print(json.dumps({"resources": suggestions}, indent=2, ensure_ascii=False))
