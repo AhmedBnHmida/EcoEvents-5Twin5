@@ -22,7 +22,7 @@ use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\PartenaireController;
 use App\Http\Controllers\SponsoringController;
 use App\Http\Controllers\DashboardController;
-
+use Illuminate\Support\Facades\Http;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -63,7 +63,6 @@ Route::get('/', function () {
 Route::post('/events/generate-description', [App\Http\Controllers\EventController::class, 'generateDescription'])->name('events.generate-description');
 Route::post('/events/generate-complete-event', [App\Http\Controllers\EventController::class, 'generateCompleteEvent'])->name('events.generate-complete-event');
 Route::post('/events/predict-success', [App\Http\Controllers\EventController::class, 'predictEventSuccess'])->name('events.predict-success');
-
 
 
 Route::get('/signin', function () {
