@@ -59,7 +59,7 @@ Route::get('/signin', function () {
 Route::get('/signup', function () {
     return view('account-pages.signup');
 })->name('signup')->middleware('guest');
-
+/*
 Route::get('/sign-up', [RegisterController::class, 'create'])
     ->middleware('guest')
     ->name('sign-up');
@@ -96,7 +96,7 @@ Route::post('/reset-password', [ResetPasswordController::class, 'store'])
 Route::get('/laravel-examples/user-profile', [ProfileController::class, 'index'])->name('users.profile')->middleware('auth');
 Route::put('/laravel-examples/user-profile/update', [ProfileController::class, 'update'])->name('user-profile.update')->middleware('auth');
 Route::get('/laravel-examples/users-management', [UserController::class, 'index'])->name('users-management')->middleware('auth');
-
+*/
 // Routes resources pour la gestion des entités du backoffice
 Route::resource('users', App\Http\Controllers\UsersController::class);
 
