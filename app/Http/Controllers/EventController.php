@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EventFournisseurNotification; // Assure-toi que ton Mailable existe
-use App\Services\AiService;
+
 use App\Services\OpenRouterAiService;
 
 

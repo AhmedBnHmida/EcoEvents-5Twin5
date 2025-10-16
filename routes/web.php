@@ -3,7 +3,6 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FournisseurController;
-use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\EventController;  // Ajoute ce use pour EventController
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\LoginController;
@@ -55,7 +54,7 @@ Route::get('/wallet', function () {
     return view('wallet');
 })->name('wallet')->middleware('auth');
 
-Route::get('/home', function () {
+Route::get('/', function () {
     return view('home');
 });
 

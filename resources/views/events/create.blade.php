@@ -34,13 +34,15 @@
                                                 <i class="fas fa-robot me-1"></i> Generate Complete Event
                                         </button>
                                         </div>
-                                        <!-- Add AI Loading Indicator -->
-                                <div id="ai-loading" class="alert alert-info" style="display: none;">
-                                    <i class="fas fa-spinner fa-spin me-2"></i> AI is generating content...
-                                </div>
+                                        
                                     </div>
-                                </div>
 
+                                    
+                                </div>
+                                <!-- Add AI Loading Indicator -->
+                                    <div id="ai-loading" class="alert alert-info" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin me-2"></i> AI is generating content...
+                                    </div>
                                 <!-- Title & Category -->
                                 <div class="row">
                                     <div class="col-md-6">
@@ -334,9 +336,9 @@
 
     <script>
         // Variables JS depuis Blade
-        const resourceTypes = @json($resourceTypes);
-        const fournisseurs = @json($fournisseurs->map(function ($f) { return ['id' => $f->id, 'nom_societe' => $f->nom_societe]; }));
-
+        const resourceTypes = JSON.parse('@json($resourceTypes)');
+        const fournisseurs = JSON.parse('@json($fournisseurs->map(function ($f) { return ["id" => $f->id, "nom_societe" => $f->nom_societe]; }))');
+    
         // Token CSRF
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
