@@ -76,6 +76,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('certificates.index') ? 'active' : '' }}" href="{{ route('certificates.index') }}">
+                        <i class="fas fa-certificate me-3"></i>
+                        <span>Certificats</span>
+                    </a>
+                </li>
+
                 <!-- Feedback Section -->
                 <li class="nav-section-header">
                     <span><i class="fas fa-comments me-2"></i>Retours & Évaluations</span>
@@ -153,9 +160,38 @@
                     </a>
                 </li>
                 <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('certificates.index') ? 'active' : '' }}" href="{{ route('certificates.index') }}">
+                        <i class="fas fa-certificate me-3"></i>
+                        <span>Certificats</span>
+                    </a>
+                </li>
+                <li class="nav-item mb-1">
                     <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('ressources.index') ? 'active' : '' }}" href="{{ route('ressources.index') }}">
                         <i class="fas fa-box-open me-3"></i>
                         <span>Ressources</span>
+                    </a>
+                </li>
+            @else
+                <!-- Participant Section -->
+                <li class="nav-section-header">
+                    <span><i class="fas fa-user me-2"></i>Mon Espace</span>
+                </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('registrations.my') ? 'active' : '' }}" href="{{ route('registrations.my') }}">
+                        <i class="fas fa-ticket-alt me-3"></i>
+                        <span>Mes Inscriptions</span>
+                    </a>
+                </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('certificates.index') ? 'active' : '' }}" href="{{ route('certificates.index') }}">
+                        <i class="fas fa-certificate me-3"></i>
+                        <span>Mes Certificats</span>
+                    </a>
+                </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('feedback.my') ? 'active' : '' }}" href="{{ route('feedback.my') }}">
+                        <i class="fas fa-comment-dots me-3"></i>
+                        <span>Mes Feedbacks</span>
                     </a>
                 </li>
             @endif

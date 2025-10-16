@@ -341,20 +341,22 @@
                                         <i class="fas fa-eye me-1"></i>Détails
                                     </a>
                                     
-                                    @if($event->status->value === 'UPCOMING' && !$isRegistered && !$isFull)
-                                        <a href="{{ route('registrations.create', ['event_id' => $event->id]) }}" 
-                                           class="btn btn-dark btn-sm px-3">
-                                            <i class="fas fa-ticket-alt me-1"></i>Participer
-                                        </a>
-                                    @elseif($isRegistered)
-                                        <button class="btn btn-success btn-sm px-3" disabled>
-                                            <i class="fas fa-check me-1"></i>Inscrit
-                                        </button>
-                                    @elseif($isFull)
-                                        <button class="btn btn-danger btn-sm px-3" disabled>
-                                            <i class="fas fa-times me-1"></i>Complet
-                                        </button>
-                                    @endif
+                                    @auth
+                                        @if($event->status->value === 'UPCOMING' && !$isRegistered && !$isFull)
+                                            <a href="{{ route('registrations.create', ['event_id' => $event->id]) }}" 
+                                               class="btn btn-dark btn-sm px-3">
+                                                <i class="fas fa-ticket-alt me-1"></i>Participer
+                                            </a>
+                                        @elseif($isRegistered)
+                                            <button class="btn btn-success btn-sm px-3" disabled>
+                                                <i class="fas fa-check me-1"></i>Inscrit
+                                            </button>
+                                        @elseif($isFull)
+                                            <button class="btn btn-danger btn-sm px-3" disabled>
+                                                <i class="fas fa-times me-1"></i>Complet
+                                            </button>
+                                        @endif
+                                    @endauth
                                 </div>
                             </div>
                         </div>

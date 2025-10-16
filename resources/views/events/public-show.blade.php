@@ -353,6 +353,14 @@
                                         <h6 class="fw-bold mb-1">Complet</h6>
                                         <p class="small mb-0">Aucune place disponible</p>
                                     </div>
+                                    <!-- Déclenchement automatique de la popup pour événement complet -->
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            setTimeout(function() {
+                                                showEventFullModal();
+                                            }, 800);
+                                        });
+                                    </script>
                                 @else
                                     <div class="text-center mb-3">
                                         <h4 class="text-primary fw-bold mb-1">
@@ -364,10 +372,17 @@
                                         </h4>
                                         <small class="text-muted">par personne</small>
                                     </div>
-                                    <a href="{{ route('registrations.create', ['event_id' => $event->id]) }}" 
-                                       class="btn btn-primary btn-lg w-100 shadow-sm mb-3 py-3">
-                                        <i class="fas fa-ticket-alt me-2"></i>Réserver maintenant
-                                    </a>
+                                    @auth
+                                        <a href="{{ route('registrations.create', ['event_id' => $event->id]) }}" 
+                                           class="btn btn-primary btn-lg w-100 shadow-sm mb-3 py-3">
+                                            <i class="fas fa-ticket-alt me-2"></i>Réserver maintenant
+                                        </a>
+                                    @else
+                                        <a href="{{ route('login') }}" 
+                                           class="btn btn-primary btn-lg w-100 shadow-sm mb-3 py-3">
+                                            <i class="fas fa-ticket-alt me-2"></i>Réserver maintenant
+                                        </a>
+                                    @endauth
                                     <div class="text-center">
                                         <small class="text-muted">
                                             <i class="fas fa-shield-alt me-1"></i>Réservation sécurisée
@@ -603,5 +618,53 @@
                 console.error('Could not copy text: ', err);
             });
         }
+        
+        // Fonction pour afficher la modal d'événement complet
+        function showEventFullModal() {
+            const eventFullModal = new bootstrap.Modal(document.getElementById('eventFullModal'));
+            eventFullModal.show();
+        }
     </script>
+    
+    <!-- Modal pour événement complet -->
+    <div class="modal fade" id="eventFullModal" tabindex="-1" aria-labelledby="eventFullModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title" id="eventFullModalLabel">
+                        <i class="fas fa-exclamation-circle me-2"></i>Événement complet
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="py-3">
+                        <i class="fas fa-users-slash fa-4x text-danger opacity-75 mb-3"></i>
+                        <h4 class="fw-bold mb-3">Désolé, cet événement est complet !</h4>
+                        <p class="text-muted mb-4">
+                            Toutes les places disponibles pour cet événement ont été réservées. 
+                            Nous vous invitons à consulter nos autres événements à venir.
+                        </p>
+                        
+                        <div class="alert alert-light border mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-lightbulb text-warning fa-2x me-3"></i>
+                                <div class="text-start">
+                                    <h6 class="fw-bold mb-1">Astuce</h6>
+                                    <p class="small mb-0">
+                                        Des places peuvent se libérer en cas d'annulations. Revenez consulter cette page ultérieurement !
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <a href="{{ route('events.public') }}" class="btn btn-primary">
+                        <i class="fas fa-calendar-alt me-2"></i>Voir d'autres événements
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </x-app-layout>
