@@ -53,58 +53,6 @@ Route::post('/events/generate-complete-event', [App\Http\Controllers\EventContro
 Route::post('/events/predict-success', [App\Http\Controllers\EventController::class, 'predictEventSuccess'])->name('events.predict-success');
 
 
-Route::get('/test-openrouter', function() {
-    $apiKey = env('OPENROUTER_API_KEY');
-    $model = env('OPENROUTER_MODEL');
-    
-    echo "<h2>🔍 OpenRouter Debug</h2>";
-    echo "API Key: " . (!empty($apiKey) ? "✅ SET" : "❌ NOT SET") . "<br>";
-    echo "Model: " . $model . "<br>";
-    
-    if (empty($apiKey)) {
-        echo "<p>❌ Please set OPENROUTER_API_KEY in your .env file</p>";
-        return;
-    }
-    
-    try {
-        $response = Http::withOptions([
-            'verify' => false,
-            'timeout' => 30,
-        ])->withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
-            'HTTP-Referer' => 'http://localhost:8000',
-            'X-Title' => 'Event Management System',
-            'Content-Type' => 'application/json',
-        ])->post('https://openrouter.ai/api/v1/chat/completions', [
-            'model' => $model,
-            'messages' => [
-                [
-                    'role' => 'user',
-                    'content' => 'Say "OpenRouter is working perfectly!" in a creative way'
-                ]
-            ],
-            'max_tokens' => 50,
-        ]);
-
-        if ($response->successful()) {
-            $data = $response->json();
-            $aiResponse = $data['choices'][0]['message']['content'];
-            $modelUsed = $data['model'] ?? 'Unknown';
-            
-            echo "<h3 style='color: green;'>🎉 SUCCESS!</h3>";
-            echo "<strong>AI Response:</strong> " . $aiResponse . "<br>";
-            echo "<strong>Model Used:</strong> " . $modelUsed . "<br>";
-            echo "<strong>Status:</strong> " . $response->status() . "<br>";
-        } else {
-            echo "<h3 style='color: red;'>❌ API Error</h3>";
-            echo "<pre>" . json_encode($response->json(), JSON_PRETTY_PRINT) . "</pre>";
-        }
-        
-    } catch (\Exception $e) {
-        echo "<h3 style='color: red;'>❌ Exception</h3>";
-        echo $e->getMessage();
-    }
-});
 
 Route::get('/signin', function () {
     return view('account-pages.signin');
