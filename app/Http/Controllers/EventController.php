@@ -13,158 +13,172 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\EventFournisseurNotification; // Assure-toi que ton Mailable existe
-
+use App\Mail\EventFournisseurNotification;
 use App\Services\OpenRouterAiService;
 
 
 class EventController extends Controller
 {
-
-
-
-
-/**
- * Generate complete event with ALL fields
- */
-public function generateCompleteEvent(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'category_id' => 'required|exists:categories,id',
-        'capacity' => 'required|integer|min:1'
-    ]);
-
-    try {
-        $category = Category::findOrFail($request->category_id);
-        $aiService = new OpenRouterAiService();
-        
-        $eventData = [
-            'title' => $request->title,
-            'category' => $category->name,
-            'capacity' => $request->capacity
-        ];
-
-        $completeEvent = $aiService->generateCompleteEvent($eventData);
-
-        return response()->json([
-            'success' => true,
-            'event' => $completeEvent,
-            'source' => 'openrouter-ai-complete'
+    /**
+     * Generate complete event with ALL fields - ENHANCED
+     */
+    public function generateCompleteEvent(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'capacity' => 'required|integer|min:1'
         ]);
 
-    } catch (\Exception $e) {
-        Log::error('Complete Event generation error: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error generating complete event: ' . $e->getMessage()
-        ], 500);
+        try {
+            $category = Category::findOrFail($request->category_id);
+            $aiService = new OpenRouterAiService();
+            
+            $eventData = [
+                'title' => $request->title,
+                'category' => $category->name,
+                'capacity' => $request->capacity
+            ];
+
+            $completeEvent = $aiService->generateCompleteEvent($eventData);
+
+            return response()->json([
+                'success' => true,
+                'event' => $completeEvent,
+                'source' => 'openrouter-ai-complete'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Complete Event generation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating complete event: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
-/**
- * Predict event success
- */
-public function predictEventSuccess(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'category_id' => 'required|exists:categories,id',
-        'capacity' => 'required|integer|min:1'
-    ]);
-
-    try {
-        $category = Category::findOrFail($request->category_id);
-        $aiService = new OpenRouterAiService();
-        
-        $eventData = [
-            'title' => $request->title,
-            'category' => $category->name,
-            'capacity' => $request->capacity
-        ];
-
-        $prediction = $aiService->predictEventSuccess($eventData);
-
-        return response()->json([
-            'success' => true,
-            'prediction' => $prediction,
-            'source' => 'openrouter-ai-prediction'
+    /**
+     * Generate description based on ALL event data - ENHANCED
+     */
+    public function generateDescription(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'location' => 'required|string|max:255',
+            'capacity_max' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date'
         ]);
 
-    } catch (\Exception $e) {
-        Log::error('Event prediction error: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error generating prediction: ' . $e->getMessage()
-        ], 500);
+        try {
+            $category = Category::findOrFail($request->category_id);
+            $aiService = new OpenRouterAiService();
+            
+            $eventData = [
+                'title' => $request->title,
+                'category' => $category->name,
+                'location' => $request->location,
+                'capacity_max' => $request->capacity_max,
+                'price' => $request->price,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date
+            ];
+
+            $description = $aiService->generateEventDescription($eventData);
+
+            return response()->json([
+                'success' => true,
+                'description' => $description,
+                'source' => 'openrouter-ai-description'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('OpenRouter Description generation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating description: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
-public function generateDescription(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'category_id' => 'required|exists:categories,id'
-    ]);
-
-    try {
-        $category = Category::findOrFail($request->category_id);
-        $aiService = new OpenRouterAiService();
-        
-        $description = $aiService->generateEventDescription(
-            $request->title, 
-            $category->name
-        );
-
-        return response()->json([
-            'success' => true,
-            'description' => $description,
-            'source' => 'openrouter-ai'
+    /**
+     * Predict event success with HTML formatted output
+     */
+    public function predictEventSuccess(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'required|string',
+            'location' => 'required|string|max:255',
+            'capacity_max' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'registration_deadline' => 'required|date'
         ]);
 
-    } catch (\Exception $e) {
-        Log::error('OpenRouter Description generation error: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error generating description: ' . $e->getMessage()
-        ], 500);
+        try {
+            $category = Category::findOrFail($request->category_id);
+            $aiService = new OpenRouterAiService();
+            
+            $eventData = [
+                'title' => $request->title,
+                'category' => $category->name,
+                'description' => $request->description,
+                'location' => $request->location,
+                'capacity_max' => $request->capacity_max,
+                'price' => $request->price,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'registration_deadline' => $request->registration_deadline
+            ];
+
+            $prediction = $aiService->predictEventSuccess($eventData);
+
+            return response()->json([
+                'success' => true,
+                'prediction' => $prediction,
+                'formatted_prediction' => $this->formatPrediction($prediction),
+                'source' => 'openrouter-ai-prediction'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Event prediction error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating prediction: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
-public function generateEvent(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'category_id' => 'required|exists:categories,id',
-        'capacity' => 'required|integer|min:1'
-    ]);
-
-    try {
-        $category = Category::findOrFail($request->category_id);
-        $aiService = new OpenRouterAiService();
+    /**
+     * Format the prediction with HTML
+     */
+    private function formatPrediction($prediction)
+    {
+        // Convert plain text to HTML formatting
+        $formatted = nl2br(htmlspecialchars($prediction));
         
-        $eventData = [
-            'title' => $request->title,
-            'category' => $category->name,
-            'capacity' => $request->capacity
-        ];
-
-        $generatedEvent = $aiService->generateCompleteEvent($eventData);
-
-        return response()->json([
-            'success' => true,
-            'event' => $generatedEvent,
-            'source' => 'openrouter-ai'
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('OpenRouter Event generation error: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error generating event: ' . $e->getMessage()
-        ], 500);
+        // Add basic styling
+        $formatted = preg_replace('/🎯 SUCCESS PROBABILITY:/', '<h5 class="text-success mb-3">🎯 SUCCESS PROBABILITY:</h5>', $formatted);
+        $formatted = preg_replace('/✅ KEY STRENGTHS:/', '<h5 class="text-success mb-2">✅ KEY STRENGTHS:</h5>', $formatted);
+        $formatted = preg_replace('/⚠️ MAIN CHALLENGES:/', '<h5 class="text-warning mb-2">⚠️ MAIN CHALLENGES:</h5>', $formatted);
+        $formatted = preg_replace('/💡 TOP RECOMMENDATIONS:/', '<h5 class="text-info mb-2">💡 TOP RECOMMENDATIONS:</h5>', $formatted);
+        $formatted = preg_replace('/🌍 ENVIRONMENTAL IMPACT:/', '<h5 class="text-primary mb-2">🌍 ENVIRONMENTAL IMPACT:</h5>', $formatted);
+        
+        // Convert bullet points to proper list items
+        $formatted = preg_replace('/•\s*(.+)/', '<li class="mb-1">$1</li>', $formatted);
+        $formatted = preg_replace('/(<h5[^>]*>⚠️ MAIN CHALLENGES:<\/h5>)(.*?)(?=<h5|$)/s', '$1<ul class="list-unstyled">$2</ul>', $formatted);
+        $formatted = preg_replace('/(<h5[^>]*>✅ KEY STRENGTHS:<\/h5>)(.*?)(?=<h5|$)/s', '$1<ul class="list-unstyled">$2</ul>', $formatted);
+        $formatted = preg_replace('/(<h5[^>]*>💡 TOP RECOMMENDATIONS:<\/h5>)(.*?)(?=<h5|$)/s', '$1<ul class="list-unstyled">$2</ul>', $formatted);
+        
+        return '<div class="ai-analysis-content">' . $formatted . '</div>';
     }
-}
+
+
     /**
      * Display events for public website with real-time filters
      */

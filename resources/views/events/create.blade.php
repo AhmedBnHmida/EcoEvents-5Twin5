@@ -304,8 +304,14 @@
                                             <div class="col-md-8">
                                                 <div class="form-group">
                                                     <label class="form-control-label text-success">Professional Analysis</label>
-                                                    <textarea class="form-control bg-light" id="success-prediction" rows="4" readonly 
-                                                              placeholder="Fill in event details and click 'Analyze Success' to get AI-powered professional insights..."></textarea>
+                                                    <!-- Add AI Loading Indicator -->
+                                                    <div id="ai-loading" class="alert alert-info" style="display: none;">
+                                                        <i class="fas fa-spinner fa-spin me-2"></i> AI is generating content...
+                                                    </div>
+                                                    <div class="form-control bg-light" id="success-prediction" 
+                                                        style="min-height: 200px; overflow-y: auto; white-space: pre-wrap;"
+                                                        placeholder="Fill in event details and click 'Analyze Success' to get AI-powered professional insights...">
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-md-4 d-flex align-items-end">
@@ -342,47 +348,6 @@
         // Token CSRF
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // AI Generation Functions
-        document.getElementById('generate-description-btn').addEventListener('click', function() {
-            const title = document.getElementById('title').value;
-            const categoryId = document.getElementById('categorie_id').value;
-            const loading = document.getElementById('ai-loading');
-            
-            if (!title || !categoryId) {
-                alert('Please enter a title and select a category first');
-                return;
-            }
-            
-            loading.style.display = 'block';
-            
-            fetch('{{ route("events.generate-description") }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: title,
-                    category_id: categoryId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                loading.style.display = 'none';
-                if (data.success) {
-                    document.getElementById('description').value = data.description;
-                } else {
-                    alert('Failed to generate description: ' + data.message);
-                }
-            })
-            .catch(error => {
-                loading.style.display = 'none';
-                console.error('Error:', error);
-                alert('Error generating description');
-            });
-        });
-
         // Enhanced Generate Complete Event Function
         document.getElementById('generate-complete-event-btn').addEventListener('click', function() {
             const title = document.getElementById('title').value;
@@ -413,6 +378,7 @@
             .then(response => response.json())
             .then(data => {
                 loading.style.display = 'none';
+                
                 if (data.success) {
                     const event = data.event;
                     
@@ -429,7 +395,7 @@
                     if (event.capacity_max) {
                         document.getElementById('capacity_max').value = event.capacity_max;
                     }
-                    if (event.price) {
+                    if (event.price !== undefined) {
                         document.getElementById('price').value = event.price;
                     }
                     if (event.status) {
@@ -439,7 +405,7 @@
                         document.getElementById('is_public').checked = event.is_public;
                     }
                     
-                    // Fill date fields
+                    // Fill date fields with proper formatting
                     if (event.start_date) {
                         document.getElementById('start_date').value = formatDateForInput(event.start_date);
                     }
@@ -448,11 +414,6 @@
                     }
                     if (event.registration_deadline) {
                         document.getElementById('registration_deadline').value = formatDateForInput(event.registration_deadline);
-                    }
-                    
-                    // Fill success prediction
-                    if (event.success_prediction) {
-                        document.getElementById('success-prediction').value = event.success_prediction;
                     }
                     
                     alert('🎉 Complete event generated successfully! All fields have been populated with AI suggestions.');
@@ -467,15 +428,95 @@
             });
         });
 
-        // Event Success Prediction
+        // Enhanced Generate Description Function - with helpful alerts
+        document.getElementById('generate-description-btn').addEventListener('click', function() {
+            const title = document.getElementById('title').value;
+            const categoryId = document.getElementById('categorie_id').value;
+            const location = document.getElementById('location').value;
+            const capacity = document.getElementById('capacity_max').value;
+            const price = document.getElementById('price').value;
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            const loading = document.getElementById('ai-loading');
+            
+            // Check if all required fields are filled
+            const missingFields = [];
+            if (!title) missingFields.push('Title');
+            if (!categoryId) missingFields.push('Category');
+            if (!location) missingFields.push('Location');
+            if (!capacity) missingFields.push('Capacity');
+            if (!price) missingFields.push('Price');
+            if (!startDate) missingFields.push('Start Date');
+            if (!endDate) missingFields.push('End Date');
+            
+            if (missingFields.length > 0) {
+                alert('Please fill in these fields first: ' + missingFields.join(', '));
+                return;
+            }
+            
+            loading.style.display = 'block';
+            
+            fetch('{{ route("events.generate-description") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    category_id: categoryId,
+                    location: location,
+                    capacity_max: capacity,
+                    price: price,
+                    start_date: startDate,
+                    end_date: endDate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success) {
+                    document.getElementById('description').value = data.description;
+                    alert('✅ Description generated successfully!');
+                } else {
+                    alert('Failed to generate description: ' + data.message);
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Error:', error);
+                alert('Error generating description');
+            });
+        });
+
+        // Enhanced Event Success Prediction with HTML display
         document.getElementById('predict-success-btn').addEventListener('click', function() {
             const title = document.getElementById('title').value;
             const categoryId = document.getElementById('categorie_id').value;
+            const description = document.getElementById('description').value;
+            const location = document.getElementById('location').value;
             const capacity = document.getElementById('capacity_max').value;
+            const price = document.getElementById('price').value;
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            const regDeadline = document.getElementById('registration_deadline').value;
             const loading = document.getElementById('ai-loading');
             
-            if (!title || !categoryId || !capacity) {
-                alert('Please enter title, category, and capacity first');
+            // Check if all required fields are filled
+            const missingFields = [];
+            if (!title) missingFields.push('Title');
+            if (!categoryId) missingFields.push('Category');
+            if (!description) missingFields.push('Description');
+            if (!location) missingFields.push('Location');
+            if (!capacity) missingFields.push('Capacity');
+            if (!price) missingFields.push('Price');
+            if (!startDate) missingFields.push('Start Date');
+            if (!endDate) missingFields.push('End Date');
+            if (!regDeadline) missingFields.push('Registration Deadline');
+            
+            if (missingFields.length > 0) {
+                alert('Please fill in these fields first: ' + missingFields.join(', '));
                 return;
             }
             
@@ -491,14 +532,23 @@
                 body: JSON.stringify({
                     title: title,
                     category_id: categoryId,
-                    capacity: capacity
+                    description: description,
+                    location: location,
+                    capacity_max: capacity,
+                    price: price,
+                    start_date: startDate,
+                    end_date: endDate,
+                    registration_deadline: regDeadline
                 })
             })
             .then(response => response.json())
             .then(data => {
                 loading.style.display = 'none';
                 if (data.success) {
-                    document.getElementById('success-prediction').value = data.prediction;
+                    // Use formatted HTML if available, otherwise use plain text
+                    const predictionContent = data.formatted_prediction || data.prediction;
+                    document.getElementById('success-prediction').innerHTML = predictionContent;
+                    alert('✅ Success analysis generated!');
                 } else {
                     alert('Failed to generate prediction: ' + data.message);
                 }
@@ -512,7 +562,33 @@
 
         // Helper function to format dates for datetime-local input
         function formatDateForInput(dateString) {
-            const date = new Date(dateString);
+            if (!dateString) return '';
+            
+            // Handle various date formats from AI
+            let date;
+            
+            // If it's already in ISO format (from AI response)
+            if (dateString.includes('T')) {
+                date = new Date(dateString);
+            } 
+            // If it's in "YYYY-MM-DD HH:MM:SS" format (common from AI)
+            else if (dateString.includes(' ')) {
+                // Replace space with T to make it ISO-like
+                const isoString = dateString.replace(' ', 'T');
+                date = new Date(isoString);
+            }
+            // Fallback - try direct parsing
+            else {
+                date = new Date(dateString);
+            }
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                console.error('Invalid date:', dateString);
+                return '';
+            }
+            
+            // Format to YYYY-MM-DDTHH:MM for datetime-local input
             return date.toISOString().slice(0, 16);
         }
 
