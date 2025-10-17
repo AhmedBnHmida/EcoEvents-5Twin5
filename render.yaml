@@ -3,7 +3,7 @@ services:
     name: ecoevents-app
     env: docker
     docker:
-      dockerfilePath: ./Dockerfile
+      dockerfilePath: ./Dockerfile.render 
     envVars:
       - key: APP_ENV
         value: production
