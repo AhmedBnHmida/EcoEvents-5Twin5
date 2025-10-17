@@ -28,7 +28,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www
 
-# Copy application files (this includes your assets/ directory)
+# Copy application files (includes public/assets/)
 COPY . .
 
 # Copy environment file for production
@@ -59,9 +59,9 @@ RUN php artisan route:cache
 # Create storage link
 RUN php artisan storage:link
 
-# Fix permissions (include assets directory)
-RUN chmod -R 775 storage bootstrap/cache database public assets
-RUN chown -R www-data:www-data storage bootstrap/cache database public assets
+# Fix permissions (only public directory)
+RUN chmod -R 775 storage bootstrap/cache database public
+RUN chown -R www-data:www-data storage bootstrap/cache database public
 
 EXPOSE 10000
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"]
