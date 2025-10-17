@@ -132,6 +132,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/payment/cancel/{registration}', [PaymentController::class, 'cancel'])->name('payment.cancel');
 
     // Feedback Routes (Participants)
+    Route::get('/feedback/create', [App\Http\Controllers\FeedbackController::class, 'create'])->name('feedback.create');
+    Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
+    Route::get('/feedback/{feedback}/edit', [App\Http\Controllers\FeedbackController::class, 'edit'])->name('feedback.edit');
+    Route::put('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'update'])->name('feedback.update');
+    Route::delete('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'destroy'])->name('feedback.destroy');
+    Route::get('/my-feedbacks', [App\Http\Controllers\FeedbackController::class, 'myFeedbacks'])->name('feedback.my');
+    
+    // Certificate Routes
+    Route::get('/certificates', [App\Http\Controllers\CertificateController::class, 'index'])->name('certificates.index');
+    Route::get('/certificates/{certificate}', [App\Http\Controllers\CertificateController::class, 'show'])->name('certificates.show');
+    Route::get('/certificates/{certificate}/download', [App\Http\Controllers\CertificateController::class, 'download'])->name('certificates.download');
+    Route::delete('/certificates/{certificate}', [App\Http\Controllers\CertificateController::class, 'destroy'])->name('certificates.destroy');
+    Route::get('/registrations/{registration}/generate-certificate', [App\Http\Controllers\CertificateController::class, 'generate'])->name('certificates.generate');
+
     Route::get('/feedback/create', [FeedbackController::class, 'create'])->name('feedback.create');
     Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
     Route::get('/feedback/{feedback}/edit', [FeedbackController::class, 'edit'])->name('feedback.edit');

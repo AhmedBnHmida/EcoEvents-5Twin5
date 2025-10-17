@@ -94,10 +94,44 @@
                             </div>
 
                             <div class="mb-4">
-                                <div class="form-check">
+                                <div class="card border border-light-subtle rounded-3 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0 fs-6 fw-bold">Conditions de participation</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-3">En vous inscrivant à un événement organisé sur la plateforme EcoEvents, vous acceptez les conditions suivantes :</p>
+                                        
+                                        <div class="mb-3">
+                                            <p class="mb-1 fw-bold"><i class="fas fa-leaf text-success me-2"></i>1️⃣ Respect de l'environnement :</p>
+                                            <p class="text-muted small ms-4">Vous vous engagez à adopter un comportement éco-responsable avant, pendant et après l'événement (zéro déchet, recyclage, utilisation de transports durables, respect des espaces verts, etc.).</p>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <p class="mb-1 fw-bold"><i class="fas fa-mobile-alt text-success me-2"></i>2️⃣ Utilisation des ressources numériques :</p>
+                                            <p class="text-muted small ms-4">Votre billet électronique remplace les billets papier afin de réduire l'impact écologique. Vous acceptez de le présenter sous forme numérique (QR code).</p>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <p class="mb-1 fw-bold"><i class="fas fa-shield-alt text-success me-2"></i>3️⃣ Protection des données personnelles :</p>
+                                            <p class="text-muted small ms-4">Les informations que vous fournissez (nom, email, numéro de téléphone) sont utilisées uniquement pour la gestion de votre inscription, la communication d'informations liées à l'événement et l'envoi de rappels.<br>Aucune donnée ne sera partagée avec des tiers sans votre accord explicite.</p>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <p class="mb-1 fw-bold"><i class="fas fa-handshake text-success me-2"></i>4️⃣ Engagement citoyen :</p>
+                                            <p class="text-muted small ms-4">Vous vous engagez à participer activement, à respecter les intervenants, les bénévoles et les autres participants, dans un esprit de collaboration et de durabilité.</p>
+                                        </div>
+                                        
+                                        <div class="mb-0">
+                                            <p class="mb-1 fw-bold"><i class="fas fa-calendar-times text-success me-2"></i>5️⃣ Annulation responsable :</p>
+                                            <p class="text-muted small ms-4">En cas d'empêchement, merci de signaler votre annulation au plus tard 24 heures avant l'événement afin de libérer une place pour un autre participant.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-check mt-3">
                                     <input class="form-check-input" type="checkbox" id="terms" required>
-                                    <label class="form-check-label" for="terms">
-                                        J'accepte les <a href="#" target="_blank">conditions générales</a> et je confirme ma participation à cet événement
+                                    <label class="form-check-label fw-bold" for="terms">
+                                        J'ai lu et j'accepte les conditions de participation ci-dessus
                                     </label>
                                 </div>
                             </div>
