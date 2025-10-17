@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies
+# Install system dependencies - ADD SQLite
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -11,14 +11,16 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
-    libzip-dev
+    libzip-dev \
+    sqlite3 \
+    libsqlite3-dev
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions
+# Install PHP extensions - ADD pdo_sqlite
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+RUN docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -32,6 +34,11 @@ COPY . .
 # Install dependencies (as root to avoid permission issues)
 USER root
 RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
+
+# Create SQLite database file for Render deployment
+RUN touch database/database.sqlite && chmod 755 database/database.sqlite
+
+# Fix permissions
 RUN chmod -R 775 storage bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache
 
