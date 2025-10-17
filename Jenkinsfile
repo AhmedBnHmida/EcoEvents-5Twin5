@@ -36,8 +36,12 @@ pipeline {
                 sh '''
                     docker run --rm -v $(pwd):/app \
                     -w /app \
+                    --user root \
                     composer:latest \
-                    composer install --no-dev --optimize-autoloader --no-scripts
+                    bash -c "
+                        git config --global --add safe.directory /app && \
+                        composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
+                    "
                 '''
             }
         }
