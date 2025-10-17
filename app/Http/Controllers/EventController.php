@@ -13,10 +13,172 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\EventFournisseurNotification; // Assure-toi que ton Mailable existe
+use App\Mail\EventFournisseurNotification;
+use App\Services\OpenRouterAiService;
+
 
 class EventController extends Controller
 {
+    /**
+     * Generate complete event with ALL fields - ENHANCED
+     */
+    public function generateCompleteEvent(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'capacity' => 'required|integer|min:1'
+        ]);
+
+        try {
+            $category = Category::findOrFail($request->category_id);
+            $aiService = new OpenRouterAiService();
+            
+            $eventData = [
+                'title' => $request->title,
+                'category' => $category->name,
+                'capacity' => $request->capacity
+            ];
+
+            $completeEvent = $aiService->generateCompleteEvent($eventData);
+
+            return response()->json([
+                'success' => true,
+                'event' => $completeEvent,
+                'source' => 'openrouter-ai-complete'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Complete Event generation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating complete event: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate description based on ALL event data - ENHANCED
+     */
+    public function generateDescription(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'location' => 'required|string|max:255',
+            'capacity_max' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date'
+        ]);
+
+        try {
+            $category = Category::findOrFail($request->category_id);
+            $aiService = new OpenRouterAiService();
+            
+            $eventData = [
+                'title' => $request->title,
+                'category' => $category->name,
+                'location' => $request->location,
+                'capacity_max' => $request->capacity_max,
+                'price' => $request->price,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date
+            ];
+
+            $description = $aiService->generateEventDescription($eventData);
+
+            return response()->json([
+                'success' => true,
+                'description' => $description,
+                'source' => 'openrouter-ai-description'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('OpenRouter Description generation error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating description: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Predict event success with HTML formatted output
+     */
+    public function predictEventSuccess(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'description' => 'required|string',
+            'location' => 'required|string|max:255',
+            'capacity_max' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'registration_deadline' => 'required|date'
+        ]);
+
+        try {
+            $category = Category::findOrFail($request->category_id);
+            $aiService = new OpenRouterAiService();
+            
+            $eventData = [
+                'title' => $request->title,
+                'category' => $category->name,
+                'description' => $request->description,
+                'location' => $request->location,
+                'capacity_max' => $request->capacity_max,
+                'price' => $request->price,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'registration_deadline' => $request->registration_deadline
+            ];
+
+            $prediction = $aiService->predictEventSuccess($eventData);
+
+            return response()->json([
+                'success' => true,
+                'prediction' => $prediction,
+                'formatted_prediction' => $this->formatPrediction($prediction),
+                'source' => 'openrouter-ai-prediction'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Event prediction error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error generating prediction: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Format the prediction with HTML
+     */
+    private function formatPrediction($prediction)
+    {
+        // Convert plain text to HTML formatting
+        $formatted = nl2br(htmlspecialchars($prediction));
+        
+        // Add basic styling
+        $formatted = preg_replace('/🎯 SUCCESS PROBABILITY:/', '<h5 class="text-success mb-3">🎯 SUCCESS PROBABILITY:</h5>', $formatted);
+        $formatted = preg_replace('/✅ KEY STRENGTHS:/', '<h5 class="text-success mb-2">✅ KEY STRENGTHS:</h5>', $formatted);
+        $formatted = preg_replace('/⚠️ MAIN CHALLENGES:/', '<h5 class="text-warning mb-2">⚠️ MAIN CHALLENGES:</h5>', $formatted);
+        $formatted = preg_replace('/💡 TOP RECOMMENDATIONS:/', '<h5 class="text-info mb-2">💡 TOP RECOMMENDATIONS:</h5>', $formatted);
+        $formatted = preg_replace('/🌍 ENVIRONMENTAL IMPACT:/', '<h5 class="text-primary mb-2">🌍 ENVIRONMENTAL IMPACT:</h5>', $formatted);
+        
+        // Convert bullet points to proper list items
+        $formatted = preg_replace('/•\s*(.+)/', '<li class="mb-1">$1</li>', $formatted);
+        $formatted = preg_replace('/(<h5[^>]*>⚠️ MAIN CHALLENGES:<\/h5>)(.*?)(?=<h5|$)/s', '$1<ul class="list-unstyled">$2</ul>', $formatted);
+        $formatted = preg_replace('/(<h5[^>]*>✅ KEY STRENGTHS:<\/h5>)(.*?)(?=<h5|$)/s', '$1<ul class="list-unstyled">$2</ul>', $formatted);
+        $formatted = preg_replace('/(<h5[^>]*>💡 TOP RECOMMENDATIONS:<\/h5>)(.*?)(?=<h5|$)/s', '$1<ul class="list-unstyled">$2</ul>', $formatted);
+        
+        return '<div class="ai-analysis-content">' . $formatted . '</div>';
+    }
+
+
     /**
      * Display events for public website with real-time filters
      */
@@ -131,18 +293,7 @@ class EventController extends Controller
         return view('events.index', compact('events', 'categories', 'statuses'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $categories = Category::all();
-        $statuses = EventStatus::cases();
-        $fournisseurs = Fournisseur::all();
-        $resourceTypes = TypeRessource::allTypes();
-
-        return view('events.create', compact('categories', 'statuses', 'fournisseurs', 'resourceTypes'));
-    }
+  
 
     /**
      * Store a newly created resource in storage.
@@ -150,23 +301,22 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'location' => 'required|string|max:255',
+            'title' => 'required|string|min:5|max:255',
+            'description' => 'required|string|min:50|max:2000',
+            'location' => 'required|string',
             'capacity_max' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0|max:10000',
             'categorie_id' => 'required|exists:categories,id',
-            'status' => 'required|in:' . implode(',', array_column(EventStatus::cases(), 'value')),
+            'status' => 'required|in:UPCOMING,ONGOING,COMPLETED,CANCELLED',
+            'start_date' => 'required|date|after:now',
+            'end_date' => 'required|date|after:start_date',
             'registration_deadline' => 'required|date|before:start_date',
-            'price' => 'required|numeric|min:0',
             'is_public' => 'boolean',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'resources' => 'nullable|array',
-            'resources.*.nom' => 'required_with:resources|string|max:255',
-            'resources.*.type' => 'required_with:resources|in:' . implode(',', TypeRessource::allTypes()),
-            'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
-            'resources.*.quantite' => 'required_with:resources|integer|min:1',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ], [
+            'start_date.after' => 'The start date must be in the future.',
+            'end_date.after' => 'The end date must be after the start date.',
+            'registration_deadline.before' => 'The registration deadline must be before the start date.',
         ]);
 
         $eventData = $request->except(['resources', 'images']);
@@ -369,69 +519,150 @@ class EventController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
-    public function suggestResources(Request $request)
+
+      /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
     {
-        try {
-            Log::info('SuggestResources called with:', $request->all());
+        $categories = Category::all();
+        $statuses = EventStatus::cases();
+        $fournisseurs = Fournisseur::all();
+        $resourceTypes = TypeRessource::allTypes();
 
-            $request->validate([
-                'categorie_id' => 'required|integer|exists:categories,id',
-                'capacity_max' => 'required|integer|min:1',
-            ]);
+        return view('events.create', compact('categories', 'statuses', 'fournisseurs', 'resourceTypes'));
+    }
 
-            $historyFile = storage_path('app/events_history.json');
-            if (!file_exists($historyFile)) {
-                $events = Event::with('ressources')->get();
-                $json = $events->toJson(JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                Storage::put('events_history.json', $json);
-                Log::info('Generated history JSON length: ' . strlen($json));
-            } else {
-                $json = Storage::get('events_history.json');
-                Log::info('Existing history JSON length: ' . strlen($json));
+
+
+public function suggestResources(Request $request)
+{
+    try {
+        Log::info('SuggestResources called with:', $request->all());
+
+        $request->validate([
+            'categorie_id' => 'required|integer|exists:categories,id',
+            'capacity_max' => 'required|integer|min:1',
+        ]);
+
+        $categorieId = $request->categorie_id;
+        $capacityMax = $request->capacity_max;
+
+        // Query DB pour events similaires (catégorie exacte + capacité ±25%)
+        $similarEvents = Event::with('ressources.fournisseur')
+            ->where('categorie_id', $categorieId)
+            ->where('capacity_max', '>=', $capacityMax * 0.75)  // Min 75% de capacity_max
+            ->where('capacity_max', '<=', $capacityMax * 1.25)  // Max 125%
+            ->get();
+
+        Log::info('Similar events found: ' . $similarEvents->count());
+
+        // Fallback : tous les events de la catégorie si aucun similaire
+        if ($similarEvents->isEmpty()) {
+            $similarEvents = Event::with('ressources.fournisseur')
+                ->where('categorie_id', $categorieId)
+                ->get();
+            Log::info('Fallback - All events in category: ' . $similarEvents->count());
+        }
+
+        // Agrège ressources par type : sums, counts, ET fournisseurs par type (pour recommandation)
+        $resourceSums = [];
+        $resourceCounts = [];
+        $representativeNoms = [];  // Noms descriptifs
+        $supplierCounts = [];  // Comptage fournisseurs par type (pour le plus utilisé)
+
+        foreach ($similarEvents as $event) {
+            $eventResources = [];  // Par type pour cet event
+            foreach ($event->ressources as $res) {
+                $nom = $res->nom ?? 'Inconnu';
+                $type = $res->type ?? '';
+                $qty = (int) ($res->quantite ?? 1);
+                $fournisseurId = $res->fournisseur_id ?? null;
+
+                if ($type && $nom) {
+                    $eventResources[$type] = ($eventResources[$type] ?? 0) + $qty;
+
+                    // Nom représentatif (comme avant)
+                    if (!isset($representativeNoms[$type])) {
+                        $representativeNoms[$type] = $nom;
+                    } elseif ($representativeNoms[$type] === 'Test' && $nom !== 'Test') {
+                        $representativeNoms[$type] = $nom;
+                    } elseif ($nom !== 'Test' && $representativeNoms[$type] !== 'Test') {
+                        if (strlen($nom) > strlen($representativeNoms[$type])) {
+                            $representativeNoms[$type] = $nom;
+                        }
+                    } elseif ($nom === 'Test' && $representativeNoms[$type] !== 'Test') {
+                        // Garde non-Test
+                    } elseif (strlen($nom) > strlen($representativeNoms[$type])) {
+                        $representativeNoms[$type] = $nom;
+                    }
+
+                    // Comptage fournisseurs par type
+                    if ($fournisseurId) {
+                        $supplierCounts[$type][$fournisseurId] = ($supplierCounts[$type][$fournisseurId] ?? 0) + 1;
+                    }
+                }
             }
 
-            $scriptPath = base_path('app/Http/Scripts/suggest_ressources.py');
-            if (!file_exists($scriptPath)) {
-                Log::error('Python script not found at: ' . $scriptPath);
-                return response()->json(['error' => 'Script Python introuvable'], 500);
+            // Ajoute à totaux quantités
+            foreach ($eventResources as $type => $eventQty) {
+                $resourceSums[$type] = ($resourceSums[$type] ?? 0) + $eventQty;
+                $resourceCounts[$type] = ($resourceCounts[$type] ?? 0) + 1;
             }
+        }
 
-            $command = sprintf('cd %s && python3 %s %d %d 2>&1',
-                escapeshellarg(base_path()), escapeshellarg($scriptPath),
-                $request->categorie_id, $request->capacity_max
-            );
-            Log::info('Executing command: ' . $command);
+        Log::info('Resource types found: ' . json_encode(array_keys($resourceSums)));
 
-            $output = shell_exec($command);
-            Log::info('Shell exec raw output: ' . ($output ? substr($output, 0, 500) : 'empty'));
+        $suggestions = [];
+        foreach ($resourceSums as $type => $totalQty) {
+            $avgQty = (int) ($totalQty / $resourceCounts[$type]);
+            if ($avgQty > 0) {
+                $repNom = $representativeNoms[$type] ?? $type;
 
-            if ($output === null || empty(trim($output))) {
-                Log::error('Empty output from script');
-                return response()->json(['error' => 'Erreur lors de l\'exécution du script (output vide)'], 500);
-            }
+                // Recommandation fournisseur : le plus utilisé pour ce type
+                $recommendedSupplierId = null;
+                $recommendedSupplierName = 'Non spécifié';
+                if (isset($supplierCounts[$type])) {
+                    arsort($supplierCounts[$type]);  // Trie par count descendant
+                    $topSupplierId = key($supplierCounts[$type]);
+                    $recommendedSupplierId = $topSupplierId;
+                    $recommendedSupplierName = Fournisseur::find($topSupplierId)->nom_societe ?? 'Inconnu';
+                }
 
-            $decoded = json_decode($output, true, 512, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                Log::error('JSON decode error: ' . json_last_error_msg());
-                $suggestions = [
-                    'resources' => [
-                        ['nom' => 'Chaise', 'type' => 'Chaise', 'quantite' => $request->capacity_max],
-                        ['nom' => 'Table', 'type' => 'Table', 'quantite' => max(1, (int)($request->capacity_max / 10))]
+                $suggestions[] = [
+                    'nom' => $repNom,
+                    'type' => $type,
+                    'quantite' => $avgQty,
+                    'fournisseur' => [
+                        'id' => $recommendedSupplierId,
+                        'nom_societe' => $recommendedSupplierName
                     ]
                 ];
-                Log::info('Fallback suggestions due to JSON error', $suggestions);
-            } else {
-                $suggestions = $decoded;
+                Log::info("Suggesting {$avgQty} of '{$repNom}' (type: {$type}) with supplier {$recommendedSupplierName}");
             }
-
-            return response()->json($suggestions);
-
-        } catch (\Exception $e) {
-            Log::error('Exception in suggestResources: ' . $e->getMessage());
-            return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
-        } catch (\Throwable $t) {
-            Log::error('Throwable in suggestResources: ' . $t->getMessage());
-            return response()->json(['error' => 'Erreur inattendue'], 500);
         }
+
+        Log::info('Total suggestions generated: ' . count($suggestions));
+
+        // Fallback seulement si zéro events dans catégorie
+        if (empty($suggestions)) {
+            Log::info('No suggestions from data - using defaults');
+            $suggestions = [
+                ['nom' => 'Chaise', 'type' => 'Chaise', 'quantite' => $capacityMax, 'fournisseur' => ['id' => 1, 'nom_societe' => 'Défaut']],
+                ['nom' => 'Table', 'type' => 'Table', 'quantite' => max(1, (int) ($capacityMax / 10)), 'fournisseur' => ['id' => 1, 'nom_societe' => 'Défaut']]
+            ];
+        }
+
+        $response = ['resources' => $suggestions];
+
+        return response()->json($response);
+
+    } catch (\Exception $e) {
+        Log::error('Exception in suggestResources: ' . $e->getMessage());
+        return response()->json(['error' => 'Erreur serveur: ' . $e->getMessage()], 500);
     }
+}
+
+
+
 }

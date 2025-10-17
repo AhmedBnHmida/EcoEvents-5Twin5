@@ -320,10 +320,9 @@
                                     <i class="fas fa-users text-primary me-2"></i>
                                     <span>{{ $event->registrations->count() }}/{{ $event->capacity_max }} inscrits</span>
                                     <div class="progress flex-grow-1 ms-2" style="height: 4px;">
-                                        @php
-                                            $progress = $event->capacity_max > 0 ? ($event->registrations->count() / $event->capacity_max) * 100 : 0;
-                                        @endphp
-                                        <div class="progress-bar bg-primary" style="width: {{ $progress }}%"></div>
+                                        <div class="progress-bar bg-primary" 
+                                            style="--progress-width: {{ $event->capacity_max > 0 ? ($event->registrations->count() / $event->capacity_max) * 100 : 0 }}%; width: var(--progress-width);">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -450,14 +449,12 @@
         
         .line-clamp-2 {
             display: -webkit-box;
-            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
         
         .line-clamp-3 {
             display: -webkit-box;
-            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
