@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EcoChatbotController;
 use App\Http\Controllers\FournisseurController;
 use App\Http\Controllers\EventController;  // Ajoute ce use pour EventController
 use App\Http\Controllers\RegistrationController;
@@ -218,5 +219,10 @@ Route::get('/events/export-history', [App\Http\Controllers\EventController::clas
 
 // Stripe Webhook Route (no CSRF protection)
 Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
+
+// EcoChatbot API route
+Route::middleware('auth')->prefix('api')->group(function () {
+    Route::post('/eco-chatbot', [EcoChatbotController::class, 'processMessage'])->name('api.eco-chatbot');
+});
 
 require __DIR__.'/auth.php';

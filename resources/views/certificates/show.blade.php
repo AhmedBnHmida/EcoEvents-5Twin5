@@ -4,8 +4,10 @@
             <div class="col-lg-10">
                 <style>
                     @media (min-width: 992px) {
+                        /* Fix for sidebar overlap - removed extra margin */
                         .g-sidenav-show .main-content {
-                            margin-left: 250px;
+                            margin-left: 0;
+                            padding-left: 15px;
                         }
                     }
                 </style>
@@ -57,20 +59,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6 text-md-end">
-                                <div class="mb-3">
-                                    <a href="{{ route('certificates.download', $certificate->id) }}" class="btn btn-primary">
-                                        <i class="fas fa-download me-2"></i>Télécharger le certificat
-                                    </a>
-                                </div>
-                                <div class="mb-3">
-                                    <form action="{{ route('certificates.destroy', $certificate->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce certificat ?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="fas fa-trash me-2"></i>Supprimer le certificat
-                                        </button>
-                                    </form>
-                                </div>
+                                <!-- Buttons removed as requested -->
                             </div>
                         </div>
 
@@ -85,14 +74,11 @@
                                 <div class="certificate-preview position-relative">
                                     <iframe src="{{ route('certificates.download', $certificate->id) }}?display=true" width="100%" height="650px" style="border: none; display: block;"></iframe>
                                 </div>
-                                <div class="certificate-actions p-4 bg-light border-top d-flex justify-content-between align-items-center">
-                                    <p class="text-muted mb-0">
+                                <div class="certificate-actions p-4 bg-light border-top">
+                                    <p class="text-muted mb-0 text-center">
                                         <i class="fas fa-info-circle me-1"></i>
                                         Ce certificat atteste de votre participation à l'événement
                                     </p>
-                                    <a href="{{ route('certificates.download', $certificate->id) }}" class="btn btn-lg btn-success shadow-sm">
-                                        <i class="fas fa-download me-2"></i>Télécharger le certificat
-                                    </a>
                                 </div>
                             </div>
                         </div>

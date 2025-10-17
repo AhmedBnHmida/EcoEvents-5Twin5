@@ -161,4 +161,8 @@
             justify-content: center;
         }
     </style>
+    
+    @auth
+        <x-eco-chatbot title="EcoAssistant" placeholder="Posez une question sur l'écologie..." />
+    @endauth
 </x-app-layout>

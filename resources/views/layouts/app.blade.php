@@ -66,6 +66,11 @@
 <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet" />
 <!-- CSS Files -->
 <link id="pagestyle" href="{{ asset('assets/css/corporate-ui-dashboard.css?v=1.0.0') }}" rel="stylesheet" />
+<!-- Custom fixes for sidebar layout issues -->
+<link href="{{ asset('assets/css/custom-fixes.css') }}" rel="stylesheet" />
+<!-- Alpine.js for interactive components -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
