@@ -43,7 +43,10 @@ RUN php artisan key:generate
 # Create SQLite database file
 RUN touch database/database.sqlite
 
-# Run database migrations
+# Debug: Show current environment and database config
+RUN php artisan tinker --execute="echo config('database.default');"
+
+# Run database migrations (only after confirming SQLite)
 RUN php artisan migrate --force
 
 # Clear and cache config
