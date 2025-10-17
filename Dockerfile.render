@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# Install system dependencies - ADD SQLite
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install PHP extensions - ADD pdo_sqlite
+# Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd zip
 
@@ -31,16 +31,37 @@ WORKDIR /var/www
 # Copy application files
 COPY . .
 
-# Install dependencies (as root to avoid permission issues)
-USER root
+# Copy environment file for production
+COPY .env.render .env
+
+# Install dependencies
 RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
 
-# Create SQLite database file for Render deployment
-RUN touch database/database.sqlite && chmod 755 database/database.sqlite
+# Generate application key
+RUN php artisan key:generate
+
+# Create SQLite database file
+RUN touch database/database.sqlite
+
+# Run database migrations
+RUN php artisan migrate --force
+
+# Clear and cache config
+RUN php artisan config:clear
+RUN php artisan cache:clear
+RUN php artisan route:clear
+RUN php artisan view:clear
+
+# Cache config and routes for production
+RUN php artisan config:cache
+RUN php artisan route:cache
+
+# Create storage link
+RUN php artisan storage:link
 
 # Fix permissions
-RUN chmod -R 775 storage bootstrap/cache
-RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache database
+RUN chown -R www-data:www-data storage bootstrap/cache database
 
 EXPOSE 10000
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"]
