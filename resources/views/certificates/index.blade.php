@@ -4,8 +4,10 @@
             <div class="col-12">
                 <style>
                     @media (min-width: 992px) {
+                        /* Fix for sidebar overlap - removed extra margin */
                         .g-sidenav-show .main-content {
-                            margin-left: 250px;
+                            margin-left: 0;
+                            padding-left: 15px;
                         }
                     }
                 </style>

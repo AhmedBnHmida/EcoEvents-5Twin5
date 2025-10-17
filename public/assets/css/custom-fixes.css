@@ -1,0 +1,36 @@
+/* Custom fixes for sidebar overlap issues */
+@media (min-width: 992px) {
+    /* Fix for sidebar overlap - remove extra margin */
+    .g-sidenav-show .main-content {
+        margin-left: 0 !important;
+        padding-left: 15px !important;
+    }
+    
+    /* Add proper spacing for content */
+    .container-fluid {
+        padding-left: 270px !important;
+    }
+    
+    /* Fix for registrations page and other pages with sidebar */
+    body.g-sidenav-show .container {
+        padding-left: 250px !important;
+        max-width: calc(1320px + 250px) !important;
+    }
+    
+    /* Fix for my-registrations page specifically */
+    body.g-sidenav-show .container .row {
+        margin-left: 0 !important;
+    }
+    
+    /* Ensure content doesn't get cut off on smaller screens */
+    @media (max-width: 1199px) {
+        .container-fluid {
+            padding-left: 15px !important;
+        }
+        
+        body.g-sidenav-show .container {
+            padding-left: 15px !important;
+            max-width: 1320px !important;
+        }
+    }
+}

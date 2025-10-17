@@ -52,20 +52,39 @@ class EventObserver
             
             $certificateService = app(CertificateService::class);
             $generatedCount = 0;
+            $failedCount = 0;
             
             foreach ($attendedRegistrations as $registration) {
                 try {
                     // Générer le certificat pour chaque participant
-                    $certificateService->generateCertificate($registration);
+                    $certificate = $certificateService->generateCertificate($registration);
                     $generatedCount++;
+                    Log::info("Certificat généré avec succès pour l'inscription ID: {$registration->id}, certificat ID: {$certificate->id}");
                 } catch (\Exception $e) {
+                    $failedCount++;
                     Log::error("Erreur lors de la génération du certificat pour l'inscription ID: {$registration->id}: " . $e->getMessage());
+                    
+                    // Retry with command line for better error handling
+                    try {
+                        \Illuminate\Support\Facades\Artisan::call('certificates:generate');
+                        Log::info("Tentative de génération via commande Artisan pour l'événement ID: {$event->id}");
+                    } catch (\Exception $innerException) {
+                        Log::error("Échec de la tentative via Artisan: " . $innerException->getMessage());
+                    }
                 }
             }
             
-            Log::info("{$generatedCount} certificats générés pour l'événement {$event->title} (ID: {$event->id})");
+            Log::info("{$generatedCount} certificats générés pour l'événement {$event->title} (ID: {$event->id}), {$failedCount} échecs");
         } catch (\Exception $e) {
             Log::error("Erreur lors de la génération des certificats pour l'événement ID: {$event->id}: " . $e->getMessage());
+            
+            // Fallback to command line generation which has better error handling
+            try {
+                \Illuminate\Support\Facades\Artisan::call('certificates:generate');
+                Log::info("Tentative de génération via commande Artisan pour l'événement ID: {$event->id}");
+            } catch (\Exception $innerException) {
+                Log::error("Échec de la tentative via Artisan: " . $innerException->getMessage());
+            }
         }
     }
 
