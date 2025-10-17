@@ -38,22 +38,19 @@ COPY .env.render .env
 RUN composer install --optimize-autoloader --no-dev --ignore-platform-reqs
 
 # Generate application key
-RUN php artisan key:generate
+RUN php artisan key:generate --force
 
 # Create SQLite database file
 RUN touch database/database.sqlite
 
-# Debug: Show current environment and database config
-RUN php artisan tinker --execute="echo config('database.default');"
-
-# Run database migrations (only after confirming SQLite)
-RUN php artisan migrate --force
-
-# Clear and cache config
+# Clear all caches first
 RUN php artisan config:clear
 RUN php artisan cache:clear
 RUN php artisan route:clear
 RUN php artisan view:clear
+
+# Run database migrations
+RUN php artisan migrate --force
 
 # Cache config and routes for production
 RUN php artisan config:cache
