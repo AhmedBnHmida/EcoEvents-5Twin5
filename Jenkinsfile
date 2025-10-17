@@ -25,7 +25,7 @@ pipeline {
         stage('Setup Environment') {
             steps {
                 sh '''
-                    cp .env.example .env || echo ".env.example not found, using existing .env"
+                    cp .env.docker .env || echo ".env.docker not found, using existing .env"
                     chmod -R 775 storage bootstrap/cache || echo "Directory not found"
                 '''
             }
