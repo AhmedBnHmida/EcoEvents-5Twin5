@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ahmedbenhmida/laravel-app:latest
+    image: ahmedbenhmida/ecoevents-app:latest  # Changed to match Jenkinsfile
     container_name: laravel_app
     restart: unless-stopped
     working_dir: /var/www
@@ -25,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.nginx
-    image: ahmedbenhmida/laravel-nginx:latest
+    image: ahmedbenhmida/ecoevents-nginx:latest  # Changed to match Jenkinsfile
     container_name: laravel_webserver
     restart: unless-stopped
     ports:
@@ -44,10 +42,10 @@ services:
     container_name: laravel_db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
     volumes:
       - dbdata:/var/lib/mysql
     ports:

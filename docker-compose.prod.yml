@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: ahmedbenhmida/laravel-app:latest
+    image: ahmedbenhmida/ecoevents-app:latest
     restart: always
     working_dir: /var/www
     environment:
@@ -20,7 +20,7 @@ services:
       - laravel_network
 
   webserver:
-    image: ahmedbenhmida/laravel-nginx:latest
+    image: ahmedbenhmida/ecoevents-nginx:latest
     restart: always
     ports:
       - "80:80"
