@@ -29,6 +29,7 @@ pipeline {
                 sh '''
                     cp .env.docker .env || echo ".env.docker not found"
                     chmod -R 775 storage bootstrap/cache || echo "Directory not found"
+                    mkdir -p reports
                 '''
             }
         }
