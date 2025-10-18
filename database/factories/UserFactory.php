@@ -23,8 +23,13 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        // Initialize faker if it's null
+        if ($this->faker === null) {
+            $this->faker = \Faker\Factory::create();
+        }
+
         return [
-            'name' => $this->faker->name(), // Changed fake() to $this->faker->
+            'name' => $this->faker->name(),
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
             'email' => $this->faker->unique()->safeEmail(),
