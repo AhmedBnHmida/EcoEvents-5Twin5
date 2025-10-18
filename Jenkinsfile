@@ -89,7 +89,7 @@ pipeline {
                         if [ -d 'tests' ]; then
                             echo '📁 Tests directory exists'
                             find tests/ -name '*Test.php' | head -10
-                            TEST_COUNT=$(find tests/ -name '*Test.php' | wc -l)
+                            TEST_COUNT=\$(find tests/ -name '*Test.php' | wc -l)
                             echo \"Found \$TEST_COUNT test files\"
                             
                             if [ \$TEST_COUNT -eq 0 ]; then
@@ -119,10 +119,8 @@ pipeline {
                     bash -c "
                         git config --global --add safe.directory /app
                         
-                        # Run PHPUnit with detailed output
-                        timeout 600 ./vendor/bin/phpunit \
-                        --verbose \
-                        --debug \
+                        # Run PHPUnit with detailed output (removed timeout as it may not be available)
+                        ./vendor/bin/phpunit \
                         --log-junit reports/test-results.xml \
                         --coverage-clover reports/coverage.xml \
                         --coverage-html reports/coverage-html \
@@ -181,8 +179,8 @@ pipeline {
                     
                     // Publish test results with empty results allowed
                     junit allowEmptyResults: true, 
-                          keepLongStdio: true,
-                          testResults: 'reports/test-results.xml'
+                        keepLongStdio: true,
+                        testResults: 'reports/test-results.xml'
                     
                     // Publish HTML coverage report if exists
                     publishHTML([
@@ -191,19 +189,7 @@ pipeline {
                         keepAll: true,
                         reportDir: 'reports/coverage-html',
                         reportFiles: 'index.html',
-                        reportName: 'PHPUnit Code Coverage',
-                        reportTitles: 'Code Coverage Report'
-                    ])
-                    
-                    // Publish PHPUnit output log for debugging
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'reports',
-                        reportFiles: 'phpunit-output.log',
-                        reportName: 'PHPUnit Output Log',
-                        reportTitles: 'PHPUnit Execution Log'
+                        reportName: 'PHPUnit Code Coverage'
                     ])
                 }
             }
