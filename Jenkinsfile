@@ -70,7 +70,7 @@ pipeline {
             steps {
                 sh '''
                     echo "🧪 Running PHPUnit tests in Docker..."
-                    docker run --rm -v $(pwd):/app -w /app composer:latest ./vendor/bin/phpunit --stop-on-failure
+                    docker run --rm -v $(pwd):/app -w /app composer:latest ./vendor/bin/phpunit --log-junit reports/test-results.xml --stop-on-failure
                 '''
             }
             
