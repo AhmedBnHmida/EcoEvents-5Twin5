@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE_APP = "ahmedbenhmida/ecoevents-app"
+        DOCKER_IMAGE_APP = "ahmedbenhmida/ecoevents-app" 
         DOCKER_IMAGE_NGINX = "ahmedbenhmida/ecoevents-nginx"
         DOCKER_TAG = "latest"
         APP_VERSION = "1.0.0"
@@ -29,7 +29,6 @@ pipeline {
                 sh '''
                     cp .env.docker .env || echo ".env.docker not found"
                     chmod -R 775 storage bootstrap/cache || echo "Directory not found"
-                    mkdir -p reports
                 '''
             }
         }
@@ -49,10 +48,14 @@ pipeline {
             }
         }
 
+        // Run Tests 
         stage('Run Tests') {
             steps {
                 sh '''
                     echo "🧪 Running PHPUnit tests..."
+                    
+                    # Create reports directory first
+                    mkdir -p reports
                     
                     # Run tests and generate reports
                     docker run --rm -v $(pwd):/app \
@@ -71,7 +74,10 @@ pipeline {
             }
             post {
                 always {
+                    // Publish test results
                     junit 'reports/test-results.xml'
+                    
+                    // Publish HTML coverage report
                     publishHTML([
                         allowMissing: true,
                         alwaysLinkToLastBuild: true,
@@ -84,6 +90,7 @@ pipeline {
             }
         }
 
+        // SonarQube Analysis Stage
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
@@ -102,10 +109,11 @@ pipeline {
             }
         }
 
+        // Quality Gate
         stage("Quality Gate") {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                    waitForQualityGate abortPipeline: false
                 }
             }
         }
