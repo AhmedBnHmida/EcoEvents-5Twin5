@@ -27,7 +27,13 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        // For verified users, should redirect to dashboard
+        // For unverified users, would redirect to verification page
+        if ($user->hasVerifiedEmail()) {
+            $response->assertRedirect(route('dashboard', absolute: false));
+        } else {
+            $response->assertRedirect(route('verification.notice'));
+        }
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
