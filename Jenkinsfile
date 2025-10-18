@@ -69,55 +69,14 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                    echo "🧪 Running PHPUnit tests..."
-                    
-                    # Create reports directory
-                    mkdir -p reports
-                    chmod -R 777 reports
-                    
-                    # Run tests directly
-                    docker run --rm -v $(pwd):/app \
-                    -w /app \
-                    --user root \
-                    composer:latest \
-                    bash -c "
-                        git config --global --add safe.directory /app
-                        ./vendor/bin/phpunit \
-                        --log-junit reports/test-results.xml \
-                        --coverage-clover reports/coverage.xml \
-                        --coverage-html reports/coverage-html \
-                        --stop-on-failure
-                    " || echo "Tests completed with exit code: $?"
-                    
-                    # Verify reports
-                    if [ -f "reports/test-results.xml" ]; then
-                        echo "✅ Test reports generated successfully"
-                        ls -la reports/
-                    else
-                        echo "⚠️ No test reports found, creating fallback..."
-                        mkdir -p reports
-                        cat > reports/test-results.xml << 'EOF'
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <testsuites>
-                        <testsuite name="No Tests" tests="0" assertions="0" failures="0" errors="0" time="0">
-                        </testsuite>
-                    </testsuites>
-                    EOF
-                        touch reports/coverage.xml
-                    fi
+                    echo "🧪 Running PHPUnit tests in Docker..."
+                    docker run --rm -v $(pwd):/app -w /app composer:latest ./vendor/bin/phpunit --stop-on-failure
                 '''
             }
+            
             post {
                 always {
-                    junit allowEmptyResults: true, testResults: 'reports/test-results.xml'
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'reports/coverage-html',
-                        reportFiles: 'index.html',
-                        reportName: 'PHPUnit Code Coverage'
-                    ])
+                    junit 'reports/test-results.xml'
                 }
             }
         }
