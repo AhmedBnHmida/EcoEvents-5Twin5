@@ -126,8 +126,8 @@ class UserSeeder extends Seeder
         }
 
         // Create additional random participants
-        User::factory()->count(20)->create([
-            'role' => 'participant'
-        ]);
+        //User::factory()->count(20)->create([
+        //    'role' => 'participant'
+        //]);
     }
 }
