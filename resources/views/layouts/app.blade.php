@@ -49,8 +49,8 @@
         <meta property="product:category" content="Admin &amp; Dashboards">
         <meta name="data-turbolinks-track" content="false">
     @endif
-    <link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png">
-    <link rel="icon" type="image/png" href="assets/img/favicon.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('assets/img/apple-icon.png') }}" onerror="this.href='/img/apple-icon.png'">
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}" onerror="this.href='/img/favicon.png'">
     <title>
         Corporate UI by Creative Tim & UPDIVISION
     </title>
@@ -59,15 +59,15 @@
         href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700"
         rel="stylesheet" />
     <!-- Nucleo Icons -->
-<link href="assets/css/nucleo-icons.css" rel="stylesheet" />
-<link href="assets/css/nucleo-svg.css" rel="stylesheet" />
+<link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet" onerror="this.href='/css/nucleo-icons.css'"/>
+<link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet" onerror="this.href='/css/nucleo-svg.css'"/>
 <!-- Font Awesome Icons -->
 <script src="https://kit.fontawesome.com/349ee9c857.js" crossorigin="anonymous"></script>
-<link href="assets/css/nucleo-svg.css" rel="stylesheet" />
+<link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet" onerror="this.href='/css/nucleo-svg.css'"/>
 <!-- CSS Files -->
-<link id="pagestyle" href="assets/css/corporate-ui-dashboard.css?v=1.0.0" rel="stylesheet" />
+<link id="pagestyle" href="{{ asset('assets/css/corporate-ui-dashboard.css?v=1.0.0') }}" rel="stylesheet" onerror="this.href='/css/corporate-ui-dashboard.css?v=1.0.0'"/>
 <!-- Custom fixes for sidebar layout issues -->
-<link href="assets/css/custom-fixes.css" rel="stylesheet" />
+<link href="{{ asset('assets/css/custom-fixes.css') }}" rel="stylesheet" onerror="this.href='/css/custom-fixes.css'"/>
 <!-- Alpine.js for interactive components -->
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -175,12 +175,12 @@
         </div>
     </div>
     <!--   Core JS Files   -->
-    <script src="assets/js/core/popper.min.js"></script>
-    <script src="assets/js/core/bootstrap.min.js"></script>
-    <script src="assets/js/plugins/perfect-scrollbar.min.js"></script>
-    <script src="assets/js/plugins/smooth-scrollbar.min.js"></script>
-    <script src="assets/js/plugins/chartjs.min.js"></script>
-    <script src="assets/js/plugins/swiper-bundle.min.js" type="text/javascript"></script>
+    <script src="{{ asset('assets/js/core/popper.min.js') }}" onerror="this.src='/js/core/popper.min.js'"></script>
+    <script src="{{ asset('assets/js/core/bootstrap.min.js') }}" onerror="this.src='/js/core/bootstrap.min.js'"></script>
+    <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}" onerror="this.src='/js/plugins/perfect-scrollbar.min.js'"></script>
+    <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}" onerror="this.src='/js/plugins/smooth-scrollbar.min.js'"></script>
+    <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}" onerror="this.src='/js/plugins/chartjs.min.js'"></script>
+    <script src="{{ asset('assets/js/plugins/swiper-bundle.min.js') }}" type="text/javascript" onerror="this.src='/js/plugins/swiper-bundle.min.js'"></script>
     <script>
         if (document.getElementsByClassName('mySwiper')) {
             var swiper = new Swiper(".mySwiper", {
@@ -447,7 +447,7 @@
     <!-- Github buttons -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <!-- Control Center for Corporate UI Dashboard: parallax effects, scripts for the example pages etc -->
-    <script src="assets/js/corporate-ui-dashboard.min.js?v=1.0.0"></script>
+    <script src="{{ asset('assets/js/corporate-ui-dashboard.min.js?v=1.0.0') }}" onerror="this.src='/js/corporate-ui-dashboard.min.js?v=1.0.0'"></script>
 
     @stack('js')
 
