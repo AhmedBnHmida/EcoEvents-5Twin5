@@ -49,8 +49,9 @@ RUN php artisan cache:clear
 RUN php artisan route:clear
 RUN php artisan view:clear
 
-# Run database migrations
+# Run database migrations AND seeders
 RUN php artisan migrate --force
+RUN php artisan db:seed --force  # ← ADD THIS LINE
 
 # Cache config and routes for production
 RUN php artisan config:cache
