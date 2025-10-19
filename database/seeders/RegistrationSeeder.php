@@ -18,6 +18,7 @@ class RegistrationSeeder extends Seeder
 
         // Check if we have events and participants
         if ($events->isEmpty() || $participants->isEmpty()) {
+            $this->command->info('No events or participants found for registration seeding.');
             return;
         }
 
@@ -26,7 +27,8 @@ class RegistrationSeeder extends Seeder
             $maxParticipants = min(8, $participants->count());
             $numParticipants = rand(1, $maxParticipants);
             
-            $eventParticipants = $participants->random($numParticipants);
+            // Get unique random participants safely
+            $eventParticipants = $participants->shuffle()->take($numParticipants);
 
             foreach ($eventParticipants as $participant) {
                 $status = $this->getRandomStatus($event);

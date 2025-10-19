@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: ecoevents-app
+    env: docker
+    docker:
+      dockerfilePath: ./Dockerfile.render 
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        value: base64:BrXBUYj/jmZfSGekgCngjKlqOitAyoOx+PrXe5/wMgU=
+      - key: APP_URL
+        value: https://ecoevents.onrender.com
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/database/database.sqlite
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan migrate --force
+      php artisan db:seed --force  # ← ADD THIS LINE
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
