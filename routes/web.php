@@ -23,6 +23,7 @@ use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\PartenaireController;
 use App\Http\Controllers\SponsoringController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Http;
 Route::get('/', function () {
     return view('welcome');
@@ -223,6 +224,13 @@ Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('str
 // EcoChatbot API route
 Route::middleware('auth')->prefix('api')->group(function () {
     Route::post('/eco-chatbot', [EcoChatbotController::class, 'processMessage'])->name('api.eco-chatbot');
+    Route::get('/notifications', [NotificationController::class, 'getNotifications'])->name('api.notifications');
+});
+
+// Notification routes
+Route::middleware('auth')->group(function () {
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::post('/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 });
 
 require __DIR__.'/auth.php';
