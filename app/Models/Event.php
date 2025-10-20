@@ -10,7 +10,7 @@ class Event extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'title', 'description', 'start_date', 'end_date', 'location', 'capacity_max','categorie_id', 'status', 'registration_deadline', 'price', 'is_public', 'images'
+        'title', 'description', 'start_date', 'end_date', 'location', 'capacity_max','categorie_id', 'status', 'registration_deadline', 'price', 'is_public', 'images', 'at_risk', 'risk_analysis'
     ];
     protected $casts = [
         'status' => \App\EventStatus::class,
@@ -19,6 +19,7 @@ class Event extends Model
         'registration_deadline' => 'datetime',
         'is_public' => 'boolean',
         'images' => 'array',
+        'at_risk' => 'boolean',
     ];
 
 

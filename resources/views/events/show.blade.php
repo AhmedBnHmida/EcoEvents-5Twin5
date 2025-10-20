@@ -200,6 +200,29 @@
     </div>
 </div>
 
+<!-- Risk Analysis Section -->
+@if($event->at_risk)
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow-xs border-radius-lg bg-danger bg-opacity-10">
+            <div class="card-header bg-danger bg-opacity-10">
+                <h6 class="text-sm font-weight-bold mb-0 text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Événement à améliorer
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-sm font-weight-bold mb-2">Analyse des retours négatifs:</p>
+                <div class="bg-white p-3 rounded">
+                    {!! nl2br(e($event->risk_analysis)) !!}
+                </div>
+                
+                <!-- Bouton "Prendre des mesures" supprimé -->
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Additional Information -->
 <div class="row mt-4">
     <div class="col-12">
@@ -232,6 +255,8 @@
         </div>
     </div>
 </div>
+
+<!-- Modal "Prendre des mesures" supprimé -->
                         </div>
                     </div>
                 </div>

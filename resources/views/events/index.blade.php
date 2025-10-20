@@ -1,4 +1,38 @@
 <x-app-layout>
+    <style>
+        .event-at-risk {
+            border: 2px solid #FF5722;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .event-at-risk::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: #FF5722;
+        }
+        
+        .event-at-risk:hover {
+            box-shadow: 0 5px 15px rgba(255, 87, 34, 0.4) !important;
+        }
+        
+        .event-at-risk td {
+            border-top-color: #FF5722;
+            border-bottom-color: #FF5722;
+        }
+        
+        .event-at-risk td:first-child {
+            border-left-color: #FF5722;
+        }
+        
+        .event-at-risk td:last-child {
+            border-right-color: #FF5722;
+        }
+    </style>
     <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
         <x-app.navbar />
         <div class="container-fluid py-4 px-5">
@@ -85,12 +119,14 @@
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Date</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Location</th>
                                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Status</th>
+                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Risk</th>
                                             <th class="text-secondary opacity-7"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($events as $event)
-                                        <tr>
+                                        <tr class="{{ $event->at_risk ? 'event-at-risk' : '' }}" 
+                                           style="{{ $event->at_risk ? 'position: relative; box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);' : '' }}">
                                             <td>
                                                 <div class="d-flex px-2 py-1">
                                                     <div>
@@ -120,6 +156,17 @@
                                                 <span class="badge badge-sm bg-gradient-{{ $statusColors[$event->status->value] ?? 'secondary' }}">
                                                     {{ $event->status->value }}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                @if($event->at_risk)
+                                                    <span class="badge badge-sm bg-gradient-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Cet événement présente des risques basés sur les retours négatifs">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i> À améliorer
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-sm bg-gradient-success">
+                                                        <i class="fas fa-check me-1"></i> OK
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td class="align-middle">
                                                 <div class="d-flex gap-2">
