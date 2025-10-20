@@ -13,11 +13,16 @@
                                     </h6>
                                     <p class="text-sm mb-0">Liste de tous les sponsorings</p>
                                 </div>
-                                @if(in_array(auth()->user()->role, ['admin', 'organisateur']))
-                                <a href="{{ route('sponsoring.create') }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus me-2"></i>Nouveau Sponsoring
-                                </a>
-                                @endif
+                                <div>
+                                    <a href="{{ route('sponsoring.statistics') }}" class="btn btn-info btn-sm me-2">
+                                        <i class="fas fa-chart-line me-2"></i>Statistiques
+                                    </a>
+                                    @if(in_array(auth()->user()->role, ['admin', 'organisateur']))
+                                    <a href="{{ route('sponsoring.create') }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus me-2"></i>Nouveau Sponsoring
+                                    </a>
+                                    @endif
+                                </div>
                             </div>
 
                             <!-- Search and Filter Form -->
@@ -122,6 +127,9 @@
                                             <td class="align-middle">
                                                 <a href="{{ route('sponsoring.show', $sponsoring->id) }}" class="text-secondary font-weight-normal text-xs" data-bs-toggle="tooltip" title="Voir">
                                                     <i class="fas fa-eye text-info"></i>
+                                                </a>
+                                                <a href="{{ route('sponsoring.pdf', $sponsoring->id) }}" class="text-secondary font-weight-normal text-xs ms-2" data-bs-toggle="tooltip" title="Export PDF" target="_blank">
+                                                    <i class="fas fa-file-pdf text-danger"></i>
                                                 </a>
                                                 @if(in_array(auth()->user()->role, ['admin', 'organisateur']))
                                                 <a href="{{ route('sponsoring.edit', $sponsoring->id) }}" class="text-secondary font-weight-normal text-xs ms-2" data-bs-toggle="tooltip" title="Modifier">

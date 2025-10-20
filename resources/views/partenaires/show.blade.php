@@ -24,6 +24,16 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            <!-- Logo Display -->
+                            @if($partner->logo)
+                            <div class="row mb-4">
+                                <div class="col-12 text-center">
+                                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->nom }}" 
+                                         style="max-width: 250px; max-height: 250px; border: 3px solid #e0e0e0; border-radius: 12px; padding: 15px; background: white;">
+                                </div>
+                            </div>
+                            @endif
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">

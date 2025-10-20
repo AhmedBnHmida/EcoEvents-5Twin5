@@ -71,3 +71,56 @@ php artisan serve
 ```
 
 Ouvrez http://localhost:8000 dans votre navigateur.
+
+## 🧪 Tests
+
+### Configuration des tests
+Les tests utilisent une base de données MySQL séparée pour éviter d'affecter les données de développement.
+
+1. **Créer la base de données de test** :
+```bash
+# Connectez-vous à MySQL et créez la base de données
+mysql -u root -p
+CREATE DATABASE ecoevents_test;
+```
+
+2. **Configurer la base de données de test** :
+Le fichier `phpunit.xml` est déjà configuré pour utiliser :
+- Base de données : `ecoevents_test`
+- Connexion : `mysql`
+
+### Exécuter les tests
+
+**Tous les tests** :
+```bash
+php artisan test
+```
+
+**Tests spécifiques** :
+```bash
+# Tests du module Partenaires & Sponsoring
+php artisan test --filter=PartenaireTest
+php artisan test --filter=SponsoringTest
+php artisan test --filter=SponsoringBuilderTest
+
+# Tests d'une classe spécifique
+php artisan test tests/Feature/PartenaireTest.php
+php artisan test tests/Feature/SponsoringTest.php
+php artisan test tests/Feature/SponsoringBuilderTest.php
+
+# Tests unitaires
+php artisan test tests/Unit/
+```
+
+**Tests avec couverture** :
+```bash
+# Si Xdebug est installé
+php artisan test --coverage
+```
+
+### Types de tests disponibles
+
+- **Tests de fonctionnalité** : CRUD, validation, permissions, uploads
+- **Tests unitaires** : Modèles, services, règles de validation
+- **Tests d'intégration** : API, base de données, relations
+- **Tests du Sponsoring Builder** : IA, optimisation de budget, génération de propositions

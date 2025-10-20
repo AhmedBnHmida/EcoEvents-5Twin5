@@ -15,6 +15,9 @@
                                     <a href="{{ route('sponsoring.index') }}" class="btn btn-white btn-sm">
                                         <i class="fas fa-arrow-left me-2"></i>Retour
                                     </a>
+                                    <a href="{{ route('sponsoring.pdf', $sponsoring->id) }}" class="btn btn-danger btn-sm" target="_blank">
+                                        <i class="fas fa-file-pdf me-2"></i>Export PDF
+                                    </a>
                                     @if(in_array(auth()->user()->role, ['admin', 'organisateur']))
                                     <a href="{{ route('sponsoring.edit', $sponsoring->id) }}" class="btn btn-primary btn-sm">
                                         <i class="fas fa-edit me-2"></i>Modifier

@@ -31,7 +31,9 @@ class OpenRouterService
         try {
             $prompt = $this->buildFeedbackPrompt($categoryName, $categoryDescription);
             
-            $response = Http::withHeaders([
+            $response = Http::withOptions([
+                'verify' => false, // Désactiver la vérification SSL en développement
+            ])->withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
                 'HTTP-Referer' => env('APP_URL', 'http://localhost'),

@@ -116,6 +116,74 @@
             @endif
         </div>
 
+        <!-- Partners Section -->
+        <div class="row mt-5 py-5 bg-light rounded-3">
+            <div class="col-12 text-center mb-4">
+                <h2 class="mb-2">Nos Partenaires</h2>
+                <p class="text-muted">Ils nous font confiance</p>
+            </div>
+            
+            @php
+                $partners = \App\Models\Partner::orderBy('created_at', 'desc')->take(8)->get();
+            @endphp
+            
+            @if($partners->count() > 0)
+            <div class="col-12 position-relative">
+                <button class="partner-nav partner-nav-left" id="scrollLeft">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="partner-nav partner-nav-right" id="scrollRight">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                
+                <div class="partners-slider" id="partnersSlider">
+                    <div class="partners-track" id="partnersTrack">
+                        @foreach($partners as $partner)
+                        <div class="partner-item">
+                            <div class="partner-card">
+                                @if($partner->logo)
+                                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->nom }}" class="partner-logo">
+                                @else
+                                    <div class="partner-placeholder">
+                                        <span class="partner-initials">{{ strtoupper(substr($partner->nom, 0, 2)) }}</span>
+                                    </div>
+                                @endif
+                                <div class="partner-info">
+                                    <h6 class="partner-name">{{ $partner->nom }}</h6>
+                                    <span class="badge bg-gradient-primary text-xxs">{{ $partner->type }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                        <!-- Duplicate for seamless loop -->
+                        @foreach($partners as $partner)
+                        <div class="partner-item">
+                            <div class="partner-card">
+                                @if($partner->logo)
+                                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->nom }}" class="partner-logo">
+                                @else
+                                    <div class="partner-placeholder">
+                                        <span class="partner-initials">{{ strtoupper(substr($partner->nom, 0, 2)) }}</span>
+                                    </div>
+                                @endif
+                                <div class="partner-info">
+                                    <h6 class="partner-name">{{ $partner->nom }}</h6>
+                                    <span class="badge bg-gradient-primary text-xxs">{{ $partner->type }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @else
+            <div class="col-12 text-center py-4">
+                <i class="fas fa-handshake text-muted fa-3x mb-3"></i>
+                <p class="text-muted">Aucun partenaire pour le moment</p>
+            </div>
+            @endif
+        </div>
+
         <!-- Features Section -->
         <div class="row mt-5 py-5">
             <div class="col-12 text-center mb-5">
@@ -160,7 +228,211 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Partners Slider */
+        .partners-slider {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            padding: 20px 0;
+        }
+
+        .partners-track {
+            display: flex;
+            gap: 30px;
+            animation: scroll 30s linear infinite;
+            width: fit-content;
+        }
+
+        .partners-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .partner-item {
+            flex-shrink: 0;
+            width: 220px;
+        }
+
+        .partner-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .partner-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .partner-logo {
+            width: 120px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            filter: grayscale(100%);
+            transition: filter 0.3s ease;
+        }
+
+        .partner-card:hover .partner-logo {
+            filter: grayscale(0%);
+        }
+
+        .partner-placeholder {
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .partner-initials {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .partner-info {
+            width: 100%;
+        }
+
+        .partner-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #344767;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Navigation Arrows */
+        .partner-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .partner-nav:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .partner-nav-left {
+            left: -25px;
+        }
+
+        .partner-nav-right {
+            right: -25px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .partner-item {
+                width: 180px;
+            }
+            .partner-logo {
+                width: 100px;
+                height: 60px;
+            }
+            .partner-placeholder {
+                width: 100px;
+                height: 60px;
+            }
+            .partner-nav {
+                width: 40px;
+                height: 40px;
+            }
+            .partner-nav-left {
+                left: 10px;
+            }
+            .partner-nav-right {
+                right: 10px;
+            }
+        }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const track = document.getElementById('partnersTrack');
+            const leftBtn = document.getElementById('scrollLeft');
+            const rightBtn = document.getElementById('scrollRight');
+            
+            if (track && leftBtn && rightBtn) {
+                let isAnimating = false;
+                const scrollAmount = 250; // pixels to scroll
+                
+                leftBtn.addEventListener('click', function() {
+                    if (!isAnimating) {
+                        isAnimating = true;
+                        track.style.animation = 'none';
+                        const currentScroll = track.scrollLeft || 0;
+                        track.style.transform = `translateX(-${Math.max(0, currentScroll - scrollAmount)}px)`;
+                        
+                        setTimeout(() => {
+                            isAnimating = false;
+                        }, 300);
+                    }
+                });
+                
+                rightBtn.addEventListener('click', function() {
+                    if (!isAnimating) {
+                        isAnimating = true;
+                        track.style.animation = 'none';
+                        const currentScroll = track.scrollLeft || 0;
+                        track.style.transform = `translateX(-${currentScroll + scrollAmount}px)`;
+                        
+                        setTimeout(() => {
+                            isAnimating = false;
+                        }, 300);
+                    }
+                });
+                
+                // Pause animation on hover
+                track.addEventListener('mouseenter', function() {
+                    track.style.animationPlayState = 'paused';
+                });
+                
+                track.addEventListener('mouseleave', function() {
+                    track.style.animationPlayState = 'running';
+                });
+            }
+        });
+    </script>
     
     @auth
         <x-eco-chatbot title="EcoAssistant" placeholder="Posez une question sur l'écologie..." />

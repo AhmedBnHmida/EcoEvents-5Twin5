@@ -171,4 +171,84 @@ class SponsoringController extends Controller
         return redirect()->route('sponsoring.index')
             ->with('success', 'Sponsoring supprimé avec succès.');
     }
+
+    /**
+     * Export sponsoring as PDF
+     */
+    public function exportPdf($id)
+    {
+        $sponsoring = Sponsoring::with(['partner', 'event'])->findOrFail($id);
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('sponsoring.pdf', compact('sponsoring'));
+        
+        return $pdf->download('sponsoring-' . $sponsoring->id . '-' . date('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Display statistics about sponsorings
+     */
+    public function statistics()
+    {
+        $stats = $this->getStatisticsData();
+        return view('sponsoring.statistics', compact('stats'));
+    }
+
+    /**
+     * Export statistics as PDF
+     */
+    public function statisticsPdf()
+    {
+        $stats = $this->getStatisticsData();
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('sponsoring.statistics-pdf', compact('stats'));
+        $pdf->setPaper('a4', 'portrait');
+        
+        return $pdf->download('statistiques-sponsorings-' . date('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Get statistics data (shared between view and PDF)
+     */
+    private function getStatisticsData()
+    {
+        return [
+            'total_sponsorings' => Sponsoring::count(),
+            'total_montant' => Sponsoring::sum('montant'),
+            'average_montant' => Sponsoring::avg('montant'),
+            
+            // By type - using DB query to get raw string values
+            'by_type' => \DB::table('sponsorings')
+                ->select('type_sponsoring', \DB::raw('COUNT(*) as count'), \DB::raw('SUM(montant) as total'))
+                ->groupBy('type_sponsoring')
+                ->get(),
+            
+            // Top partners
+            'top_partners' => Partner::withCount('sponsorings')
+                ->withSum('sponsorings', 'montant')
+                ->orderByDesc('sponsorings_sum_montant')
+                ->limit(5)
+                ->get(),
+            
+            // Recent sponsorings
+            'recent_sponsorings' => Sponsoring::with(['partner', 'event'])
+                ->orderByDesc('created_at')
+                ->limit(10)
+                ->get(),
+            
+            // Events with most sponsorings
+            'top_events' => Event::withCount('sponsorings')
+                ->withSum('sponsorings', 'montant')
+                ->orderByDesc('sponsorings_sum_montant')
+                ->limit(5)
+                ->get(),
+            
+            // Monthly trend (last 6 months)
+            'monthly_trend' => \DB::table('sponsorings')
+                ->select(\DB::raw('DATE_FORMAT(date, "%Y-%m") as month'), \DB::raw('COUNT(*) as count'), \DB::raw('SUM(montant) as total'))
+                ->where('date', '>=', now()->subMonths(6))
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get(),
+        ];
+    }
 }

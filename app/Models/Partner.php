@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Partner extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'user_id',
         'nom',
@@ -13,6 +15,7 @@ class Partner extends Model
         'contact',
         'email',
         'telephone',
+        'logo',
     ];
 
     public function sponsorings()
@@ -35,5 +38,15 @@ class Partner extends Model
     public function getContactEmailAttribute()
     {
         return $this->user ? $this->user->email : $this->email;
+    }
+
+    // Accessor to get logo URL
+    public function getLogoUrlAttribute()
+    {
+        if ($this->logo) {
+            return asset('storage/' . $this->logo);
+        }
+        // Default logo if none
+        return asset('assets/img/default-partner-logo.png');
     }
 }
