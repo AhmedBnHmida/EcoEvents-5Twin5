@@ -81,9 +81,18 @@ class PartenaireController extends Controller
             'contact' => 'nullable|required_without:user_id|string|max:255',
             'email' => 'nullable|required_without:user_id|email|max:255',
             'telephone' => 'required|string|max:20',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        Partner::create($request->all());
+        $data = $request->except('logo');
+
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('partners/logos', 'public');
+            $data['logo'] = $logoPath;
+        }
+
+        Partner::create($data);
 
         return redirect()->route('partenaires.index')
             ->with('success', 'Partenaire créé avec succès.');
@@ -94,7 +103,7 @@ class PartenaireController extends Controller
      */
     public function show(string $id)
     {
-        $partner = Partner::with(['sponsorings.event', 'sponsorings.typeSponsoring'])->findOrFail($id);
+        $partner = Partner::with(['sponsorings.event'])->findOrFail($id);
         return view('partenaires.show', compact('partner'));
     }
 
@@ -137,9 +146,23 @@ class PartenaireController extends Controller
             'contact' => 'nullable|required_without:user_id|string|max:255',
             'email' => 'nullable|required_without:user_id|email|max:255',
             'telephone' => 'required|string|max:20',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $partner->update($request->all());
+        $data = $request->except('logo');
+
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            // Delete old logo if exists
+            if ($partner->logo && \Storage::disk('public')->exists($partner->logo)) {
+                \Storage::disk('public')->delete($partner->logo);
+            }
+            
+            $logoPath = $request->file('logo')->store('partners/logos', 'public');
+            $data['logo'] = $logoPath;
+        }
+
+        $partner->update($data);
 
         return redirect()->route('partenaires.index')
             ->with('success', 'Partenaire modifié avec succès.');
@@ -156,6 +179,12 @@ class PartenaireController extends Controller
         }
 
         $partner = Partner::findOrFail($id);
+        
+        // Delete logo if exists
+        if ($partner->logo && \Storage::disk('public')->exists($partner->logo)) {
+            \Storage::disk('public')->delete($partner->logo);
+        }
+        
         $partner->delete();
 
         return redirect()->route('partenaires.index')

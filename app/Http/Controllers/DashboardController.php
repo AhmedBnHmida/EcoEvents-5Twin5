@@ -121,21 +121,21 @@ class DashboardController extends Controller
 
     /**
      * Get organisateur statistics
+     * Note: Since events table doesn't have organisateur_id, showing general stats
      */
     private function getOrganisateurStatistics($user)
     {
-        $userEvents = Event::where('organisateur_id', $user->id);
-        
+        // Since events table doesn't have organisateur_id column,
+        // we show general event statistics for organisateurs
         return [
-            'total_events' => $userEvents->count(),
-            'upcoming_events' => (clone $userEvents)->where('status', EventStatus::UPCOMING)->count(),
-            'ongoing_events' => (clone $userEvents)->where('status', EventStatus::ONGOING)->count(),
-            'completed_events' => (clone $userEvents)->where('status', EventStatus::COMPLETED)->count(),
-            'total_registrations' => Registration::whereIn('event_id', (clone $userEvents)->pluck('id'))->count(),
-            'total_revenue' => $this->calculateUserRevenue($user),
-            'average_rating' => Feedback::whereIn('id_evenement', (clone $userEvents)->pluck('id'))->avg('note'),
-            'total_ressources' => $user->ressources()->count(),
-            'popular_events' => $this->getUserPopularEvents($user, 3),
+            'total_events' => Event::count(),
+            'upcoming_events' => Event::where('status', EventStatus::UPCOMING)->count(),
+            'ongoing_events' => Event::where('status', EventStatus::ONGOING)->count(),
+            'completed_events' => Event::where('status', EventStatus::COMPLETED)->count(),
+            'total_registrations' => Registration::count(),
+            'total_revenue' => $this->calculateTotalRevenue(),
+            'average_rating' => Feedback::avg('note'),
+            'popular_events' => $this->getPopularEvents(5),
         ];
     }
 

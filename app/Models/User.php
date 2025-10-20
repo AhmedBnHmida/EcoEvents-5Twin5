@@ -85,10 +85,14 @@ class User extends Authenticatable
         return $this->hasOne(Partner::class);
     }
 
+    public function ressources()
+    {
+        return $this->hasMany(Ressource::class, 'fournisseur_id');
+    }
 
     public function interactions()
-{
-    return $this->hasMany(\App\Models\Interaction::class);
-}
+    {
+        return $this->hasMany(\App\Models\Interaction::class);
+    }
 
 }

@@ -22,6 +22,7 @@ use App\Http\Controllers\RessourceController;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\PartenaireController;
 use App\Http\Controllers\SponsoringController;
+use App\Http\Controllers\SponsoringBuilderController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Http;
 Route::get('/', function () {
@@ -204,11 +205,27 @@ Route::middleware('auth')->group(function () {
 Route::post('/suggest-resources', [App\Http\Controllers\EventController::class, 'suggestResources'])->name('events.suggest-resources');
 
 // Feedback and evaluations are now managed via custom routes above
-Route::resource('ressources', RessourceController::class);
-Route::resource('fournisseurs', FournisseurController::class);
-Route::resource('inscriptions', InscriptionController::class);
-Route::resource('partenaires', PartenaireController::class);
-Route::resource('sponsoring', SponsoringController::class);
+Route::middleware('auth')->group(function () {
+    Route::resource('ressources', RessourceController::class);
+    Route::resource('fournisseurs', FournisseurController::class);
+    Route::resource('inscriptions', InscriptionController::class);
+    Route::resource('partenaires', PartenaireController::class);
+    Route::resource('sponsoring', SponsoringController::class);
+    
+    // Sponsoring Statistics and PDF Export Routes
+    Route::get('/sponsoring/statistics/dashboard', [SponsoringController::class, 'statistics'])->name('sponsoring.statistics');
+    Route::get('/sponsoring/statistics/pdf', [SponsoringController::class, 'statisticsPdf'])->name('sponsoring.statistics.pdf');
+    Route::get('/sponsoring/{id}/pdf', [SponsoringController::class, 'exportPdf'])->name('sponsoring.pdf');
+    
+    // Sponsoring Builder Routes
+    Route::prefix('sponsoring-builder')->name('sponsoring-builder.')->middleware(['auth'])->group(function () {
+        Route::get('/', [SponsoringBuilderController::class, 'index'])->name('index');
+        Route::post('/optimize', [SponsoringBuilderController::class, 'optimizeBudget'])->name('optimize');
+        Route::post('/generate-proposals', [SponsoringBuilderController::class, 'generateProposals'])->name('generate-proposals');
+        Route::get('/results', [SponsoringBuilderController::class, 'results'])->name('results');
+        Route::get('/export', [SponsoringBuilderController::class, 'exportProposals'])->name('export');
+    });
+});
 
 Route::get('/dashboard-Fournisseur', function () {
     return view('dashboard-Fournisseur.dashboard');

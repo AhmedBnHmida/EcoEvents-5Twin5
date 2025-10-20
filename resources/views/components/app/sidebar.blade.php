@@ -123,6 +123,12 @@
                         <span>Sponsoring</span>
                     </a>
                 </li>
+                <li class="nav-item mb-1">
+                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('sponsoring-builder.index') ? 'active' : '' }}" href="{{ route('sponsoring-builder.index') }}">
+                        <i class="fas fa-robot me-3"></i>
+                        <span>Sponsoring Builder</span>
+                    </a>
+                </li>
 
             @elseif($user && $user->role === 'fournisseur')
                 <!-- Fournisseur Section -->

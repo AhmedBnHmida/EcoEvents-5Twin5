@@ -86,6 +86,17 @@
                                         <tr>
                                             <td>
                                                 <div class="d-flex px-3 py-1">
+                                                    @if($partner->logo)
+                                                    <div class="me-3">
+                                                        <img src="{{ $partner->logo_url }}" alt="{{ $partner->nom }}" 
+                                                             class="avatar avatar-sm border-radius-lg" 
+                                                             style="object-fit: contain; background: white;">
+                                                    </div>
+                                                    @else
+                                                    <div class="avatar avatar-sm bg-gradient-secondary me-3">
+                                                        <span class="text-white text-xs">{{ strtoupper(substr($partner->nom, 0, 2)) }}</span>
+                                                    </div>
+                                                    @endif
                                                     <div class="d-flex flex-column justify-content-center">
                                                         <h6 class="mb-0 text-sm">{{ $partner->nom }}</h6>
                                                         @if($partner->user_id)
