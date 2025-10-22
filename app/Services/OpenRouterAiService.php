@@ -14,7 +14,7 @@ class OpenRouterAiService
 
     public function __construct()
     {
-        $this->apiKey = env('OPENROUTER_API_KEY');
+        $this->apiKey = env('OPENROUTER_API_KEYY');
         $this->model = env('OPENROUTER_MODEL', 'meta-llama/llama-3.3-70b-instruct:free');
         
         Log::info("🔧 OpenRouterAI Service Initializing with Llama 3.3 70B");
