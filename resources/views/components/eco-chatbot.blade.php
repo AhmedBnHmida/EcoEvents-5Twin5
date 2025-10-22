@@ -3,26 +3,47 @@
 
 <div class="eco-chatbot" x-data="ecoChatbot()" x-init="initChatbot">
     <div class="eco-chatbot-toggle" x-on:click="toggleChatbot">
-        <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="EcoBot" class="chatbot-icon">
-        <span class="chat-text">EcoBot</span>
+        <div class="chatbot-toggle-content">
+            <i class="fas fa-leaf chatbot-icon"></i>
+            <span class="chat-text">EcoBot</span>
+        </div>
+        <div class="chatbot-pulse"></div>
     </div>
 
-    <div class="eco-chatbot-container" x-show="isOpen" x-transition>
+    <div class="eco-chatbot-container" x-show="isOpen" x-transition:enter="chatbot-enter" x-transition:enter-start="chatbot-enter-start" x-transition:enter-end="chatbot-enter-end">
         <div class="eco-chatbot-header">
             <div class="d-flex align-items-center">
-                <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="Assistant" class="chatbot-header-icon me-2">
-                <h5 class="m-0">EcoBot</h5>
+                <div class="chatbot-header-avatar">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="m-0 text-bright-white">EcoBot</h5>
+                    <small class="text-success-bright">En ligne</small>
+                </div>
             </div>
-            <button class="btn-close" x-on:click="toggleChatbot"></button>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-light" x-on:click="clearChat">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="btn-close btn-close-white" x-on:click="toggleChatbot"></button>
+            </div>
         </div>
 
         <div class="eco-chatbot-messages" x-ref="messagesContainer">
             <div class="eco-chatbot-message bot">
                 <div class="avatar">
-                    <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="Assistant" class="avatar-icon">
+                    <i class="fas fa-leaf"></i>
                 </div>
                 <div class="eco-chatbot-bubble">
-                    Bonjour ! Je suis votre assistant écologique. Comment puis-je vous aider aujourd'hui ?
+                    <div class="message-content">
+                        <strong>Bonjour ! 🌱</strong><br>
+                        Je suis votre assistant écologique EcoBot. Je peux vous aider avec :
+                        <div class="quick-suggestions mt-2">
+                            <span class="suggestion-tag" x-on:click="userInput = 'Comment réduire mon empreinte carbone ?'; sendMessage()">Réduction carbone</span>
+                            <span class="suggestion-tag" x-on:click="userInput = 'Quels sont les gestes écologiques au quotidien ?'; sendMessage()">Gestes écologiques</span>
+                            <span class="suggestion-tag" x-on:click="userInput = 'Comment participer à des événements éco-responsables ?'; sendMessage()">Événements éco</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -30,10 +51,13 @@
                 <div :class="`eco-chatbot-message ${message.sender}`">
                     <template x-if="message.sender === 'bot'">
                         <div class="avatar">
-                            <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="Assistant" class="avatar-icon">
+                            <i class="fas fa-leaf"></i>
                         </div>
                     </template>
-                    <div class="eco-chatbot-bubble" x-html="formatMessage(message.text)"></div>
+                    <div class="eco-chatbot-bubble">
+                        <div class="message-content" x-html="formatMessage(message.text)"></div>
+                        <div class="message-time" x-text="getCurrentTime()"></div>
+                    </div>
                     <template x-if="message.sender === 'user'">
                         <div class="avatar user-avatar">
                             <i class="fas fa-user"></i>
@@ -44,12 +68,15 @@
 
             <div class="eco-chatbot-typing" x-show="isLoading">
                 <div class="avatar">
-                    <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="Assistant" class="avatar-icon">
+                    <i class="fas fa-leaf"></i>
                 </div>
                 <div class="eco-chatbot-bubble typing-bubble">
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
+                    <div class="typing-indicator">
+                        <span>EcoBot réfléchit</span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -64,12 +91,22 @@
                         x-model="userInput"
                         :disabled="isLoading"
                         x-on:keydown.enter="sendMessage"
+                        x-ref="chatInput"
                     >
                     <button class="btn send-btn" type="submit" :disabled="isLoading || !userInput.trim()">
-                        <i class="fas fa-paper-plane"></i>
+                        <i class="fas fa-paper-plane" x-show="!isLoading"></i>
+                        <i class="fas fa-spinner fa-spin" x-show="isLoading"></i>
                     </button>
                 </div>
             </form>
+            <div class="quick-actions mt-2">
+                <small class="text-muted">Suggestions rapides :</small>
+                <div class="d-flex gap-1 mt-1 flex-wrap">
+                    <span class="quick-action" x-on:click="userInput = 'Conseils pour le tri sélectif'; sendMessage()">♻️ Tri</span>
+                    <span class="quick-action" x-on:click="userInput = 'Économies d\\'énergie'; sendMessage()">⚡ Énergie</span>
+                    <span class="quick-action" x-on:click="userInput = 'Transport écologique'; sendMessage()">🚲 Transport</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -80,116 +117,137 @@
     bottom: 20px;
     right: 20px;
     z-index: 1000;
-    font-family: var(--bs-font-sans-serif, "Noto Sans", "Open Sans");
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Toggle Button */
 .eco-chatbot-toggle {
+    position: relative;
     width: 140px;
     height: 50px;
     border-radius: 25px;
-    background: var(--bs-primary, #774dd3);
+    background: linear-gradient(135deg, var(--color-success-dark) 0%, #43a047 100%);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(119, 77, 211, 0.3);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
     transition: all 0.3s ease;
-    animation: pulse 2s infinite;
-    font-family: var(--bs-font-sans-serif, "Noto Sans", "Open Sans");
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(119, 77, 211, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(119, 77, 211, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(119, 77, 211, 0);
-    }
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .eco-chatbot-toggle:hover {
-    transform: scale(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(76, 175, 80, 0.4);
+}
+
+.chatbot-toggle-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+}
+
+.chatbot-icon {
+    font-size: 20px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .chat-text {
     font-size: 16px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    font-family: var(--bs-font-sans-serif, "Noto Sans", "Open Sans");
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.chatbot-icon {
-    width: 40px;
-    height: 40px;
-    margin-right: 8px;
+.chatbot-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 25px;
+    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 100%);
+    animation: pulse 2s infinite;
 }
 
-.chatbot-header-icon {
-    width: 28px;
-    height: 28px;
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
 }
 
-.avatar-icon {
-    width: 28px;
-    height: 28px;
-}
-
+/* Chat Container */
 .eco-chatbot-container {
     position: absolute;
     bottom: 80px;
     right: 0;
-    width: 350px;
-    height: 500px;
-    background-color: #ffffff;
+    width: 380px;
+    height: 520px;
+    background: var(--color-section-dark);
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(119, 77, 211, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border: 1px solid rgba(119, 77, 211, 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid var(--color-border-light);
+    backdrop-filter: blur(10px);
 }
 
+.chatbot-enter-start {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+}
+
+.chatbot-enter-end {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Header */
 .eco-chatbot-header {
-    background: var(--bs-primary, #774dd3);
+    background: linear-gradient(135deg, var(--color-success-dark) 0%, #388e3c 100%);
     color: white;
-    padding: 15px;
+    padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: bold;
-    font-family: var(--bs-font-sans-serif, "Noto Sans", "Open Sans");
+    border-bottom: 1px solid var(--color-border-light);
 }
 
-.eco-chatbot-header i {
-    font-size: 20px;
+.chatbot-header-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
 }
 
-.eco-chatbot-header .btn-close {
-    background-color: transparent;
-    color: white;
-    opacity: 0.8;
-    font-size: 20px;
-}
-
-.eco-chatbot-header .btn-close:hover {
-    opacity: 1;
-}
-
+/* Messages Area */
 .eco-chatbot-messages {
     flex: 1;
-    padding: 16px;
+    padding: 20px;
     overflow-y: auto;
-    background-color: #f8f9fa;
+    background: var(--color-dark-main-bg);
     display: flex;
     flex-direction: column;
     gap: 16px;
     scrollbar-width: thin;
-    scrollbar-color: rgba(119, 77, 211, 0.2) transparent;
+    scrollbar-color: var(--color-success-dark) transparent;
 }
 
 .eco-chatbot-messages::-webkit-scrollbar {
@@ -201,26 +259,27 @@
 }
 
 .eco-chatbot-messages::-webkit-scrollbar-thumb {
-    background-color: rgba(119, 77, 211, 0.2);
+    background-color: var(--color-success-dark);
     border-radius: 6px;
 }
 
+/* Messages */
 .eco-chatbot-message {
     display: flex;
     margin-bottom: 12px;
     align-items: flex-start;
-    position: relative;
-    animation: fadeIn 0.3s ease-in-out;
+    gap: 12px;
+    animation: messageSlide 0.3s ease-out;
 }
 
-@keyframes fadeIn {
+@keyframes messageSlide {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateX(10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
 }
 
@@ -232,91 +291,109 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background-color: var(--bs-primary, #774dd3);
+    background: linear-gradient(135deg, var(--color-success-dark) 0%, #43a047 100%);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 8px;
     flex-shrink: 0;
-}
-
-.eco-chatbot-message.user .avatar {
-    margin-left: 8px;
-    margin-right: 0;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
 .user-avatar {
-    background-color: var(--bs-secondary, #64748b);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
+/* Message Bubbles */
 .eco-chatbot-bubble {
-    max-width: 85%;
+    max-width: 75%;
     padding: 12px 16px;
     border-radius: 18px;
     position: relative;
     word-break: break-word;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     line-height: 1.5;
     font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .eco-chatbot-message.bot .eco-chatbot-bubble {
-    background-color: white;
-    color: #333;
+    background: var(--color-section-dark);
+    color: var(--color-success-bright);
+    border: 1px solid var(--color-border-light);
     border-top-left-radius: 4px;
-    position: relative;
-}
-
-.eco-chatbot-message.bot .eco-chatbot-bubble::after {
-    content: '';
-    position: absolute;
-    left: -6px;
-    top: 0;
-    width: 10px;
-    height: 10px;
-    background: white;
-    transform: rotate(45deg);
 }
 
 .eco-chatbot-message.user .eco-chatbot-bubble {
-    background-color: var(--bs-primary, #774dd3);
+    background: linear-gradient(135deg, var(--color-success-dark) 0%, #43a047 100%);
     color: white;
     border-top-right-radius: 4px;
-    position: relative;
 }
 
-.eco-chatbot-message.user .eco-chatbot-bubble::after {
-    content: '';
-    position: absolute;
-    right: -6px;
-    top: 0;
-    width: 10px;
-    height: 10px;
-    background: var(--bs-primary, #774dd3);
-    transform: rotate(45deg);
+.message-content {
+    line-height: 1.5;
 }
 
+.message-content a {
+    color: var(--color-info-bright);
+    text-decoration: underline;
+}
+
+.message-time {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+/* Quick Suggestions */
+.quick-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.suggestion-tag {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: var(--color-success-bright);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.suggestion-tag:hover {
+    background: rgba(76, 175, 80, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Input Area */
 .eco-chatbot-input {
-    padding: 16px;
-    background-color: #f8f9fa;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-    position: relative;
+    padding: 16px 20px;
+    background: var(--color-section-dark);
+    border-top: 1px solid var(--color-border-light);
 }
 
 .eco-chatbot-input .form-control {
-    border-radius: 24px;
-    border: 1px solid #e0e0e0;
-    padding: 12px 18px;
-    box-shadow: none;
-    background-color: white;
-    transition: all 0.2s ease;
+    border-radius: 20px;
+    border: 1px solid var(--color-border-light);
+    padding: 12px 50px 12px 16px;
+    background: var(--color-dark-main-bg);
+    color: var(--color-success-bright);
     font-size: 14px;
+    transition: all 0.2s ease;
 }
 
 .eco-chatbot-input .form-control:focus {
-    box-shadow: 0 0 0 3px rgba(119, 77, 211, 0.15);
-    border-color: var(--bs-primary, #774dd3);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+    border-color: var(--color-success-dark);
+    background: var(--color-section-dark);
+}
+
+.eco-chatbot-input .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .eco-chatbot-input .input-group {
@@ -325,51 +402,80 @@
 
 .eco-chatbot-input .send-btn {
     position: absolute;
-    right: 5px;
-    top: 5px;
-    bottom: 5px;
+    right: 6px;
+    top: 6px;
+    bottom: 6px;
     border-radius: 50%;
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--bs-primary, #774dd3);
+    background: linear-gradient(135deg, var(--color-success-dark) 0%, #43a047 100%);
     border: none;
     color: white;
     z-index: 5;
+    transition: all 0.2s ease;
 }
 
-.eco-chatbot-input .send-btn:hover {
-    background-color: var(--bs-link-hover-color, #522aaa);
+.eco-chatbot-input .send-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
 }
 
 .eco-chatbot-input .send-btn:disabled {
-    background-color: #bdc3c7;
+    background: var(--color-border-light);
     cursor: not-allowed;
+    transform: none;
 }
 
+/* Quick Actions */
+.quick-actions {
+    font-size: 12px;
+}
+
+.quick-action {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border-light);
+    color: var(--color-success-bright);
+    padding: 4px 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 11px;
+}
+
+.quick-action:hover {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: var(--color-success-dark);
+}
+
+/* Typing Indicator */
 .eco-chatbot-typing {
     display: flex;
-    margin-bottom: 10px;
     align-items: flex-start;
+    gap: 12px;
 }
 
 .typing-bubble {
-    background-color: white;
-    min-width: 50px;
+    background: var(--color-section-dark);
+    border: 1px solid var(--color-border-light);
+    min-width: 100px;
+}
+
+.typing-indicator {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 4px;
+    color: var(--color-success-bright);
+    font-size: 12px;
 }
 
 .typing-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background-color: var(--bs-primary, #774dd3);
-    margin-right: 4px;
+    background-color: var(--color-success-bright);
     animation: typing 1.4s infinite both;
 }
 
@@ -379,26 +485,32 @@
 
 .typing-dot:nth-child(3) {
     animation-delay: 0.4s;
-    margin-right: 0;
 }
 
 @keyframes typing {
     0%, 60%, 100% {
         transform: translateY(0);
+        opacity: 0.4;
     }
     30% {
-        transform: translateY(-6px);
+        transform: translateY(-4px);
+        opacity: 1;
     }
 }
 
+/* Responsive Design */
 @media (max-width: 576px) {
+    .eco-chatbot {
+        bottom: 10px;
+        right: 10px;
+    }
+    
     .eco-chatbot-container {
-        width: 100%;
-        height: 100%;
-        bottom: 0;
-        right: 0;
-        border-radius: 0;
-        position: fixed;
+        width: calc(100vw - 20px);
+        height: calc(100vh - 100px);
+        bottom: 70px;
+        right: 10px;
+        border-radius: 12px;
     }
     
     .eco-chatbot-toggle {
@@ -406,18 +518,34 @@
         height: 45px;
     }
     
-    .chatbot-icon {
-        width: 30px;
-        height: 30px;
+    .eco-chatbot-messages {
+        padding: 16px;
     }
     
     .eco-chatbot-input {
-        padding: 12px;
+        padding: 12px 16px;
     }
     
     .eco-chatbot-header {
         padding: 12px 16px;
     }
+}
+
+/* Text Colors from Your Theme */
+.text-bright-white { 
+    color: #fafafa !important; 
+}
+
+.text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.text-success-bright { 
+    color: var(--color-success-bright) !important; 
+}
+
+.text-info-bright { 
+    color: var(--color-info-bright) !important; 
 }
 </style>
 
@@ -440,6 +568,15 @@ function ecoChatbot() {
                     this.scrollToBottom();
                 });
             }
+            
+            // Auto-focus input when chatbot opens
+            this.$watch('isOpen', (value) => {
+                if (value) {
+                    this.$nextTick(() => {
+                        this.$refs.chatInput.focus();
+                    });
+                }
+            });
         },
         
         toggleChatbot() {
@@ -447,6 +584,7 @@ function ecoChatbot() {
             if (this.isOpen) {
                 this.$nextTick(() => {
                     this.scrollToBottom();
+                    this.$refs.chatInput.focus();
                 });
             }
         },
@@ -457,7 +595,8 @@ function ecoChatbot() {
             // Add user message
             this.messages.push({
                 sender: 'user',
-                text: this.userInput.trim()
+                text: this.userInput.trim(),
+                timestamp: new Date()
             });
             
             // Save the message to send to API
@@ -493,7 +632,8 @@ function ecoChatbot() {
                 // Add bot response
                 this.messages.push({
                     sender: 'bot',
-                    text: data.response
+                    text: data.response,
+                    timestamp: new Date()
                 });
                 
                 // Save to localStorage
@@ -509,7 +649,8 @@ function ecoChatbot() {
                 // Add error message
                 this.messages.push({
                     sender: 'bot',
-                    text: "Désolé, je n'ai pas pu traiter votre demande. Veuillez réessayer plus tard."
+                    text: "Désolé, je n'ai pas pu traiter votre demande. Veuillez réessayer plus tard.",
+                    timestamp: new Date()
                 });
                 
                 // Save to localStorage
@@ -523,6 +664,11 @@ function ecoChatbot() {
             .finally(() => {
                 this.isLoading = false;
             });
+        },
+        
+        clearChat() {
+            this.messages = [];
+            localStorage.removeItem('ecoChatbotMessages');
         },
         
         scrollToBottom() {
@@ -539,7 +685,14 @@ function ecoChatbot() {
         
         formatMessage(text) {
             // Convert URLs to clickable links
-            return text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+            return text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-info-bright">$1</a>');
+        },
+        
+        getCurrentTime() {
+            return new Date().toLocaleTimeString('fr-FR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
         }
     };
 }

@@ -12,13 +12,37 @@ use Illuminate\View\View;
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Display the user's profile form for admin/organisateur.
      */
     public function edit(Request $request): View
     {
         return view('profile.edit', [
             'user' => $request->user(),
         ]);
+    }
+
+    /**
+     * Display the user's profile form for front users.
+     */
+    public function editFront(Request $request): View
+    {
+        return view('profile.editfront', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Redirect users to the appropriate profile page.
+     */
+    public function redirectToProfile(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        
+        if ($user->isAdmin() || $user->isOrganisateur()) {
+            return redirect()->route('profile.edit');
+        } else {
+            return redirect()->route('profile.editfront');
+        }
     }
 
     /**
@@ -34,7 +58,13 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        // Redirect back to the appropriate profile page
+        $user = $request->user();
+        if ($user->isAdmin() || $user->isOrganisateur()) {
+            return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        } else {
+            return Redirect::route('profile.editfront')->with('status', 'profile-updated');
+        }
     }
 
     /**

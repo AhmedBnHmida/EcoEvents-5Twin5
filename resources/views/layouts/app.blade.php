@@ -67,7 +67,7 @@
 <!-- CSS Files -->
 <link id="pagestyle" href="{{ asset('assets/css/corporate-ui-dashboard.css?v=1.0.0') }}" rel="stylesheet" onerror="this.href='/css/corporate-ui-dashboard.css?v=1.0.0'"/>
 <!-- Custom fixes for sidebar layout issues -->
-<link href="{{ asset('assets/css/custom-fixes.css') }}" rel="stylesheet" onerror="this.href='/css/custom-fixes.css'"/>
+<!--<link href="{{ asset('assets/css/custom-fixes.css') }}" rel="stylesheet" onerror="this.href='/css/custom-fixes.css'"/>-->
 <!-- Alpine.js for interactive components -->
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -77,7 +77,7 @@
 <body class="g-sidenav-show  bg-gray-100">
     @php
         $topSidenavArray = ['wallet', 'profile'];
-        $topSidenavTransparent = ['','signin', 'signup', 'login', 'register', 'home','events.public','events.public.show','dashboard-Fournisseur','feedback.my','feedback.create','feedback.edit','registrations.create'];
+        $topSidenavTransparent = ['','profile.editfront','signin','certificates.index', 'registrations.show', 'registrations.destroy', 'registrations.my', 'signup', 'login', 'register', 'home','events.public','events.public.show','dashboard-Fournisseur','feedback.my','feedback.create','feedback.edit','registrations.create'];
         $topSidenavRTL = ['RTL'];
     @endphp
     @if (in_array(request()->route()->getName(),
@@ -95,9 +95,11 @@
     {{ $slot }}
 
     <div class="fixed-plugin">
+        <!--
         <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
             <i class="fa fa-cog py-2"></i>
         </a>
+        -->
         <div class="card shadow-lg ">
             <div class="card-header pb-0 pt-3 ">
                 <div class="float-start">

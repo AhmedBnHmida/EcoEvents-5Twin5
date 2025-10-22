@@ -1,24 +1,46 @@
 <x-app-layout>
+    <canvas id="fullScreenCanvas" class="fixed-canvas"></canvas>
+    
     <x-front-navbar />
     
-    <div class="container py-5">
+    <div class="container py-5 main-content-wrapper">
 
-        <!-- Real-time Search and Filter Bar -->
+        <!-- Page Header -->
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <span class="badge bg-success-gradient text-uppercase py-2 px-3 mb-3 badge-pill">Événements Écologiques</span>
+                <h1 class="display-5 fw-bold text-bright-white mb-3">Découvrez nos Événements</h1>
+                <p class="lead text-muted">Participez à des actions concrètes pour l'environnement et rejoignez notre communauté engagée</p>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card shadow-xs border">
+                <div class="card shadow-lg border-0 section-dark-bg">
+                    <div class="card-header bg-transparent border-bottom py-4">
+                        <h4 class="mb-0 text-bright-white fw-semibold">
+                            <i class="fas fa-filter text-success me-2"></i>
+                            Filtres et Recherche
+                        </h4>
+                    </div>
                     <div class="card-body">
                         <form method="GET" action="{{ route('events.public') }}" id="filter-form">
-                            <div class="row g-3 align-items-end">
+                            <div class="row g-4 align-items-end">
                                 <!-- Search Input -->
                                 <div class="col-md-3">
-                                    <label class="form-label text-dark fw-bold">Recherche</label>
-                                    <div class="input-group">
+                                    <label class="form-label text-bright-white fw-semibold mb-2">
+                                        <i class="fas fa-search me-1"></i>Recherche
+                                    </label>
+                                    <div class="input-group input-group-eco">
+                                        <span class="input-group-text bg-dark-input border-end-0">
+                                            <i class="fas fa-search text-muted"></i>
+                                        </span>
                                         <input type="text" 
                                                name="search" 
-                                               class="form-control" 
+                                               class="form-control bg-dark-input text-white border-start-0" 
                                                value="{{ request('search') }}"
-                                               placeholder="Titre, catégorie..."
+                                               placeholder="Titre, description..."
                                                id="search-input">
                                         @if(request('search'))
                                         <button type="button" class="btn btn-outline-secondary clear-filter" data-filter="search">
@@ -30,11 +52,16 @@
 
                                 <!-- Location Filter -->
                                 <div class="col-md-3">
-                                    <label class="form-label text-dark fw-bold">Lieu</label>
-                                    <div class="input-group">
+                                    <label class="form-label text-bright-white fw-semibold mb-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Lieu
+                                    </label>
+                                    <div class="input-group input-group-eco">
+                                        <span class="input-group-text bg-dark-input border-end-0">
+                                            <i class="fas fa-location-dot text-muted"></i>
+                                        </span>
                                         <input type="text" 
                                                name="location" 
-                                               class="form-control" 
+                                               class="form-control bg-dark-input text-white border-start-0" 
                                                value="{{ request('location') }}"
                                                placeholder="Ville, adresse..."
                                                id="location-input">
@@ -48,9 +75,11 @@
                                 
                                 <!-- Category Filter -->
                                 <div class="col-md-2">
-                                    <label class="form-label text-dark fw-bold">Catégorie</label>
-                                    <div class="input-group">
-                                        <select name="category" class="form-control form-select" id="category-select">
+                                    <label class="form-label text-bright-white fw-semibold mb-2">
+                                        <i class="fas fa-tag me-1"></i>Catégorie
+                                    </label>
+                                    <div class="input-group input-group-eco">
+                                        <select name="category" class="form-control form-select bg-dark-input text-white" id="category-select">
                                             <option value="">Toutes les catégories</option>
                                             @foreach($categories as $category)
                                                 <option value="{{ $category->id }}" 
@@ -69,13 +98,15 @@
 
                                 <!-- Price Range -->
                                 <div class="col-md-2">
-                                    <label class="form-label text-dark fw-bold">Prix</label>
+                                    <label class="form-label text-bright-white fw-semibold mb-2">
+                                        <i class="fas fa-ticket me-1"></i>Prix
+                                    </label>
                                     <div class="row g-2">
                                         <div class="col-6">
-                                            <div class="input-group">
+                                            <div class="input-group input-group-eco">
                                                 <input type="number" 
                                                        name="min_price" 
-                                                       class="form-control" 
+                                                       class="form-control bg-dark-input text-white text-center" 
                                                        value="{{ request('min_price') }}"
                                                        placeholder="Min" 
                                                        min="0"
@@ -83,10 +114,10 @@
                                             </div>
                                         </div>
                                         <div class="col-6">
-                                            <div class="input-group">
+                                            <div class="input-group input-group-eco">
                                                 <input type="number" 
                                                        name="max_price" 
-                                                       class="form-control" 
+                                                       class="form-control bg-dark-input text-white text-center" 
                                                        value="{{ request('max_price') }}"
                                                        placeholder="Max" 
                                                        min="0"
@@ -103,21 +134,23 @@
 
                                 <!-- Date Range -->
                                 <div class="col-md-2">
-                                    <label class="form-label text-dark fw-bold">Date</label>
+                                    <label class="form-label text-bright-white fw-semibold mb-2">
+                                        <i class="fas fa-calendar me-1"></i>Date
+                                    </label>
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <input type="date" 
                                                    name="start_date" 
-                                                   class="form-control" 
+                                                   class="form-control bg-dark-input text-white text-center" 
                                                    value="{{ request('start_date') }}"
                                                    id="start-date"
                                                    placeholder="Début">
                                         </div>
                                         <div class="col-6">
-                                            <div class="input-group">
+                                            <div class="input-group input-group-eco">
                                                 <input type="date" 
                                                        name="end_date" 
-                                                       class="form-control" 
+                                                       class="form-control bg-dark-input text-white text-center" 
                                                        value="{{ request('end_date') }}"
                                                        id="end-date"
                                                        placeholder="Fin">
@@ -133,23 +166,23 @@
                             </div>
                             
                             <!-- Active Filters Display -->
-                            <div class="row mt-3">
+                            <div class="row mt-4">
                                 <div class="col-12">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div id="active-filters" class="d-flex flex-wrap gap-2 align-items-center">
                                             @if(request()->anyFilled(['search', 'location', 'category', 'min_price', 'max_price', 'start_date', 'end_date']))
-                                                <small class="text-muted me-2">Filtres actifs:</small>
+                                                <small class="text-success fw-semibold me-2">Filtres actifs:</small>
                                                 
                                                 @if(request('search'))
-                                                <span class="badge bg-primary d-flex align-items-center">
-                                                    Recherche: "{{ request('search') }}"
+                                                <span class="badge bg-primary d-flex align-items-center py-2">
+                                                    <i class="fas fa-search me-1"></i>"{{ request('search') }}"
                                                     <button type="button" class="btn-close btn-close-white ms-2 clear-filter" data-filter="search" style="font-size: 0.7rem;"></button>
                                                 </span>
                                                 @endif
 
                                                 @if(request('location'))
-                                                <span class="badge bg-secondary d-flex align-items-center">
-                                                    Lieu: "{{ request('location') }}"
+                                                <span class="badge bg-secondary d-flex align-items-center py-2">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>"{{ request('location') }}"
                                                     <button type="button" class="btn-close btn-close-white ms-2 clear-filter" data-filter="location" style="font-size: 0.7rem;"></button>
                                                 </span>
                                                 @endif
@@ -159,24 +192,24 @@
                                                         $selectedCategory = $categories->firstWhere('id', request('category'));
                                                     @endphp
                                                     @if($selectedCategory)
-                                                    <span class="badge bg-info d-flex align-items-center">
-                                                        Catégorie: {{ $selectedCategory->name }}
+                                                    <span class="badge bg-info d-flex align-items-center py-2">
+                                                        <i class="fas fa-tag me-1"></i>{{ $selectedCategory->name }}
                                                         <button type="button" class="btn-close btn-close-white ms-2 clear-filter" data-filter="category" style="font-size: 0.7rem;"></button>
                                                     </span>
                                                     @endif
                                                 @endif
                                                 
                                                 @if(request('min_price') || request('max_price'))
-                                                <span class="badge bg-warning text-dark d-flex align-items-center">
-                                                    Prix: 
-                                                    ${{ request('min_price', 0) }} - ${{ request('max_price', '∞') }}
+                                                <span class="badge bg-warning text-dark d-flex align-items-center py-2">
+                                                    <i class="fas fa-dollar-sign me-1"></i>
+                                                    {{ request('min_price', 0) }} - {{ request('max_price', '∞') }}
                                                     <button type="button" class="btn-close ms-2 clear-filter" data-filter="price" style="font-size: 0.7rem;"></button>
                                                 </span>
                                                 @endif
                                                 
                                                 @if(request('start_date') || request('end_date'))
-                                                <span class="badge bg-success d-flex align-items-center">
-                                                    Date: 
+                                                <span class="badge bg-success d-flex align-items-center py-2">
+                                                    <i class="fas fa-calendar me-1"></i>
                                                     {{ request('start_date') ? \Carbon\Carbon::parse(request('start_date'))->format('d/m/Y') : '∞' }} 
                                                     - 
                                                     {{ request('end_date') ? \Carbon\Carbon::parse(request('end_date'))->format('d/m/Y') : '∞' }}
@@ -184,7 +217,9 @@
                                                 </span>
                                                 @endif
                                             @else
-                                                <small class="text-muted">Aucun filtre actif</small>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i>Aucun filtre actif
+                                                </small>
                                             @endif
                                         </div>
                                         <div>
@@ -206,18 +241,18 @@
         <!-- Results Summary -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card shadow-xs border">
+                <div class="card shadow-lg border-0 section-dark-bg">
                     <div class="card-body py-3">
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <div class="d-flex align-items-center">
                                     <div class="me-3">
-                                        <span class="badge bg-primary rounded-pill">{{ $events->total() }}</span>
-                                        <span class="ms-2 text-dark">événement(s) trouvé(s)</span>
+                                        <span class="badge bg-success-gradient rounded-pill fs-6 px-3 py-2">{{ $events->total() }}</span>
+                                        <span class="ms-2 text-bright-white fw-semibold">événement(s) trouvé(s)</span>
                                     </div>
-                                    <div class="vr mx-3"></div>
+                                    <div class="vr mx-3 bg-light opacity-25"></div>
                                     <div class="text-muted">
-                                        <small>Dernière mise à jour: {{ now()->format('d/m/Y') }}</small>
+                                        <small><i class="fas fa-sync-alt me-1"></i>Dernière mise à jour: {{ now()->format('d/m/Y à H:i') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -237,22 +272,21 @@
             <div class="row">
                 @forelse($events as $event)
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card event-card shadow-xs border-0 h-100 overflow-hidden">
+                    <div class="card event-card shadow-hover-3d border-0 h-100 overflow-hidden section-dark-bg">
                         <!-- Image Section with Overlay -->
                         <div class="card-image position-relative">
                             @if($event->images && count($event->images) > 0)
                                 <img src="{{ str_starts_with($event->images[0], 'http') ? $event->images[0] : asset('storage/' . $event->images[0]) }}" 
-                                    class="card-img-top" 
+                                    class="card-img-top card-img-eco" 
                                     alt="{{ $event->title }}" 
-                                    style="height: 250px; object-fit: cover; transition: transform 0.3s ease;">
+                                    style="height: 220px; object-fit: cover; transition: transform 0.3s ease;">
                             @else
-                                <div class="card-img-top bg-gradient-dark d-flex align-items-center justify-content-center position-relative" 
-                                     style="height: 250px;">
-                                    <div class="position-absolute top-0 start-0 w-100 h-100 opacity-20" 
-                                         style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);"></div>
-                                    <div class="position-relative z-1 text-center text-white">
-                                        <i class="fas fa-calendar-alt fa-4x mb-3"></i>
-                                        <h6 class="mb-0">{{ $event->title }}</h6>
+                                <div class="card-img-top bg-gradient-success d-flex align-items-center justify-content-center card-img-eco" 
+                                     style="height: 220px;">
+                                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50"></div>
+                                    <div class="position-relative z-1 text-center text-white p-3">
+                                        <i class="fas fa-leaf fa-4x mb-3 opacity-75"></i>
+                                        <h6 class="mb-0 fw-semibold">{{ $event->title }}</h6>
                                     </div>
                                 </div>
                             @endif
@@ -261,31 +295,31 @@
                             <div class="position-absolute top-3 start-3">
                                 @php
                                     $statusColors = [
-                                        'UPCOMING' => 'bg-gradient-warning',
-                                        'ONGOING' => 'bg-gradient-success',
-                                        'COMPLETED' => 'bg-gradient-info',
-                                        'CANCELLED' => 'bg-gradient-danger'
+                                        'UPCOMING' => 'bg-warning',
+                                        'ONGOING' => 'bg-success',
+                                        'COMPLETED' => 'bg-info',
+                                        'CANCELLED' => 'bg-danger'
                                     ];
                                 @endphp
-                                <span class="badge {{ $statusColors[$event->status->value] ?? 'bg-gradient-secondary' }} text-xs shadow-sm">
-                                    {{ $event->status->value }}
+                                <span class="badge {{ $statusColors[$event->status->value] ?? 'bg-secondary' }} text-xs shadow-sm px-2 py-1">
+                                    <i class="fas fa-circle me-1 small"></i>{{ $event->status->value }}
                                 </span>
                             </div>
                             
                             <!-- Category Badge Overlay -->
                             <div class="position-absolute top-3 end-3">
-                                <span class="badge bg-gradient-primary text-xs shadow-sm">
-                                    {{ $event->category->name }}
+                                <span class="badge bg-primary text-xs shadow-sm px-2 py-1">
+                                    <i class="fas fa-tag me-1"></i>{{ $event->category->name }}
                                 </span>
                             </div>
                             
                             <!-- Price Overlay -->
                             <div class="position-absolute bottom-3 end-3">
-                                <span class="badge bg-dark text-white px-3 py-2 shadow">
+                                <span class="badge bg-dark text-white px-3 py-2 shadow-sm fw-semibold">
                                     @if($event->price > 0)
-                                        ${{ number_format($event->price, 2) }}
+                                        <i class="fas fa-ticket-alt me-1"></i>${{ number_format($event->price, 2) }}
                                     @else
-                                        GRATUIT
+                                        <i class="fas fa-gift me-1"></i>GRATUIT
                                     @endif
                                 </span>
                             </div>
@@ -293,34 +327,37 @@
                         
                         <!-- Card Body -->
                         <div class="card-body d-flex flex-column p-4">
-                            <h5 class="card-title font-weight-bold text-dark mb-2 line-clamp-2" style="min-height: 3rem;">
+                            <h5 class="card-title fw-bold text-bright-white mb-3 line-clamp-2" style="min-height: 3rem; line-height: 1.4;">
                                 {{ $event->title }}
                             </h5>
                             
-                            <p class="card-text text-muted mb-3 flex-grow-1 line-clamp-3" style="min-height: 4.5rem;">
+                            <p class="card-text text-muted mb-4 flex-grow-1 line-clamp-3" style="min-height: 4.5rem; line-height: 1.6;">
                                 {{ Str::limit($event->description, 120) }}
                             </p>
                             
                             <!-- Event Meta Information -->
-                            <div class="event-meta mb-3">
-                                <div class="d-flex align-items-center text-sm text-muted mb-2">
-                                    <i class="fas fa-calendar text-primary me-2"></i>
-                                    <span>{{ $event->start_date->format('d M Y') }}</span>
-                                    <span class="mx-2">•</span>
-                                    <i class="fas fa-clock text-primary me-2"></i>
-                                    <span>{{ $event->start_date->format('H:i') }}</span>
+                            <div class="event-meta mb-4">
+                                <div class="d-flex align-items-center text-sm text-muted mb-3">
+                                    <div class="d-flex align-items-center me-4">
+                                        <i class="fas fa-calendar text-success me-2"></i>
+                                        <span class="text-bright-white small">{{ $event->start_date->format('d M Y') }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-clock text-success me-2"></i>
+                                        <span class="text-bright-white small">{{ $event->start_date->format('H:i') }}</span>
+                                    </div>
                                 </div>
                                 
-                                <div class="d-flex align-items-center text-sm text-muted mb-2">
-                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
-                                    <span class="flex-grow-1">{{ Str::limit($event->location, 25) }}</span>
+                                <div class="d-flex align-items-center text-sm text-muted mb-3">
+                                    <i class="fas fa-map-marker-alt text-success me-2"></i>
+                                    <span class="text-bright-white small flex-grow-1">{{ Str::limit($event->location, 25) }}</span>
                                 </div>
                                 
                                 <div class="d-flex align-items-center text-sm text-muted">
-                                    <i class="fas fa-users text-primary me-2"></i>
-                                    <span>{{ $event->registrations->count() }}/{{ $event->capacity_max }} inscrits</span>
-                                    <div class="progress flex-grow-1 ms-2" style="height: 4px;">
-                                        <div class="progress-bar bg-primary" 
+                                    <i class="fas fa-users text-success me-2"></i>
+                                    <span class="text-bright-white small me-3">{{ $event->registrations->count() }}/{{ $event->capacity_max }} inscrits</span>
+                                    <div class="progress flex-grow-1" style="height: 6px;">
+                                        <div class="progress-bar bg-warning" 
                                             style="--progress-width: {{ $event->capacity_max > 0 ? ($event->registrations->count() / $event->capacity_max) * 100 : 0 }}%; width: var(--progress-width);">
                                         </div>
                                     </div>
@@ -336,22 +373,22 @@
                                 
                                 <div class="d-flex justify-content-between align-items-center">
                                     <a href="{{ route('events.public.show', $event->id) }}" 
-                                       class="btn btn-outline-dark btn-sm flex-grow-1 me-2">
-                                        <i class="fas fa-eye me-1"></i>Détails
+                                       class="btn btn-outline-light btn-sm flex-grow-1 me-2 py-2">
+                                        <i class="fas fa-eye me-1"></i>Voir détails
                                     </a>
                                     
                                     @auth
                                         @if($event->status->value === 'UPCOMING' && !$isRegistered && !$isFull)
                                             <a href="{{ route('registrations.create', ['event_id' => $event->id]) }}" 
-                                               class="btn btn-dark btn-sm px-3">
+                                               class="btn btn-success-gradient btn-sm px-3 py-2">
                                                 <i class="fas fa-ticket-alt me-1"></i>Participer
                                             </a>
                                         @elseif($isRegistered)
-                                            <button class="btn btn-success btn-sm px-3" disabled>
+                                            <button class="btn btn-success btn-sm px-3 py-2" disabled>
                                                 <i class="fas fa-check me-1"></i>Inscrit
                                             </button>
                                         @elseif($isFull)
-                                            <button class="btn btn-danger btn-sm px-3" disabled>
+                                            <button class="btn btn-danger btn-sm px-3 py-2" disabled>
                                                 <i class="fas fa-times me-1"></i>Complet
                                             </button>
                                         @endif
@@ -364,19 +401,19 @@
                 @empty
                 <!-- Empty State -->
                 <div class="col-12">
-                    <div class="card shadow-xs border-0">
+                    <div class="card shadow-lg border-0 section-dark-bg">
                         <div class="card-body text-center py-5">
                             <div class="empty-state-icon mb-4">
                                 <i class="fas fa-calendar-times text-muted fa-5x"></i>
                             </div>
-                            <h3 class="text-muted mb-3">
+                            <h3 class="text-bright-white mb-3 fw-bold">
                                 @if(request()->anyFilled(['search', 'location', 'category', 'min_price', 'max_price', 'start_date', 'end_date']))
                                     Aucun événement trouvé
                                 @else
                                     Aucun événement à venir
                                 @endif
                             </h3>
-                            <p class="text-muted mb-4">
+                            <p class="text-muted mb-4 fs-5">
                                 @if(request()->anyFilled(['search', 'location', 'category', 'min_price', 'max_price', 'start_date', 'end_date']))
                                     Aucun résultat pour vos critères de recherche. Essayez de modifier vos filtres.
                                 @else
@@ -385,11 +422,11 @@
                             </p>
                             <div class="d-flex justify-content-center gap-3">
                                 @if(request()->anyFilled(['search', 'location', 'category', 'min_price', 'max_price', 'start_date', 'end_date']))
-                                    <button type="button" class="btn btn-dark" id="clear-all-empty">
+                                    <button type="button" class="btn btn-success-gradient px-4 py-2" id="clear-all-empty">
                                         <i class="fas fa-times me-2"></i>Effacer les filtres
                                     </button>
                                 @endif
-                                <a href="/" class="btn btn-outline-dark">
+                                <a href="/" class="btn btn-outline-light px-4 py-2">
                                     <i class="fas fa-home me-2"></i>Retour à l'accueil
                                 </a>
                             </div>
@@ -403,11 +440,12 @@
             @if($events->hasPages())
             <div class="row mt-5">
                 <div class="col-12">
-                    <div class="card shadow-xs border-0">
-                        <div class="card-body py-3">
+                    <div class="card shadow-lg border-0 section-dark-bg">
+                        <div class="card-body py-4">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="text-muted">
-                                    <small>
+                                <div class="text-bright-white">
+                                    <small class="fw-semibold">
+                                        <i class="fas fa-list me-1"></i>
                                         Affichage de {{ $events->firstItem() }} à {{ $events->lastItem() }} 
                                         sur {{ $events->total() }} événement(s)
                                     </small>
@@ -425,65 +463,145 @@
     </div>
 
     <style>
-        .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* Professional Dark Theme Variables */
+        :root {
+            --color-success-dark: #388e3c;
+            --color-success-bright: #c8e6c9;
+            --color-info-bright: #b3e5fc;
+            --color-dark-main-bg: #102027;
+            --color-section-dark: #1a3038;
+            --color-dark-navbar-bg: rgba(16, 32, 39, 0.95);
+            --color-nav-link: #d4edda;
+            --color-success-bright-nav: #81c784;
+            --color-dark-input: #2c3e50;
+            --color-border-light: rgba(255, 255, 255, 0.1);
         }
-        
-        .event-card {
-            transition: all 0.3s ease;
+
+        /* Global Styles */
+        .main-content-wrapper {
+            margin-top: 100px;
+        }
+
+        .text-bright-white { 
+            color: #fafafa !important; 
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        /* Section Background */
+        .section-dark-bg {
+            background-color: var(--color-section-dark) !important;
             border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--color-border-light);
         }
-        
-        .event-card:hover {
+
+        /* Dark Input Styling */
+        .bg-dark-input {
+            background-color: var(--color-dark-input) !important;
+            border-color: #34495e !important;
+            color: white !important;
+        }
+
+        .bg-dark-input::placeholder {
+            color: #bdc3c7 !important;
+        }
+
+        .input-group-eco .input-group-text {
+            background-color: var(--color-dark-input);
+            border-color: #34495e;
+            color: #bdc3c7;
+        }
+
+        /* Button Gradients */
+        .btn-success-gradient {
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+
+        .bg-success-gradient {
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%) !important;
+        }
+
+        /* Card Enhancements */
+        .card-img-eco {
+            height: 220px; 
+            object-fit: cover;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .shadow-hover-3d {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .shadow-hover-3d:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.15) !important;
+            box-shadow: 0 20px 40px rgba(0, 150, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.1);
         }
-        
-        .event-card:hover .card-img-top {
-            transform: scale(1.05);
-        }
-        
-        .card-image {
-            overflow: hidden;
-        }
-        
+
+        /* Text Utilities */
         .line-clamp-2 {
             display: -webkit-box;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
+
         .line-clamp-3 {
             display: -webkit-box;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-        
-        .empty-state-icon {
-            opacity: 0.7;
+
+        /* Badge Enhancements */
+        .badge-pill {
+            border-radius: 50rem;
         }
-        
+
+        /* Progress Bar */
         .progress {
-            background-color: #e9ecef;
-            border-radius: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
         }
 
-        .form-select, .form-control {
-            border: 1px solid #d2d6da;
-            border-radius: 8px;
+        .progress-bar {
+            border-radius: 4px;
         }
 
-        #events-container {
-            transition: opacity 0.3s ease;
+        /* Canvas Background */
+        .fixed-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -2;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--color-dark-main-bg);
         }
 
+        /* Loading State */
         .loading {
             opacity: 0.6;
             pointer-events: none;
         }
 
+        /* Clear Filter Buttons */
         .clear-filter {
-            border-left: none;
             transition: all 0.2s ease;
         }
 
@@ -492,23 +610,141 @@
             color: white;
         }
 
-        .input-group .form-control {
-            border-right: none;
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .main-content-wrapper {
+                margin-top: 80px;
+            }
+            
+            .card-body {
+                padding: 1.5rem !important;
+            }
         }
-
-        .input-group .clear-filter {
-            border-left: 1px solid #d2d6da;
-        }
-        
     </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Particle Background
+            const canvas = document.getElementById('fullScreenCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let mouseX = 0, mouseY = 0;
+            let particles = [];
+            const particleCount = 80;
+            const maxDistance = 100;
+
+            function resizeCanvas() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+
+            class Particle {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.size = Math.random() * 2 + 1;
+                    this.speedX = Math.random() * 0.3 - 0.15;
+                    this.speedY = Math.random() * 0.3 - 0.15;
+                    this.color = `rgba(${Math.floor(Math.random() * 50)}, ${Math.floor(180 + Math.random() * 75)}, ${Math.floor(180 + Math.random() * 50)}, 0.6)`;
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+
+                    if (this.x > width || this.x < 0) this.speedX *= -1;
+                    if (this.y > height || this.y < 0) this.speedY *= -1;
+                }
+
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            function init() {
+                particles = [];
+                for (let i = 0; i < particleCount; i++) {
+                    const x = Math.random() * width;
+                    const y = Math.random() * height;
+                    particles.push(new Particle(x, y));
+                }
+            }
+
+            function connectParticles() {
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i; j < particles.length; j++) {
+                        const dist = Math.sqrt(
+                            Math.pow(particles[i].x - particles[j].x, 2) + 
+                            Math.pow(particles[i].y - particles[j].y, 2)
+                        );
+
+                        if (dist < maxDistance) {
+                            ctx.strokeStyle = `rgba(0, 150, 0, ${0.3 - dist / maxDistance})`;
+                            ctx.lineWidth = 0.3;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            function connectToMouse() {
+                for (let i = 0; i < particles.length; i++) {
+                    const dist = Math.sqrt(
+                        Math.pow(particles[i].x - mouseX, 2) + 
+                        Math.pow(particles[i].y - mouseY, 2)
+                    );
+
+                    if (dist < maxDistance + 30) {
+                        ctx.strokeStyle = `rgba(150, 255, 150, ${0.5 - dist / (maxDistance + 30)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(mouseX, mouseY);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.fillStyle = 'rgba(10, 30, 40, 0.03)';
+                ctx.fillRect(0, 0, width, height);
+
+                connectParticles();
+                connectToMouse();
+
+                particles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            window.addEventListener('resize', resizeCanvas);
+
+            resizeCanvas();
+            init();
+            animate();
+
+            // Filter Functionality
             const filterForm = document.getElementById('filter-form');
             const eventsContainer = document.getElementById('events-container');
             let debounceTimer;
 
-            // Get all filter inputs
             const filterInputs = [
                 document.getElementById('search-input'),
                 document.getElementById('location-input'),
@@ -519,7 +755,6 @@
                 document.getElementById('end-date')
             ];
 
-            // Add event listeners for real-time filtering
             filterInputs.forEach(input => {
                 if (input) {
                     if (input.type === 'text' || input.type === 'number' || input.type === 'date') {
@@ -530,7 +765,6 @@
                 }
             });
 
-            // Clear individual filter buttons
             document.querySelectorAll('.clear-filter').forEach(button => {
                 button.addEventListener('click', function() {
                     const filterType = this.dataset.filter;
@@ -538,7 +772,6 @@
                 });
             });
 
-            // Clear all filters button
             document.getElementById('clear-all-filters')?.addEventListener('click', clearAllFilters);
             document.getElementById('clear-all-empty')?.addEventListener('click', clearAllFilters);
 
@@ -566,7 +799,6 @@
             }
 
             function clearAllFilters() {
-                // Clear all filter inputs
                 document.getElementById('search-input').value = '';
                 document.getElementById('location-input').value = '';
                 document.getElementById('category-select').value = '';
@@ -580,21 +812,17 @@
 
             function handleFilterChange() {
                 clearTimeout(debounceTimer);
-                
-                // Show loading state
                 eventsContainer.classList.add('loading');
                 
-                // Debounce to avoid too many requests
                 debounceTimer = setTimeout(() => {
                     submitForm();
-                }, 500); // 500ms delay
+                }, 500);
             }
 
             function submitForm() {
                 const formData = new FormData(filterForm);
                 const params = new URLSearchParams(formData);
                 
-                // Use Fetch API to get updated results
                 fetch(`${filterForm.action}?${params}`, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
@@ -602,41 +830,31 @@
                 })
                 .then(response => response.text())
                 .then(html => {
-                    // Parse the response and update the events container
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
                     const newEventsContainer = doc.getElementById('events-container');
                     
                     if (newEventsContainer) {
                         eventsContainer.innerHTML = newEventsContainer.innerHTML;
-                        
-                        // Update active filters display
                         const newActiveFilters = doc.getElementById('active-filters');
                         if (newActiveFilters) {
                             document.getElementById('active-filters').innerHTML = newActiveFilters.innerHTML;
                         }
                     }
                     
-                    // Update URL without page reload
                     const newUrl = `${filterForm.action}?${params}`;
                     window.history.pushState({}, '', newUrl);
-                    
-                    // Remove loading state
                     eventsContainer.classList.remove('loading');
-                    
-                    // Re-attach event listeners to new clear buttons
                     attachClearButtonListeners();
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     eventsContainer.classList.remove('loading');
-                    // Fallback to traditional form submission if AJAX fails
                     filterForm.submit();
                 });
             }
 
             function attachClearButtonListeners() {
-                // Re-attach event listeners to new clear buttons
                 document.querySelectorAll('.clear-filter').forEach(button => {
                     button.addEventListener('click', function() {
                         const filterType = this.dataset.filter;
@@ -644,17 +862,14 @@
                     });
                 });
 
-                // Re-attach clear all button
                 document.getElementById('clear-all-filters')?.addEventListener('click', clearAllFilters);
                 document.getElementById('clear-all-empty')?.addEventListener('click', clearAllFilters);
             }
 
-            // Handle browser back/forward buttons
             window.addEventListener('popstate', function() {
                 location.reload();
             });
 
-            // Initial attachment of event listeners
             attachClearButtonListeners();
         });
     </script>
