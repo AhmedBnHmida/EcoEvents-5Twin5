@@ -40,7 +40,9 @@ Route::middleware('auth')->prefix('api')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'redirectToProfile'])->name('profile');
+    Route::get('/profile/admin', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/front', [ProfileController::class, 'editFront'])->name('profile.editfront');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
