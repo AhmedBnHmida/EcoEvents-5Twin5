@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\EventFournisseurNotification;
 use App\Services\OpenRouterAiService;
-
+use Illuminate\Support\Facades\Auth;
 
 class EventController extends Controller
 {
@@ -245,6 +245,7 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
+    /*
     public function index(Request $request)
     {
         $query = Event::with('category');
@@ -292,6 +293,129 @@ class EventController extends Controller
 
         return view('events.index', compact('events', 'categories', 'statuses'));
     }
+    */
+
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Get pending events (is_public = false)
+        $pendingEventsQuery = Event::with('category')
+            ->where('is_public', false);
+
+        // Get approved events (is_public = true)  
+        $approvedEventsQuery = Event::with('category')
+            ->where('is_public', true);
+
+        // Apply filters to both queries
+        $filters = ['search', 'category', 'status', 'min_price', 'max_price', 'start_date', 'end_date'];
+        
+        foreach ($filters as $filter) {
+            if ($request->has($filter) && $request->$filter != '') {
+                $this->applyFilter($pendingEventsQuery, $filter, $request->$filter);
+                $this->applyFilter($approvedEventsQuery, $filter, $request->$filter);
+            }
+        }
+
+        // For organizers, only show their events
+        if ($user->role === 'organisateur') {
+            // If you have user_id in events table, uncomment this:
+            // $pendingEventsQuery->where('user_id', $user->id);
+            // $approvedEventsQuery->where('user_id', $user->id);
+        }
+
+        $pendingEvents = $pendingEventsQuery->paginate(5, ['*'], 'pending_page');
+        $approvedEvents = $approvedEventsQuery->paginate(5, ['*'], 'approved_page');
+
+        $categories = Category::all();
+        $statuses = EventStatus::cases();
+
+        return view('events.index', compact('pendingEvents', 'approvedEvents', 'categories', 'statuses'));
+    }
+
+    // Helper method to apply filters
+    private function applyFilter($query, $filter, $value)
+    {
+        switch ($filter) {
+            case 'search':
+                $query->where(function($q) use ($value) {
+                    $q->where('title', 'like', "%{$value}%")
+                    ->orWhere('description', 'like', "%{$value}%")
+                    ->orWhere('location', 'like', "%{$value}%");
+                });
+                break;
+            case 'category':
+                $query->where('categorie_id', $value);
+                break;
+            case 'status':
+                $query->where('status', $value);
+                break;
+            case 'min_price':
+                $query->where('price', '>=', $value);
+                break;
+            case 'max_price':
+                $query->where('price', '<=', $value);
+                break;
+            case 'start_date':
+                $query->where('start_date', '>=', $value);
+                break;
+            case 'end_date':
+                $query->where('end_date', '<=', $value);
+                break;
+        }
+    }
+
+    /**
+     * Approve an event (Admin only)
+     */
+    public function approve($id)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        $event = Event::findOrFail($id);
+        $event->update(['is_public' => true]);
+        
+        // Optional: Add notification or log
+        Log::info("Event {$event->id} approved by admin " . Auth::user()->id);
+        
+        return redirect()->back()->with('success', 'Event approved and published successfully.');
+    }
+
+    /**
+     * Reject and delete an event (Admin only)
+     */
+    public function reject($id)
+    {
+        // Check if user is admin
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        $event = Event::findOrFail($id);
+        
+        // Store event info for logging before deletion
+        $eventTitle = $event->title;
+        $eventId = $event->id;
+        
+        // Delete associated resources first (if needed)
+        $event->ressources()->delete();
+        
+        // Delete the event
+        $event->delete();
+        
+        // Optional: Add notification or log
+        Log::info("Event {$eventId} ('{$eventTitle}') rejected and deleted by admin " . Auth::user()->id);
+        
+        return redirect()->back()->with('success', 'Event rejected and deleted successfully.');
+    }
+
 
   
 
@@ -300,6 +424,8 @@ class EventController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
         $request->validate([
             'title' => 'required|string|min:5|max:255',
             'description' => 'required|string|min:50|max:2000',
@@ -327,6 +453,15 @@ class EventController extends Controller
                 $uploadedImages[] = $image->store('events/images', 'public');
             }
             $eventData['images'] = $uploadedImages;
+        }
+
+        // SIMPLE APPROVAL LOGIC:
+        if ($user->role === 'admin') {
+            // Admin events are automatically public
+            $eventData['is_public'] = true;
+        } else {
+            // Organizer events are not public until admin approves
+            $eventData['is_public'] = false;
         }
 
         $event = Event::create($eventData);

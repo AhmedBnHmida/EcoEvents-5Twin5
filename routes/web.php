@@ -174,6 +174,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/manage/events/{id}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/manage/events/{id}', [EventController::class, 'destroy'])->name('events.destroy');
 
+    Route::post('/events/{id}/approve', [EventController::class, 'approve'])->name('events.approve');
+    Route::post('/events/{id}/reject', [EventController::class, 'reject'])->name('events.reject');
+
     // Categories Routes
     Route::get('/manage/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('/manage/categories/create', [CategoryController::class, 'create'])->name('categories.create');

@@ -231,36 +231,43 @@
                                 </div>
 
                                 <!-- Status & Visibility -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="status" class="form-control-label">Status *</label>
-                                            <select class="form-control @error('status') is-invalid @enderror" id="status" name="status" required>
-                                                <option value="">Select Status</option>
-                                                @foreach($statuses as $status)
-                                                    <option value="{{ $status->value }}" {{ old('status') == $status->value ? 'selected' : '' }}>
-                                                        {{ $status->value }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                            <div class="validation-feedback" id="status-feedback"></div>
-                                            @error('status')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label class="form-control-label">Visibility</label>
-                                            <div class="form-check mt-2">
-                                                <input class="form-check-input" type="checkbox" id="is_public" name="is_public" value="1" {{ old('is_public') ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="is_public">
-                                                    Public Event
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="status" class="form-control-label">Status *</label>
+            <select class="form-control @error('status') is-invalid @enderror" id="status" name="status" required>
+                <option value="">Select Status</option>
+                @foreach($statuses as $status)
+                    <option value="{{ $status->value }}" {{ old('status') == $status->value ? 'selected' : '' }}>
+                        {{ $status->value }}
+                    </option>
+                @endforeach
+            </select>
+            <div class="validation-feedback" id="status-feedback"></div>
+            @error('status')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+        </div>
+    </div>
+    
+    <!-- Only show visibility toggle for admin -->
+    @if(auth()->user()->role === 'admin')
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="form-control-label">Visibility</label>
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="is_public" name="is_public" value="1" {{ old('is_public') ? 'checked' : '' }}>
+                <label class="form-check-label" for="is_public">
+                    Public Event
+                </label>
+            </div>
+        </div>
+    </div>
+    @else
+    <!-- Hidden field for organizers - always false -->
+    <input type="hidden" name="is_public" value="0">
+    @endif
+</div>
 
                                 <!-- Event Images -->
                                 <div class="card mt-4">
