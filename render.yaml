@@ -25,3 +25,45 @@ services:
       php artisan route:cache
       php artisan view:cache
     startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+  
+  - type: cron
+    name: event-status-updater
+    env: docker  
+    plan: free
+    schedule: "*/5 * * * *"  # Every 5 minutes
+    docker:
+      dockerfilePath: ./Dockerfile.render  
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan optimize:clear
+    startCommand: php artisan events:update-statuses
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/database/database.sqlite  
+
+  - type: cron
+    name: event-risk-detector
+    env: docker  
+    plan: free
+    schedule: "0 0 * * *"  # Daily at midnight
+    docker:
+      dockerfilePath: ./Dockerfile.render  
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php artisan optimize:clear
+    startCommand: php artisan events:detect-risks
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/database/database.sqlite 

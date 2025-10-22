@@ -5,15 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\EventStatus;
 
 class Event extends Model
 {
     use HasFactory;
+    
     protected $fillable = [
-        'title', 'description', 'start_date', 'end_date', 'location', 'capacity_max','categorie_id', 'status', 'registration_deadline', 'price', 'is_public', 'images', 'at_risk', 'risk_analysis'
+        'title', 'description', 'start_date', 'end_date', 'location', 'capacity_max',
+        'categorie_id', 'status', 'registration_deadline', 'price', 'is_public', 
+        'images', 'at_risk', 'risk_analysis'
     ];
+    
     protected $casts = [
-        'status' => \App\EventStatus::class,
+        'status' => EventStatus::class,
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'registration_deadline' => 'datetime',
@@ -21,7 +26,6 @@ class Event extends Model
         'images' => 'array',
         'at_risk' => 'boolean',
     ];
-
 
     // Get all image URLs
     public function getImageUrlsAttribute()
@@ -31,11 +35,9 @@ class Event extends Model
         }
 
         return array_map(function($image) {
-            // Check if it's a full URL (starts with http)
             if (str_starts_with($image, 'http')) {
                 return $image;
             }
-            // Otherwise, it's a local storage file
             return asset('storage/' . $image);
         }, $this->images);
     }
@@ -45,29 +47,94 @@ class Event extends Model
     {
         if ($this->images && count($this->images) > 0) {
             $firstImage = $this->images[0];
-            // Check if it's a full URL
             if (str_starts_with($firstImage, 'http')) {
                 return $firstImage;
             }
-            // Otherwise, it's a local storage file
             return asset('storage/' . $firstImage);
         }
         return asset('images/default-event.jpg');
     }
 
+    // Status helper methods
+    public function isUpcoming(): bool
+    {
+        return $this->status === EventStatus::UPCOMING;
+    }
 
+    public function isOngoing(): bool
+    {
+        return $this->status === EventStatus::ONGOING;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === EventStatus::COMPLETED;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === EventStatus::CANCELLED;
+    }
+
+    // Date-based status calculation
+    public function calculateStatusBasedOnDates(): EventStatus
+    {
+        $now = now();
+        
+        if ($this->end_date <= $now) {
+            return EventStatus::COMPLETED;
+        }
+        
+        if ($this->start_date <= $now && $this->end_date > $now) {
+            return EventStatus::ONGOING;
+        }
+        
+        return EventStatus::UPCOMING;
+    }
+
+    // Check if registration is still open
+    public function isRegistrationOpen(): bool
+    {
+        return $this->isUpcoming() && now() <= $this->registration_deadline;
+    }
+
+    // Check if event is at risk (registration deadline approaching)
+    public function shouldBeAtRisk(): bool
+    {
+        return $this->isUpcoming() && 
+               now()->addDays(3) >= $this->registration_deadline && 
+               now() < $this->registration_deadline;
+    }
+
+    // Update status based on current date
+    public function updateStatusBasedOnDates(): bool
+    {
+        $newStatus = $this->calculateStatusBasedOnDates();
+        
+        if ($this->status !== $newStatus) {
+            $this->update(['status' => $newStatus]);
+            return true;
+        }
+        
+        return false;
+    }
+
+    // Relationships
     public function registrations()
     {
         return $this->hasMany(Registration::class);
     }
+    
     public function ressources()
     {
         return $this->hasMany(Ressource::class);
     }
+    
     public function feedbacks()
     {
         return $this->hasMany(Feedback::class, 'id_evenement');
     }
+    
     public function category()
     {
         return $this->belongsTo(Category::class, 'categorie_id');
@@ -83,13 +150,8 @@ class Event extends Model
         return $this->hasManyThrough(Partner::class, Sponsoring::class, 'evenement_id', 'id', 'id', 'partenaire_id');
     }
 
-    
-
-
     public function interactions()
-{
-    return $this->hasMany(\App\Models\Interaction::class, 'event_id');
-}
-
-
+    {
+        return $this->hasMany(\App\Models\Interaction::class, 'event_id');
+    }
 }
