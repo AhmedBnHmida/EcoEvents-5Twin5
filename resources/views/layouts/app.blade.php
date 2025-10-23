@@ -49,10 +49,14 @@
         <meta property="product:category" content="Admin &amp; Dashboards">
         <meta name="data-turbolinks-track" content="false">
     @endif
+    <!--  
     <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('assets/img/apple-icon.png') }}" onerror="this.href='/img/apple-icon.png'">
     <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}" onerror="this.href='/img/favicon.png'">
+    -->
+    <link rel="apple-touch-icon" sizes="76x76" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='%234CAF50' d='M50 15C30 15 20 30 20 50C20 70 35 85 50 85S80 70 80 50C80 30 70 15 50 15Z M50 25C40 25 30 35 30 50C30 65 40 75 50 75S70 65 70 50C70 35 60 25 50 25Z'/></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='%234CAF50' d='M50 15C30 15 20 30 20 50C20 70 35 85 50 85S80 70 80 50C80 30 70 15 50 15Z M50 25C40 25 30 35 30 50C30 65 40 75 50 75S70 65 70 50C70 35 60 25 50 25Z'/></svg>">
     <title>
-        Corporate UI by Creative Tim & UPDIVISION
+        EcoEvents
     </title>
     <!--     Fonts and icons     -->
     <link
