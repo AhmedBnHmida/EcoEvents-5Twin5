@@ -9,6 +9,7 @@
             </div>
             <span class="font-weight-bold text-lg text-white">EcoEvents</span>
         </a>
+        <!-- Subtitle based on user role
         <div class="brand-subtitle">
             @php $user = Auth::user(); @endphp
             <small class="text-white-50">
@@ -22,7 +23,7 @@
                     Dashboard
                 @endif
             </small>
-        </div>
+        </div> -->
     </div>
     <div class="collapse navbar-collapse px-3 w-auto h-100" id="sidenav-collapse-main">
         @php $user = Auth::user(); @endphp
