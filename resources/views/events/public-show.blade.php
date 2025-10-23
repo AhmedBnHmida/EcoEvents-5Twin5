@@ -961,11 +961,11 @@
             // Add to calendar functionality
             document.getElementById('add-to-calendar')?.addEventListener('click', function() {
                 const event = {
-                    title: '{{ $event->title }}',
-                    start: '{{ $event->start_date->format('Y-m-d\TH:i:s') }}',
-                    end: '{{ $event->end_date->format('Y-m-d\TH:i:s') }}',
-                    location: '{{ $event->location }}',
-                    description: '{{ Str::limit($event->description, 100) }}'
+                    title: `{{ $event->title }}`,
+                    start: `{{ $event->start_date->format('Y-m-d\\TH:i:s') }}`,
+                    end: `{{ $event->end_date->format('Y-m-d\\TH:i:s') }}`,
+                    location: `{{ $event->location }}`,
+                    description: `{{ Str::limit($event->description, 100) }}`
                 };
                 
                 // Create .ics file content
