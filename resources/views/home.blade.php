@@ -285,7 +285,7 @@
                     <div class="col-12 text-center py-4">
                         <i class="fas fa-handshake text-success fa-3x mb-3"></i>
                         <p class="text-muted">Devenez notre premier partenaire et amplifiez votre impact.</p>
-                        <a href="{{ route('contact') }}" class="btn btn-outline-success-gradient mt-3">Devenir Partenaire</a>
+                        <a href="" class="btn btn-outline-success-gradient mt-3">Devenir Partenaire</a>
                     </div>
                     @endif
                 </div>

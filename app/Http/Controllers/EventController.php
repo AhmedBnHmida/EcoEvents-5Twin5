@@ -496,125 +496,156 @@ class EventController extends Controller
         return redirect()->route('events.index')->with('success', 'Event created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
-    {
-        $event = Event::with(['category', 'ressources.fournisseur'])->findOrFail($id);
-        return view('events.show', compact('event'));
+{
+    $event = Event::with(['category', 'ressources.fournisseur'])->findOrFail($id);
+    
+    // Manual override: Attach actual Fournisseur data to each resource
+    foreach ($event->ressources as $resource) {
+        // Clear the wrong User relation and load the correct Fournisseur
+        $resource->unsetRelation('fournisseur');
+        $resource->setRelation('fournisseur', Fournisseur::find($resource->fournisseur_id));
     }
+    
+    return view('events.show', compact('event'));
+}
+
+
+
+
+
+
 
     /**
      * Show the form for editing the specified resource.
      */
     public function edit(string $id)
-    {
-        $event = Event::with('ressources')->findOrFail($id);
-        $categories = Category::all();
-        $statuses = EventStatus::cases();
-        $fournisseurs = User::where('role', 'fournisseur')->get();
-        $resourceTypes = TypeRessource::allTypes();
-
-        return view('events.edit', compact('event', 'categories', 'statuses', 'fournisseurs', 'resourceTypes'));
+{
+    $event = Event::with('ressources')->findOrFail($id);
+    
+    // Manual override: Attach actual Fournisseur data to each resource (like in show)
+    foreach ($event->ressources as $resource) {
+        $resource->unsetRelation('fournisseur');
+        $resource->setRelation('fournisseur', Fournisseur::find($resource->fournisseur_id));
     }
+    
+    $categories = Category::all();
+    $statuses = EventStatus::cases();
+    $fournisseurs = Fournisseur::all();
+    $resourceTypes = TypeRessource::allTypes();
+
+    return view('events.edit', compact('event', 'categories', 'statuses', 'fournisseurs', 'resourceTypes'));
+}
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'location' => 'required|string|max:255',
-            'capacity_max' => 'required|integer|min:1',
-            'categorie_id' => 'required|exists:categories,id',
-            'status' => 'required|in:' . implode(',', array_column(EventStatus::cases(), 'value')),
-            'registration_deadline' => 'required|date|before:start_date',
-            'price' => 'required|numeric|min:0',
-            'is_public' => 'boolean',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'resources' => 'nullable|array',
-            'resources.*.nom' => 'required_with:resources|string|max:255',
-            'resources.*.type' => 'required_with:resources|in:' . implode(',', TypeRessource::allTypes()),
-            'resources.*.fournisseur_id' => 'required_with:resources|exists:users,id',
-            'resources.*.quantite' => 'required_with:resources|integer|min:1',
-            'resources.*.id' => 'nullable|exists:ressources,id',
-        ]);
+    /**
+ * Update the specified resource in storage.
+ */
+public function update(Request $request, string $id)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after:start_date',
+        'location' => 'required|string|max:255',
+        'capacity_max' => 'required|integer|min:1',
+        'categorie_id' => 'required|exists:categories,id',
+        'status' => 'required|in:' . implode(',', array_column(EventStatus::cases(), 'value')),
+        'registration_deadline' => 'required|date|before:start_date',
+        'price' => 'required|numeric|min:0',
+        'is_public' => 'boolean',
+        'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'resources' => 'nullable|array',
+        'resources.*.nom' => 'required_with:resources|string|max:255',
+        'resources.*.type' => 'required_with:resources|in:' . implode(',', TypeRessource::allTypes()),
+        'resources.*.fournisseur_id' => 'required_with:resources|exists:fournisseurs,id',  // Fixed: Changed from 'users' to 'fournisseurs'
+        'resources.*.quantite' => 'required_with:resources|integer|min:1',
+        'resources.*.id' => 'nullable|exists:ressources,id',
+    ]);
 
-        $event = Event::findOrFail($id);
-        $eventData = $request->except(['resources', 'images', 'remove_images']);
+    $event = Event::findOrFail($id);
+    $eventData = $request->except(['resources', 'images', 'remove_images']);
 
-        $currentImages = $event->images ?? [];
-        if ($request->has('remove_images')) {
-            foreach ($request->remove_images as $imageToRemove) {
-                if (Storage::disk('public')->exists($imageToRemove)) {
-                    Storage::disk('public')->delete($imageToRemove);
-                }
-                $currentImages = array_filter($currentImages, fn($image) => $image !== $imageToRemove);
+    $currentImages = $event->images ?? [];
+    if ($request->has('remove_images')) {
+        foreach ($request->remove_images as $imageToRemove) {
+            if (Storage::disk('public')->exists($imageToRemove)) {
+                Storage::disk('public')->delete($imageToRemove);
             }
+            $currentImages = array_filter($currentImages, fn($image) => $image !== $imageToRemove);
         }
-
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $currentImages[] = $image->store('events/images', 'public');
-            }
-        }
-
-        $eventData['images'] = $currentImages;
-        $event->update($eventData);
-        Log::info('Event mis à jour: ID=' . $event->id);
-
-        $existingResourceIds = $event->ressources()->pluck('id')->toArray();
-        $submittedResourceIds = [];
-
-        if ($request->has('resources')) {
-            foreach ($request->resources as $resourceData) {
-                if (isset($resourceData['id']) && !empty($resourceData['id'])) {
-                    $resource = Ressource::findOrFail($resourceData['id']);
-                    $resource->update([
-                        'nom' => $resourceData['nom'],
-                        'type' => $resourceData['type'],
-                        'fournisseur_id' => $resourceData['fournisseur_id'],
-                        'quantite' => $resourceData['quantite'] ?? 1,
-                    ]);
-                    $submittedResourceIds[] = $resourceData['id'];
-                } else {
-                    $newResource = $event->ressources()->create([
-                        'nom' => $resourceData['nom'],
-                        'type' => $resourceData['type'],
-                        'fournisseur_id' => $resourceData['fournisseur_id'],
-                        'quantite' => $resourceData['quantite'] ?? 1,
-                        'event_id' => $event->id,
-                    ]);
-                    $submittedResourceIds[] = $newResource->id;
-
-                    $fournisseur = $newResource->fournisseur;
-                    if ($fournisseur && $fournisseur->email) {
-                        Log::info('Prêt à envoyer mail au fournisseur: ' . $fournisseur->email);
-                        try {
-                            Mail::to($fournisseur->email)->send(new EventFournisseurNotification($event, $newResource));
-                            Log::info('Mail envoyé avec succès à ' . $fournisseur->email);
-                        } catch (\Exception $e) {
-                            Log::error('Erreur lors de l\'envoi du mail: ' . $e->getMessage());
-                        }
-                    } else {
-                        Log::warning('Fournisseur sans email pour la ressource: ' . $newResource->nom);
-                    }
-                }
-            }
-        }
-
-        $resourcesToDelete = array_diff($existingResourceIds, $submittedResourceIds);
-        if (!empty($resourcesToDelete)) {
-            Ressource::whereIn('id', $resourcesToDelete)->delete();
-        }
-
-        return redirect()->route('events.index')->with('success', 'Event updated successfully.');
     }
+
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $currentImages[] = $image->store('events/images', 'public');
+        }
+    }
+
+    $eventData['images'] = $currentImages;
+    $event->update($eventData);
+    Log::info('Event mis à jour: ID=' . $event->id);
+
+    $existingResourceIds = $event->ressources()->pluck('id')->toArray();
+    $submittedResourceIds = [];
+
+    if ($request->has('resources')) {
+        foreach ($request->resources as $resourceData) {
+            if (isset($resourceData['id']) && !empty($resourceData['id'])) {
+                $resource = Ressource::findOrFail($resourceData['id']);
+                $resource->update([
+                    'nom' => $resourceData['nom'],
+                    'type' => $resourceData['type'],
+                    'fournisseur_id' => $resourceData['fournisseur_id'],
+                    'quantite' => $resourceData['quantite'] ?? 1,
+                ]);
+                $submittedResourceIds[] = $resourceData['id'];
+            } else {
+                $newResource = $event->ressources()->create([
+                    'nom' => $resourceData['nom'],
+                    'type' => $resourceData['type'],
+                    'fournisseur_id' => $resourceData['fournisseur_id'],
+                    'quantite' => $resourceData['quantite'] ?? 1,
+                    'event_id' => $event->id,
+                ]);
+                $submittedResourceIds[] = $newResource->id;
+
+                $fournisseur = $newResource->fournisseur;
+                if ($fournisseur && $fournisseur->email) {
+                    Log::info('Prêt à envoyer mail au fournisseur: ' . $fournisseur->email);
+                    try {
+                        Mail::to($fournisseur->email)->send(new EventFournisseurNotification($event, $newResource));
+                        Log::info('Mail envoyé avec succès à ' . $fournisseur->email);
+                    } catch (\Exception $e) {
+                        Log::error('Erreur lors de l\'envoi du mail: ' . $e->getMessage());
+                    }
+                } else {
+                    Log::warning('Fournisseur sans email pour la ressource: ' . $newResource->nom);
+                }
+            }
+        }
+    }
+
+    $resourcesToDelete = array_diff($existingResourceIds, $submittedResourceIds);
+    if (!empty($resourcesToDelete)) {
+        Ressource::whereIn('id', $resourcesToDelete)->delete();
+    }
+
+    return redirect()->route('events.index')->with('success', 'Event updated successfully.');
+}
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Remove the specified resource from storage.
