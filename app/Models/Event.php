@@ -154,4 +154,84 @@ class Event extends Model
     {
         return $this->hasMany(\App\Models\Interaction::class, 'event_id');
     }
+
+
+     /**
+     * Check if registration is open with countdown data
+     */
+    public function getRegistrationCountdownData()
+    {
+        $now = now();
+        $deadline = $this->registration_deadline;
+        
+        if ($deadline <= $now) {
+            return [
+                'status' => 'closed',
+                'message' => 'Registration closed',
+                'seconds_remaining' => 0,
+                'is_expired' => true,
+                'days' => 0,
+                'hours' => 0,
+                'minutes' => 0,
+                'seconds' => 0
+            ];
+        }
+        
+        $secondsRemaining = $deadline->diffInSeconds($now);
+        
+        return [
+            'status' => 'open',
+            'message' => 'Registration open',
+            'seconds_remaining' => $secondsRemaining,
+            'deadline' => $deadline->toISOString(),
+            'days' => floor($secondsRemaining / (60 * 60 * 24)),
+            'hours' => floor(($secondsRemaining % (60 * 60 * 24)) / (60 * 60)),
+            'minutes' => floor(($secondsRemaining % (60 * 60)) / 60),
+            'seconds' => $secondsRemaining % 60,
+            'is_expired' => false,
+            'is_urgent' => $secondsRemaining < (24 * 60 * 60), // Less than 24 hours
+            'is_ending_soon' => $secondsRemaining < (3 * 24 * 60 * 60) // Less than 3 days
+        ];
+    }
+
+    /**
+     * Get registration status for styling
+     */
+    public function getRegistrationStatus()
+    {
+        $countdown = $this->getRegistrationCountdownData();
+        
+        if ($countdown['status'] === 'closed') {
+            return 'closed';
+        }
+        
+        if ($countdown['is_urgent']) {
+            return 'urgent'; // Less than 24 hours
+        }
+        
+        if ($countdown['is_ending_soon']) {
+            return 'ending_soon'; // Less than 3 days
+        }
+        
+        return 'open';
+    }
+
+    /**
+     * Get countdown CSS class based on status
+     */
+    public function getCountdownClass()
+    {
+        $status = $this->getRegistrationStatus();
+        
+        switch ($status) {
+            case 'urgent':
+                return 'countdown-urgent';
+            case 'ending_soon':
+                return 'countdown-warning';
+            case 'closed':
+                return 'countdown-closed';
+            default:
+                return 'countdown-normal';
+        }
+    }
 }

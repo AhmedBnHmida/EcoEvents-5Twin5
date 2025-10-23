@@ -61,7 +61,7 @@ Route::get('/wallet', function () {
 
 Route::get('/', function () {
     return view('home');
-});
+})->name('home');
 
 
 

@@ -31,6 +31,8 @@ class EventController extends Controller
         ]);
 
         try {
+
+            set_time_limit(90);
             $category = Category::findOrFail($request->category_id);
             $aiService = new OpenRouterAiService();
             

@@ -363,6 +363,57 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Countdown Timer Section - Add this inside each event card -->
+                            @if($event->isUpcoming() && $event->isRegistrationOpen())
+                            <div class="countdown-section mt-3 pt-3 border-top border-secondary">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted fw-semibold">
+                                        <i class="fas fa-clock me-1"></i>Inscriptions fermées dans:
+                                    </small>
+                                    <span class="badge {{ $event->getCountdownClass() }} text-xs">
+                                        @if($event->getRegistrationStatus() === 'urgent')
+                                            <i class="fas fa-exclamation-triangle me-1"></i>Dernières heures!
+                                        @elseif($event->getRegistrationStatus() === 'ending_soon')
+                                            <i class="fas fa-clock me-1"></i>Bientôt terminé
+                                        @else
+                                            <i class="fas fa-clock me-1"></i>En cours
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="countdown-timer" data-deadline="{{ $event->registration_deadline->toISOString() }}">
+                                    <div class="d-flex justify-content-between text-center">
+                                        <div class="countdown-item">
+                                            <div class="countdown-value bg-dark-input rounded-2 py-1 fw-bold" data-days>00</div>
+                                            <small class="text-muted">Jours</small>
+                                        </div>
+                                        <div class="countdown-separator text-muted fw-bold py-1">:</div>
+                                        <div class="countdown-item">
+                                            <div class="countdown-value bg-dark-input rounded-2 py-1 fw-bold" data-hours>00</div>
+                                            <small class="text-muted">Heures</small>
+                                        </div>
+                                        <div class="countdown-separator text-muted fw-bold py-1">:</div>
+                                        <div class="countdown-item">
+                                            <div class="countdown-value bg-dark-input rounded-2 py-1 fw-bold" data-minutes>00</div>
+                                            <small class="text-muted">Minutes</small>
+                                        </div>
+                                        <div class="countdown-separator text-muted fw-bold py-1">:</div>
+                                        <div class="countdown-item">
+                                            <div class="countdown-value bg-dark-input rounded-2 py-1 fw-bold" data-seconds>00</div>
+                                            <small class="text-muted">Secondes</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @elseif(!$event->isRegistrationOpen())
+                            <div class="mt-3 pt-3 border-top border-secondary">
+                                <div class="alert alert-danger d-flex justify-content-between text-center">
+                                    <small class="fw-semibold">
+                                        <i class="fas fa-times-circle me-1"></i>Inscriptions fermées
+                                    </small>
+                                </div>
+                            </div>
+                            @endif
                             
                             <!-- Action Buttons -->
                             <div class="mt-auto">
@@ -871,6 +922,101 @@
             });
 
             attachClearButtonListeners();
+            initializeCountdownTimers();
         });
+        // Countdown Timer Functionality
+        function initializeCountdownTimers() {
+            console.log('Initializing countdown timers...');
+            
+            const countdownTimers = document.querySelectorAll('.countdown-timer, .countdown-timer-large, .countdown-timer-mini');
+            
+            countdownTimers.forEach(timer => {
+                // Skip if already initialized
+                if (timer.dataset.initialized === 'true') {
+                    console.log('Timer already initialized, skipping...');
+                    return;
+                }
+                
+                const deadline = new Date(timer.dataset.deadline).getTime();
+                console.log('Deadline:', timer.dataset.deadline, 'Parsed:', deadline);
+                
+                const daysElement = timer.querySelector('[data-days]');
+                const hoursElement = timer.querySelector('[data-hours]');
+                const minutesElement = timer.querySelector('[data-minutes]');
+                const secondsElement = timer.querySelector('[data-seconds]');
+                
+                // Mark as initialized
+                timer.dataset.initialized = 'true';
+                
+                function updateCountdown() {
+                    const now = new Date().getTime();
+                    const distance = deadline - now;
+                    
+                    if (distance < 0) {
+                        // Countdown finished
+                        if (daysElement) daysElement.textContent = '00';
+                        if (hoursElement) hoursElement.textContent = '00';
+                        if (minutesElement) minutesElement.textContent = '00';
+                        if (secondsElement) secondsElement.textContent = '00';
+                        
+                        // Update UI to show registration closed
+                        const countdownSection = timer.closest('.countdown-mini, .countdown-section');
+                        if (countdownSection) {
+                            countdownSection.innerHTML = `
+                                <div class="alert alert-danger border-0 text-center py-2 mb-0">
+                                    <small class="fw-semibold">
+                                        <i class="fas fa-times-circle me-1"></i>Inscriptions fermées
+                                    </small>
+                                </div>
+                            `;
+                        }
+                        return;
+                    }
+                    
+                    // Calculate time units
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    
+                    // Update display
+                    if (daysElement) daysElement.textContent = days.toString().padStart(2, '0');
+                    if (hoursElement) hoursElement.textContent = hours.toString().padStart(2, '0');
+                    if (minutesElement) minutesElement.textContent = minutes.toString().padStart(2, '0');
+                    if (secondsElement) secondsElement.textContent = seconds.toString().padStart(2, '0');
+                    
+                    // Update urgency styling
+                    updateUrgencyStyling(timer, distance);
+                }
+                
+                function updateUrgencyStyling(timerElement, distance) {
+                    const daysRemaining = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hoursRemaining = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    
+                    // Remove existing urgency classes
+                    timerElement.classList.remove('countdown-urgent', 'countdown-warning', 'countdown-normal');
+                    
+                    // Add appropriate class based on time remaining
+                    if (daysRemaining === 0 && hoursRemaining < 24) {
+                        timerElement.classList.add('countdown-urgent');
+                    } else if (daysRemaining < 3) {
+                        timerElement.classList.add('countdown-warning');
+                    } else {
+                        timerElement.classList.add('countdown-normal');
+                    }
+                }
+                
+                // Initial update
+                updateCountdown();
+                
+                // Update every second
+                const countdownInterval = setInterval(updateCountdown, 1000);
+                
+                // Store interval ID for cleanup if needed
+                timer.dataset.intervalId = countdownInterval;
+                
+                console.log('Countdown timer initialized successfully');
+            });
+        }
     </script>
 </x-app-layout>
