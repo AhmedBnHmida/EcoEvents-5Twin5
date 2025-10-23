@@ -893,228 +893,291 @@
             animate();
 
             // Carousel slide counter
-            const carousel = document.getElementById('eventCarousel');
-            if (carousel) {
-                carousel.addEventListener('slid.bs.carousel', function (e) {
-                    const activeIndex = e.to;
-                    document.getElementById('currentSlide').textContent = activeIndex + 1;
-                });
-            }
-
-            // Copy event link to clipboard
-            function copyEventLink() {
-                const url = window.location.href;
-                navigator.clipboard.writeText(url).then(function() {
-                    // Show success message
-                    const alert = document.createElement('div');
-                    alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5';
-                    alert.style.zIndex = '1060';
-                    alert.innerHTML = `
-                        <i class="fas fa-check-circle me-2"></i>
-                        Lien copié dans le presse-papier !
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-                    `;
-                    document.body.appendChild(alert);
-                    
-                    setTimeout(() => {
-                        alert.remove();
-                    }, 3000);
-                }, function(err) {
-                    console.error('Could not copy text: ', err);
-                });
-            }
-
-            // Share buttons functionality
-            document.querySelectorAll('.share-btn').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const platform = this.dataset.platform;
-                    const url = window.location.href;
-                    const title = document.querySelector('h1').textContent;
-                    
-                    let shareUrl;
-                    switch(platform) {
-                        case 'facebook':
-                            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-                            break;
-                        case 'twitter':
-                            shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
-                            break;
-                        case 'instagram':
-                            // Instagram doesn't support direct sharing, open app or show message
-                            alert('Partagez cet événement depuis l\'application Instagram !');
-                            return;
-                        case 'whatsapp':
-                            shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + url)}`;
-                            break;
-                        case 'email':
-                            shareUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent('Découvrez cet événement: ' + url)}`;
-                            break;
-                    }
-                    
-                    if (shareUrl) {
-                        window.open(shareUrl, '_blank', 'width=600,height=400');
-                    }
-                });
-            });
-
-            // Add to calendar functionality
-            document.getElementById('add-to-calendar')?.addEventListener('click', function() {
-                const event = {
-                    title: `{{ $event->title }}`,
-                    start: `{{ $event->start_date->format('Y-m-d\\TH:i:s') }}`,
-                    end: `{{ $event->end_date->format('Y-m-d\\TH:i:s') }}`,
-                    location: `{{ $event->location }}`,
-                    description: `{{ Str::limit($event->description, 100) }}`
-                };
-                
-                // Create .ics file content
-                const icsContent = [
-                    'BEGIN:VCALENDAR',
-                    'VERSION:2.0',
-                    'BEGIN:VEVENT',
-                    `SUMMARY:${event.title}`,
-                    `DTSTART:${event.start.replace(/[-:]/g, '')}`,
-                    `DTEND:${event.end.replace(/[-:]/g, '')}`,
-                    `LOCATION:${event.location}`,
-                    `DESCRIPTION:${event.description}`,
-                    'END:VEVENT',
-                    'END:VCALENDAR'
-                ].join('\n');
-                
-                // Create and trigger download
-                const blob = new Blob([icsContent], { type: 'text/calendar' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = '{{ $event->title }}.ics';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-                
-                // Show success message
-                const alert = document.createElement('div');
-                alert.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5';
-                alert.style.zIndex = '1060';
-                alert.innerHTML = `
-                    <i class="fas fa-check-circle me-2"></i>
-                    Fichier calendrier téléchargé !
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-                `;
-                document.body.appendChild(alert);
-                
-                setTimeout(() => {
-                    alert.remove();
-                }, 3000);
-            });
-            
-            // Fonction pour afficher la modal d'événement complet
-            function showEventFullModal() {
-                const eventFullModal = new bootstrap.Modal(document.getElementById('eventFullModal'));
-                eventFullModal.show();
-            }
-
-            // **FIXED: Initialize countdown timers here - remove the duplicate DOMContentLoaded**
-            initializeCountdownTimers();
-        });
-
-        // Countdown Timer Functionality
-        function initializeCountdownTimers() {
-            console.log('Initializing countdown timers...');
-            
-            const countdownTimers = document.querySelectorAll('.countdown-timer, .countdown-timer-large, .countdown-timer-mini');
-            
-            countdownTimers.forEach(timer => {
-                // Skip if already initialized
-                if (timer.dataset.initialized === 'true') {
-                    console.log('Timer already initialized, skipping...');
-                    return;
-                }
-                
-                const deadline = new Date(timer.dataset.deadline).getTime();
-                console.log('Deadline:', timer.dataset.deadline, 'Parsed:', deadline);
-                
-                const daysElement = timer.querySelector('[data-days]');
-                const hoursElement = timer.querySelector('[data-hours]');
-                const minutesElement = timer.querySelector('[data-minutes]');
-                const secondsElement = timer.querySelector('[data-seconds]');
-                
-                // Mark as initialized
-                timer.dataset.initialized = 'true';
-                
-                function updateCountdown() {
-                    const now = new Date().getTime();
-                    const distance = deadline - now;
-                    
-                    if (distance < 0) {
-                        // Countdown finished
-                        if (daysElement) daysElement.textContent = '00';
-                        if (hoursElement) hoursElement.textContent = '00';
-                        if (minutesElement) minutesElement.textContent = '00';
-                        if (secondsElement) secondsElement.textContent = '00';
-                        
-                        // Update UI to show registration closed
-                        const countdownSection = timer.closest('.countdown-mini, .countdown-section');
-                        if (countdownSection) {
-                            countdownSection.innerHTML = `
-                                <div class="alert alert-danger border-0 text-center py-2 mb-0">
-                                    <small class="fw-semibold">
-                                        <i class="fas fa-times-circle me-1"></i>Inscriptions fermées
-                                    </small>
-                                </div>
-                            `;
-                        }
-                        return;
-                    }
-                    
-                    // Calculate time units
-                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                    
-                    // Update display
-                    if (daysElement) daysElement.textContent = days.toString().padStart(2, '0');
-                    if (hoursElement) hoursElement.textContent = hours.toString().padStart(2, '0');
-                    if (minutesElement) minutesElement.textContent = minutes.toString().padStart(2, '0');
-                    if (secondsElement) secondsElement.textContent = seconds.toString().padStart(2, '0');
-                    
-                    // Update urgency styling
-                    updateUrgencyStyling(timer, distance);
-                }
-                
-                function updateUrgencyStyling(timerElement, distance) {
-                    const daysRemaining = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    const hoursRemaining = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    
-                    // Remove existing urgency classes
-                    timerElement.classList.remove('countdown-urgent', 'countdown-warning', 'countdown-normal');
-                    
-                    // Add appropriate class based on time remaining
-                    if (daysRemaining === 0 && hoursRemaining < 24) {
-                        timerElement.classList.add('countdown-urgent');
-                    } else if (daysRemaining < 3) {
-                        timerElement.classList.add('countdown-warning');
-                    } else {
-                        timerElement.classList.add('countdown-normal');
-                    }
-                }
-                
-                // Initial update
-                updateCountdown();
-                
-                // Update every second
-                const countdownInterval = setInterval(updateCountdown, 1000);
-                
-                // Store interval ID for cleanup if needed
-                timer.dataset.intervalId = countdownInterval;
-                
-                console.log('Countdown timer initialized successfully');
+        const carousel = document.getElementById('eventCarousel');
+        if (carousel) {
+            carousel.addEventListener('slid.bs.carousel', function (e) {
+                const activeIndex = e.to;
+                document.getElementById('currentSlide').textContent = activeIndex + 1;
             });
         }
 
-    </script>
+        // Enhanced Copy event link to clipboard
+        window.copyEventLink = function(button) {
+            const url = window.location.href;
+            const title = document.querySelector('h1')?.textContent || 'Événement EcoGuard';
+            
+            navigator.clipboard.writeText(url).then(function() {
+                showTemporaryAlert('Lien copié dans le presse-papier !', 'success');
+                
+                // Visual feedback on the button
+                if (button) {
+                    const originalHTML = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-check"></i>';
+                    button.classList.remove('btn-outline-success');
+                    button.classList.add('btn-success');
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalHTML;
+                        button.classList.remove('btn-success');
+                        button.classList.add('btn-outline-success');
+                    }, 2000);
+                }
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                // Fallback for older browsers
+                fallbackCopyToClipboard(url);
+            });
+        };
+
+        // Fallback copy method
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showTemporaryAlert('Lien copié dans le presse-papier !', 'success');
+            } catch (err) {
+                console.error('Fallback copy failed: ', err);
+                alert('Impossible de copier le lien. Veuillez le copier manuellement: ' + text);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Enhanced Share buttons functionality
+        document.querySelectorAll('.share-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const platform = this.dataset.platform;
+                const url = encodeURIComponent(window.location.href);
+                const title = encodeURIComponent(document.querySelector('h1')?.textContent || 'Événement EcoGuard');
+                const description = encodeURIComponent(document.querySelector('.lead')?.textContent || '');
+                
+                let shareUrl;
+                
+                switch(platform) {
+                    case 'facebook':
+                        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`;
+                        break;
+                    case 'twitter':
+                        shareUrl = `https://twitter.com/intent/tweet?text=${title}&url=${url}&hashtags=EcoGuard,Événement`;
+                        break;
+                    case 'whatsapp':
+                        shareUrl = `https://wa.me/?text=${title}%20${url}`;
+                        break;
+                    case 'linkedin':
+                        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+                        break;
+                    case 'email':
+                        shareUrl = `mailto:?subject=${title}&body=Découvrez cet événement: ${url}`;
+                        break;
+                    default:
+                        return;
+                }
+                
+                if (platform === 'email') {
+                    window.location.href = shareUrl;
+                } else {
+                    window.open(shareUrl, '_blank', 'width=600,height=400,menubar=no,toolbar=no,resizable=yes,scrollbars=yes');
+                }
+            });
+        });
+
+        // Enhanced Add to calendar functionality
+        document.getElementById('add-to-calendar')?.addEventListener('click', function() {
+            const event = {
+                title: `{{ $event->title }}`,
+                start: `{{ $event->start_date->format('Y-m-d\\TH:i:s') }}`,
+                end: `{{ $event->end_date->format('Y-m-d\\TH:i:s') }}`,
+                location: `{{ $event->location }}`,
+                description: `{{ Str::limit($event->description, 100) }}`
+            };
+            
+            // Create .ics file content with proper formatting
+            const icsContent = [
+                'BEGIN:VCALENDAR',
+                'VERSION:2.0',
+                'CALSCALE:GREGORIAN',
+                'BEGIN:VEVENT',
+                `SUMMARY:${event.title.replace(/,/g, '\\,')}`,
+                `DTSTART:${event.start.replace(/[-:]/g, '')}`,
+                `DTEND:${event.end.replace(/[-:]/g, '')}`,
+                `LOCATION:${event.location.replace(/,/g, '\\,')}`,
+                `DESCRIPTION:${event.description.replace(/,/g, '\\,')}`,
+                'URL:' + window.location.href,
+                'STATUS:CONFIRMED',
+                'END:VEVENT',
+                'END:VCALENDAR'
+            ].join('\r\n');
+            
+            // Create and trigger download
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '{{ Str::slug($event->title) }}.ics';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showTemporaryAlert('Fichier calendrier téléchargé !', 'success');
+        });
+
+        // Add to favorites functionality
+        document.getElementById('add-to-favorites')?.addEventListener('click', function() {
+            const button = this;
+            const icon = button.querySelector('i');
+            
+            // Toggle visual state
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas', 'text-danger');
+                button.innerHTML = '<i class="fas fa-heart me-2 text-danger"></i>Ajouté aux favoris';
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-outline-danger');
+                
+                showTemporaryAlert('Événement ajouté aux favoris !', 'success');
+            } else {
+                icon.classList.remove('fas', 'text-danger');
+                icon.classList.add('far');
+                button.innerHTML = '<i class="far fa-heart me-2"></i>Ajouter aux favoris';
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-outline-primary');
+                
+                showTemporaryAlert('Événement retiré des favoris.', 'info');
+            }
+            
+            // Here you would typically make an AJAX call to save to favorites
+            // saveToFavorites({{ $event->id }});
+        });
+
+        // Utility function to show temporary alerts
+        function showTemporaryAlert(message, type = 'success') {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5`;
+            alert.style.zIndex = '1060';
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'info'}-circle me-2"></i>
+                ${message}
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 3000);
+        }
+        
+        // Fonction pour afficher la modal d'événement complet
+        function showEventFullModal() {
+            const eventFullModal = new bootstrap.Modal(document.getElementById('eventFullModal'));
+            eventFullModal.show();
+        }
+
+        // Initialize countdown timers
+        initializeCountdownTimers();
+    });
+
+    // Countdown Timer Functionality (keep this unchanged)
+    function initializeCountdownTimers() {
+        console.log('Initializing countdown timers...');
+        
+        const countdownTimers = document.querySelectorAll('.countdown-timer, .countdown-timer-large, .countdown-timer-mini');
+        
+        countdownTimers.forEach(timer => {
+            // Skip if already initialized
+            if (timer.dataset.initialized === 'true') {
+                console.log('Timer already initialized, skipping...');
+                return;
+            }
+            
+            const deadline = new Date(timer.dataset.deadline).getTime();
+            console.log('Deadline:', timer.dataset.deadline, 'Parsed:', deadline);
+            
+            const daysElement = timer.querySelector('[data-days]');
+            const hoursElement = timer.querySelector('[data-hours]');
+            const minutesElement = timer.querySelector('[data-minutes]');
+            const secondsElement = timer.querySelector('[data-seconds]');
+            
+            // Mark as initialized
+            timer.dataset.initialized = 'true';
+            
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = deadline - now;
+                
+                if (distance < 0) {
+                    // Countdown finished
+                    if (daysElement) daysElement.textContent = '00';
+                    if (hoursElement) hoursElement.textContent = '00';
+                    if (minutesElement) minutesElement.textContent = '00';
+                    if (secondsElement) secondsElement.textContent = '00';
+                    
+                    // Update UI to show registration closed
+                    const countdownSection = timer.closest('.countdown-mini, .countdown-section');
+                    if (countdownSection) {
+                        countdownSection.innerHTML = `
+                            <div class="alert alert-danger border-0 text-center py-2 mb-0">
+                                <small class="fw-semibold">
+                                    <i class="fas fa-times-circle me-1"></i>Inscriptions fermées
+                                </small>
+                            </div>
+                        `;
+                    }
+                    return;
+                }
+                
+                // Calculate time units
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                // Update display
+                if (daysElement) daysElement.textContent = days.toString().padStart(2, '0');
+                if (hoursElement) hoursElement.textContent = hours.toString().padStart(2, '0');
+                if (minutesElement) minutesElement.textContent = minutes.toString().padStart(2, '0');
+                if (secondsElement) secondsElement.textContent = seconds.toString().padStart(2, '0');
+                
+                // Update urgency styling
+                updateUrgencyStyling(timer, distance);
+            }
+            
+            function updateUrgencyStyling(timerElement, distance) {
+                const daysRemaining = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hoursRemaining = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                
+                // Remove existing urgency classes
+                timerElement.classList.remove('countdown-urgent', 'countdown-warning', 'countdown-normal');
+                
+                // Add appropriate class based on time remaining
+                if (daysRemaining === 0 && hoursRemaining < 24) {
+                    timerElement.classList.add('countdown-urgent');
+                } else if (daysRemaining < 3) {
+                    timerElement.classList.add('countdown-warning');
+                } else {
+                    timerElement.classList.add('countdown-normal');
+                }
+            }
+            
+            // Initial update
+            updateCountdown();
+            
+            // Update every second
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            
+            // Store interval ID for cleanup if needed
+            timer.dataset.intervalId = countdownInterval;
+            
+            console.log('Countdown timer initialized successfully');
+        });
+    }
+</script>
     
     <!-- Modal pour événement complet -->
     <div class="modal fade" id="eventFullModal" tabindex="-1" aria-labelledby="eventFullModalLabel" aria-hidden="true">
