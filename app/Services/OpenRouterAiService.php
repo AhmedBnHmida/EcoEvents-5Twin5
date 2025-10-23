@@ -114,6 +114,8 @@ class OpenRouterAiService
      */
     private function buildCompleteEventPrompt($eventData)
     {
+        $currentDate = date('Y-m-d H:i:s');
+    
         return <<<PROMPT
 IMPORTANT: You are an expert event planner specializing in ECOLOGY and SUSTAINABLE DEVELOPMENT events. Create a complete, professional event proposal that aligns with environmental values.
 
@@ -125,34 +127,39 @@ EVENT DETAILS PROVIDED:
 - Expected Capacity: {$eventData['capacity']}
 
 REQUIREMENTS:
-Generate a COMPLETE event proposal with ALL these fields in VALID JSON format:
+Generate a COMPLETE event proposal with ALL these fields in VALID JSON format. Today is {$currentDate} - use FUTURE dates only:
 
 {
     "title": "enhanced eco-friendly event title",
     "description": "compelling description focusing on environmental impact (150-250 words)",
     "location": "eco-appropriate venue with sustainability features",
-    "capacity_max": realistic number,
-    "price": "affordable price (often free or low-cost for community events)",
+    "capacity_max": {$eventData['capacity']},
+    "price": 15.00,
     "status": "UPCOMING",
     "is_public": true,
-    "start_date": "YYYY-MM-DD HH:MM:SS (reasonable future date)",
-    "end_date": "YYYY-MM-DD HH:MM:SS",
-    "registration_deadline": "YYYY-MM-DD HH:MM:SS (before start date)",
+    "start_date": "2025-03-15 10:00:00",
+    "end_date": "2025-03-15 16:00:00",
+    "registration_deadline": "2025-03-08 18:00:00",
     "eco_focus": "specific environmental benefits of this event",
-    "sustainability_features": ["array", "of", "eco-friendly", "features"]
+    "sustainability_features": ["zero-waste", "recycling", "public transport access"]
 }
+
+PRICE REQUIREMENTS:
+- Must be a NUMBER (not string)
+- Affordable range: 0-25 for community events
+- Examples: 0, 5.00, 12.50, 15, 20.00
+- Free events should use 0
 
 ECO-FOCUSED GUIDELINES:
 - Emphasize environmental education, community action, or sustainable practices
 - Suggest outdoor locations, eco-centers, or community spaces when appropriate
 - Keep prices accessible to encourage community participation
-- Include specific sustainability features (zero-waste, recycling, public transport access, etc.)
+- Include specific sustainability features
 - Make events public to maximize community impact
-- Focus on practical, actionable environmental outcomes
 
-Make the event realistic, inspiring, and aligned with ecological values.
+Return VALID JSON only.
 PROMPT;
-    }
+}
 
     /**
      * Generate event description based on ALL event data

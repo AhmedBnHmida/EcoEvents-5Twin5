@@ -477,14 +477,30 @@
                     if (event.capacity_max) {
                         document.getElementById('capacity_max').value = event.capacity_max;
                     }
-                    if (event.price !== undefined) {
+                   if (event.price !== undefined && event.price !== null) {
                         document.getElementById('price').value = event.price;
                     }
                     if (event.status) {
                         document.getElementById('status').value = event.status;
                     }
+                    
+                    // ✅ FIXED: Safely handle is_public field
                     if (event.is_public !== undefined) {
-                        document.getElementById('is_public').checked = event.is_public;
+                        const isPublicCheckbox = document.getElementById('is_public');
+                        const isPublicHidden = document.querySelector('input[name="is_public"][type="hidden"]');
+                        
+                        // If checkbox exists (admin user), set checked state
+                        if (isPublicCheckbox) {
+                            isPublicCheckbox.checked = event.is_public;
+                            console.log('✅ is_public checkbox set to:', event.is_public);
+                        }
+                        // If hidden input exists (non-admin user), set value
+                        else if (isPublicHidden) {
+                            isPublicHidden.value = event.is_public ? '1' : '0';
+                            console.log('✅ is_public hidden input set to:', event.is_public ? '1' : '0');
+                        } else {
+                            console.log('⚠️ is_public field not found in form');
+                        }
                     }
                     
                     // Fill date fields with proper formatting
