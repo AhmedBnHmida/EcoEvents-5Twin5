@@ -74,7 +74,7 @@
                                         <i class="fas fa-tag text-success me-2"></i>
                                         <strong>Prix:</strong> 
                                         @if($event->price > 0)
-                                            ${{ number_format($event->price, 2) }}
+                                            {{ number_format($event->price, 2) }} TND
                                         @else
                                             <span class="text-success">Gratuit</span>
                                         @endif

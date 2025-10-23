@@ -317,7 +317,7 @@
                             <div class="position-absolute bottom-3 end-3">
                                 <span class="badge bg-dark text-white px-3 py-2 shadow-sm fw-semibold">
                                     @if($event->price > 0)
-                                        <i class="fas fa-ticket-alt me-1"></i>${{ number_format($event->price, 2) }}
+                                        <i class="fas fa-ticket-alt me-1"></i>{{ number_format($event->price, 2) }} TND
                                     @else
                                         <i class="fas fa-gift me-1"></i>GRATUIT
                                     @endif

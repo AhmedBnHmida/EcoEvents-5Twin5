@@ -70,7 +70,7 @@
                             {{ Str::limit($event->location, 20) }}
                         </div>
                         <div class="fw-bold text-dark">
-                            ${{ number_format($event->price, 2) }}
+                            {{ number_format($event->price, 2) }} TND
                         </div>
                     </div>
                     

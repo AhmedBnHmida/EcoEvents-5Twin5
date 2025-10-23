@@ -82,12 +82,12 @@
                                         <h5 class="text-bright-white mb-3">Récapitulatif</h5>
                                         <div class="d-flex justify-content-between mb-2">
                                             <span class="text-muted">Prix de l'inscription:</span>
-                                            <span class="text-bright-white fw-semibold">{{ number_format($event->price, 2) }} €</span>
+                                            <span class="text-bright-white fw-semibold">{{ number_format($event->price, 2) }} TND</span>
                                         </div>
                                         <hr class="border-secondary my-3">
                                         <div class="d-flex justify-content-between">
                                             <span class="text-bright-white fw-bold">Total:</span>
-                                            <span class="text-success fw-bold fs-5">{{ number_format($event->price, 2) }} €</span>
+                                            <span class="text-success fw-bold fs-5">{{ number_format($event->price, 2) }} TND</span>
                                         </div>
                                     </div>
                                 </div>

@@ -70,6 +70,8 @@
 <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet" onerror="this.href='/css/nucleo-svg.css'"/>
 <!-- CSS Files -->
 <link id="pagestyle" href="{{ asset('assets/css/corporate-ui-dashboard.css?v=1.0.0') }}" rel="stylesheet" onerror="this.href='/css/corporate-ui-dashboard.css?v=1.0.0'"/>
+<!-- Custom pagination styles -->
+<link href="{{ asset('assets/css/pagination.css') }}" rel="stylesheet" onerror="this.href='/css/pagination.css'"/>
 <!-- Custom fixes for sidebar layout issues -->
 <!--<link href="{{ asset('assets/css/custom-fixes.css') }}" rel="stylesheet" onerror="this.href='/css/custom-fixes.css'"/>-->
 <!-- Alpine.js for interactive components -->

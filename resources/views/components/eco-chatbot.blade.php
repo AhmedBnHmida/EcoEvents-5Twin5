@@ -4,7 +4,7 @@
 <div class="eco-chatbot" x-data="ecoChatbot()" x-init="initChatbot">
     <div class="eco-chatbot-toggle" x-on:click="toggleChatbot">
         <div class="chatbot-toggle-content">
-            <i class="fas fa-leaf chatbot-icon"></i>
+            <img src="{{ asset('assets/img/chatbot-robot.svg') }}" class="chatbot-icon" alt="EcoBot" width="24" height="24">
             <span class="chat-text">EcoBot</span>
         </div>
         <div class="chatbot-pulse"></div>
@@ -14,7 +14,7 @@
         <div class="eco-chatbot-header">
             <div class="d-flex align-items-center">
                 <div class="chatbot-header-avatar">
-                    <i class="fas fa-leaf"></i>
+                    <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="EcoBot" width="24" height="24">
                 </div>
                 <div class="ms-3">
                     <h5 class="m-0 text-bright-white">EcoBot</h5>
@@ -32,7 +32,7 @@
         <div class="eco-chatbot-messages" x-ref="messagesContainer">
             <div class="eco-chatbot-message bot">
                 <div class="avatar">
-                    <i class="fas fa-leaf"></i>
+                    <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="EcoBot" width="24" height="24">
                 </div>
                 <div class="eco-chatbot-bubble">
                     <div class="message-content">
@@ -51,7 +51,7 @@
                 <div :class="`eco-chatbot-message ${message.sender}`">
                     <template x-if="message.sender === 'bot'">
                         <div class="avatar">
-                            <i class="fas fa-leaf"></i>
+                            <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="EcoBot" width="24" height="24">
                         </div>
                     </template>
                     <div class="eco-chatbot-bubble">
@@ -68,7 +68,7 @@
 
             <div class="eco-chatbot-typing" x-show="isLoading">
                 <div class="avatar">
-                    <i class="fas fa-leaf"></i>
+                    <img src="{{ asset('assets/img/chatbot-robot.svg') }}" alt="EcoBot" width="24" height="24">
                 </div>
                 <div class="eco-chatbot-bubble typing-bubble">
                     <div class="typing-indicator">
@@ -151,7 +151,8 @@
 }
 
 .chatbot-icon {
-    font-size: 20px;
+    width: 24px;
+    height: 24px;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
@@ -299,6 +300,12 @@
     flex-shrink: 0;
     font-size: 14px;
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.avatar img {
+    width: 24px;
+    height: 24px;
+    filter: brightness(1.2);
 }
 
 .user-avatar {

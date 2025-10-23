@@ -132,7 +132,7 @@
                     <!-- Pending Events Table (is_public = false) -->
                     @if($pendingEvents->count() > 0)
                     <div class="card shadow-xs border mb-4">
-                        <div class="card-header pb-0 bg-warning bg-opacity-10">
+                        <div class="card-header pb-0 bg-opacity-10">
                             <h6 class="font-weight-semibold text-lg mb-0 text-warning">
                                 <i class="fas fa-clock me-2"></i>Pending Approval Events
                             </h6>
@@ -241,9 +241,9 @@
                     @endif
 
                     <!-- Approved Events Table (is_public = true) -->
-                    <div class="card shadow-xs border">
-                        <div class="card-header pb-0 bg-success bg-opacity-10">
-                            <h6 class="font-weight-semibold text-lg mb-0 text-success">
+                    <div class="card shadow-xs border ">
+                        <div class="card-header pb-0  bg-opacity-10">
+                            <h6 class="font-weight-semibold text-lg mb-0  text-success">
                                 <i class="fas fa-check-circle me-2"></i>Approved Events
                             </h6>
                             <p class="text-sm mb-0 text-success">Public events visible to everyone</p>

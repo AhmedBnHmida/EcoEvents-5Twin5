@@ -1,8 +1,8 @@
 <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 modern-sidebar fixed-start min-vh-100" id="sidenav-main">
-    <div class="sidenav-header modern-header">
+    <div class="sidenav-header modern-header pt-2">
         <i class="fas fa-times p-3 cursor-pointer text-white opacity-7 position-absolute end-0 top-0 d-none d-xl-none"
             aria-hidden="true" id="iconSidenav"></i>
-        <a class="navbar-brand d-flex align-items-center m-0 justify-content-center"
+        <a class="navbar-brand d-flex align-items-center m-0 justify-content-center mt-n3"
             href="{{ route('dashboard') }}">
             <div class="brand-logo me-2">
                 <i class="fas fa-leaf text-success"></i>
@@ -31,14 +31,14 @@
             <!-- Dashboard -->
             <li class="nav-item mb-1">
                 <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                    <i class="fas fa-tachometer-alt me-3"></i>
+                    <i class="fas fa-tachometer-alt me-2"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
 
             @if($user && $user->role === 'admin')
                 <!-- User Management Section -->
-                <li class="nav-section-header">
+                <li class="nav-section-header mt-n1">
                     <span><i class="fas fa-users-cog me-2"></i>Gestion Utilisateurs</span>
                 </li>
                 <li class="nav-item mb-1">
@@ -49,7 +49,7 @@
                 </li>
 
                 <!-- Events Section -->
-                <li class="nav-section-header">
+                <li class="nav-section-header  mt-n1"">
                     <span><i class="fas fa-calendar me-2"></i>Événements</span>
                 </li>
                 <li class="nav-item mb-1">
@@ -85,7 +85,7 @@
                 </li>
 
                 <!-- Feedback Section -->
-                <li class="nav-section-header">
+                <li class="nav-section-header  mt-n1"">
                     <span><i class="fas fa-comments me-2"></i>Retours & Évaluations</span>
                 </li>
                 <li class="nav-item mb-1">
@@ -102,7 +102,7 @@
                 </li>
 
                 <!-- Resources Section -->
-                <li class="nav-section-header">
+                <li class="nav-section-header  mt-n1"">
                     <span><i class="fas fa-box me-2"></i>Ressources & Logistique</span>
                 </li>
            

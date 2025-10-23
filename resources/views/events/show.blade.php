@@ -47,7 +47,7 @@
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <span class="text-sm text-secondary">Price:</span>
-                                                        <h6 class="text-dark mb-0">${{ number_format($event->price, 2) }}</h6>
+                                                        <h6 class="text-dark mb-0">{{ number_format($event->price, 2) }} TND</h6>
                                                     </div>
                                                     <div class="mb-3">
                                                         <span class="text-sm text-secondary">Visibility:</span>

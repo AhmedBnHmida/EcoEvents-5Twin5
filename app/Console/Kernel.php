@@ -36,6 +36,18 @@ class Kernel extends ConsoleKernel
                 ->weekly()
                 ->sundays()
                 ->at('01:00');
+                   // Envoyer les rappels 24 heures avant les événements
+        $schedule->command('events:send-reminders --hours=24')
+        ->dailyAt('09:00')
+        ->withoutOverlapping()
+        ->appendOutputTo(storage_path('logs/reminders.log'));
+
+// Vérifier les événements récemment terminés et envoyer des remerciements
+$schedule->command('events:send-thank-you')
+        ->dailyAt('10:00')
+        ->withoutOverlapping()
+        ->appendOutputTo(storage_path('logs/thank-you.log'));
+                
     }
 
     /**

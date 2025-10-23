@@ -28,8 +28,14 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect all users to home page after login
-        return redirect()->intended('/');
+        // Redirect based on user role
+        $user = Auth::user();
+        if ($user && ($user->role === 'admin' || $user->role === 'organisateur')) {
+            return redirect()->intended(route('dashboard'));
+        }
+        
+        // Redirect other users to events page
+        return redirect()->intended(route('events.public.index'));
     }
 
     /**

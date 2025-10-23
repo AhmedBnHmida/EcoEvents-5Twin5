@@ -738,7 +738,7 @@
                 messages: {
                     required: 'Price is required',
                     min: 'Price cannot be negative',
-                    max: 'Price cannot exceed $10,000'
+                    max: 'Price cannot exceed 10,000 TND'
                 }
             },
             categorie_id: {

@@ -86,9 +86,7 @@
                                     <a href="{{ route('feedback.index') }}" class="btn btn-outline-secondary btn-sm">
                                         <i class="fas fa-redo me-1"></i>Réinitialiser les filtres
                                     </a>
-                                    <a href="{{ route('feedback.categories.index') }}" class="btn btn-info btn-sm ms-2">
-                                        <i class="fas fa-tags me-1"></i>Gérer les catégories
-                                    </a>
+                                  
                                 </div>
                             </div>
                         </form>

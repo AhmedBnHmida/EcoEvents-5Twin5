@@ -116,7 +116,7 @@
                                             <i class="fas fa-tag text-success me-2"></i>
                                             <strong>Prix:</strong> 
                                             @if($registration->event->price > 0)
-                                                ${{ number_format($registration->event->price, 2) }}
+                                                {{ number_format($registration->event->price, 2) }} TND
                                             @else
                                                 <span class="text-success">Gratuit</span>
                                             @endif
@@ -127,19 +127,27 @@
                         </div>
 
                         <!-- Actions -->
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ route('registrations.my') }}" class="btn btn-outline-light">
+                        <div class="d-flex justify-content-between flex-wrap">
+                            <a href="{{ route('registrations.my') }}" class="btn btn-outline-light mb-2">
                                 <i class="fas fa-arrow-left me-2"></i>Mes inscriptions
                             </a>
-                            @if($registration->status->value !== 'canceled' && $registration->user_id === auth()->id())
-                            <form action="{{ route('registrations.destroy', $registration->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler votre inscription ?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="fas fa-times me-2"></i>Annuler mon inscription
-                                </button>
-                            </form>
-                            @endif
+                            <div class="d-flex gap-2">
+                                @if($registration->status->value === 'pending' && $registration->event->price > 0 && $registration->user_id === auth()->id())
+                                <a href="{{ route('payment.checkout', $registration->id) }}" class="btn btn-payment mb-2">
+                                    <i class="fas fa-credit-card me-2"></i>Payer maintenant
+                                </a>
+                                @endif
+                                
+                                @if($registration->status->value !== 'canceled' && $registration->user_id === auth()->id())
+                                <form action="{{ route('registrations.destroy', $registration->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler votre inscription ?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger mb-2">
+                                        <i class="fas fa-times me-2"></i>Annuler mon inscription
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -160,6 +168,8 @@
             --color-success-bright-nav: #81c784;
             --color-dark-input: #2c3e50;
             --color-border-light: rgba(255, 255, 255, 0.1);
+            --color-payment-gradient-start: #4facfe;
+            --color-payment-gradient-end: #00f2fe;
         }
 
         /* Global Styles */
@@ -199,6 +209,46 @@
             width: 100vw;
             height: 100vh;
             background-color: var(--color-dark-main-bg);
+        }
+
+        /* Payment Button Styles */
+        .btn-payment {
+            background: linear-gradient(135deg, var(--color-payment-gradient-start) 0%, var(--color-payment-gradient-end) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-payment:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(79, 172, 254, 0.4);
+            color: white;
+        }
+        
+        .btn-payment:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-payment::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .btn-payment:hover::before {
+            transform: translateX(100%);
         }
 
         /* Responsive Adjustments */

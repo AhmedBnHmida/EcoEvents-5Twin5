@@ -134,7 +134,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="price" class="form-control-label">Price ($)</label>
+                                        <label for="price" class="form-control-label">Price (TND)</label>
                                         <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" 
                                                id="price" name="price" value="{{ old('price', $event->price) }}" min="0" required>
                                         @error('price')

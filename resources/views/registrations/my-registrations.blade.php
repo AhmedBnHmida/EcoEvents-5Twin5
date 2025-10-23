@@ -77,6 +77,13 @@
                                     <a href="{{ route('registrations.show', $registration->id) }}" class="btn btn-sm btn-success-gradient">
                                         <i class="fas fa-eye me-1"></i>Détails
                                     </a>
+                                    
+                                    @if($registration->status->value === 'pending' && $registration->event->price > 0)
+                                    <a href="{{ route('payment.checkout', $registration->id) }}" class="btn btn-sm btn-payment-small w-100">
+                                        <i class="fas fa-credit-card me-1"></i>Payer
+                                    </a>
+                                    @endif
+                                    
                                     @if($registration->status->value !== 'canceled')
                                     <form action="{{ route('registrations.destroy', $registration->id) }}" method="POST" onsubmit="return confirm('Annuler votre inscription ?');">
                                         @csrf
@@ -127,6 +134,8 @@
             --color-success-bright-nav: #81c784;
             --color-dark-input: #2c3e50;
             --color-border-light: rgba(255, 255, 255, 0.1);
+            --color-payment-gradient-start: #4facfe;
+            --color-payment-gradient-end: #00f2fe;
         }
 
         /* Global Styles */
@@ -180,6 +189,44 @@
             width: 100vw;
             height: 100vh;
             background-color: var(--color-dark-main-bg);
+        }
+
+        /* Payment Button Styles */
+        .btn-payment-small {
+            background: linear-gradient(135deg, var(--color-payment-gradient-start) 0%, var(--color-payment-gradient-end) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(79, 172, 254, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-payment-small:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(79, 172, 254, 0.4);
+            color: white;
+        }
+        
+        .btn-payment-small:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-payment-small::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .btn-payment-small:hover::before {
+            transform: translateX(100%);
         }
 
         /* Responsive Adjustments */
