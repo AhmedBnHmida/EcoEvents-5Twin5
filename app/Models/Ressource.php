@@ -12,7 +12,7 @@ class Ressource extends Model
 
     public function fournisseur()
     {
-        return $this->belongsTo(User::class, 'fournisseur_id');
+        return $this->belongsTo(Fournisseur::class, 'fournisseur_id');
     }
 
     public function event()
