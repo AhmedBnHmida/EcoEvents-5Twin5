@@ -89,7 +89,7 @@
                             </div>
                             <div class="card-body p-0">
                                 <div class="certificate-preview position-relative">
-                                    <iframe src="{{ route('certificates.download', $certificate->id) }}?display=true" width="100%" height="650px" style="border: none; display: block;"></iframe>
+                                    <iframe src="{{ route('certificates.download', $certificate->id) }}?display=true" width="100%" height="500px" style="border: none; display: block;"></iframe>
                                 </div>
                                 <div class="certificate-actions p-4 bg-dark-input border-top border-secondary">
                                     <p class="text-muted mb-0 text-center">

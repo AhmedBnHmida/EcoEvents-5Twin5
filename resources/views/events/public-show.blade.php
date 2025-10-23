@@ -126,7 +126,7 @@
                                 <div class="price-display bg-dark-input rounded-3 p-3 text-center border">
                                     <h3 class="text-success mb-1 fw-bold">
                                         @if($event->price > 0)
-                                            ${{ number_format($event->price, 2) }}
+                                            {{ number_format($event->price, 2) }} TND
                                         @else
                                             <span class="text-success">GRATUIT</span>
                                         @endif
@@ -366,7 +366,7 @@
                                     <div class="text-center mb-3">
                                         <h4 class="text-success fw-bold mb-1">
                                             @if($event->price > 0)
-                                                ${{ number_format($event->price, 2) }}
+                                                {{ number_format($event->price, 2) }} TND
                                             @else
                                                 <span class="text-success">GRATUIT</span>
                                             @endif
