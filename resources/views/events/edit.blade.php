@@ -17,21 +17,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        {{-- Debug: Dump event and resources for inspection --}}
-                        @if(config('app.debug'))
-                            <div class="alert alert-info">
-                                <h6>Debug Info:</h6>
-                                <p><strong>Event ID:</strong> {{ $event->id }}</p>
-                                <p><strong>Total Resources:</strong> {{ $event->ressources->count() }}</p>
-                                <ul>
-                                    @foreach($event->ressources as $resource)
-                                        <li>Resource {{ $loop->index + 1 }}: Nom="{{ $resource->nom }}", Type="{{ $resource->type }}", Quantite={{ $resource->quantite }}, Fournisseur ID={{ $resource->fournisseur_id }}</li>
-                                    @endforeach
-                                </ul>
-                                <p><strong>Fournisseurs Count:</strong> {{ count($fournisseurs) }}</p>
-                                <p><strong>Resource Types:</strong> {{ json_encode($resourceTypes) }}</p>
-                            </div>
-                        @endif
+                        
 
                         <form action="{{ route('events.update', $event->id) }}" method="POST" enctype="multipart/form-data" id="edit-event-form">
                             @csrf
@@ -245,9 +231,6 @@
                     @error('resources.'.$index.'.nom')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    @if(config('app.debug'))
-                        <small class="text-muted d-block">Debug: Old Nom = {{ old('resources.'.$index.'.nom') }}</small>
-                    @endif
                 </div>
             </div>
             <div class="col-md-2">
@@ -265,9 +248,6 @@
                     @error('resources.'.$index.'.type')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    @if(config('app.debug'))
-                        <small class="text-muted d-block">Debug: Old Type = {{ old('resources.'.$index.'.type') }}, Current = {{ $resource->type }}</small>
-                    @endif
                 </div>
             </div>
             <div class="col-md-2">
@@ -278,9 +258,6 @@
                     @error('resources.'.$index.'.quantite')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    @if(config('app.debug'))
-                        <small class="text-muted d-block">Debug: Old Quantite = {{ old('resources.'.$index.'.quantite') }}, Current = {{ $resource->quantite ?? 'NULL' }}</small>
-                    @endif
                 </div>
             </div>
             <div class="col-md-3">
@@ -298,9 +275,6 @@
                     @error('resources.'.$index.'.fournisseur_id')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    @if(config('app.debug'))
-                        <small class="text-muted d-block">Debug: Expected Fournisseur ID = {{ $resource->fournisseur_id ?? 'NULL' }}, Selected = {{ old('resources.'.$index.'.fournisseur_id', $resource->fournisseur_id) }}</small>
-                    @endif
                 </div>
             </div>
             <div class="col-md-2 d-flex align-items-end">

@@ -16,7 +16,7 @@ class QrScanController extends Controller
     public function showScanPage()
     {
         // Vérifier que l'utilisateur est un organisateur ou un admin
-        if (!Auth::user()->isAdmin() && Auth::user()->role !== 'organizer') {
+        if (!Auth::user()->isAdmin() && !Auth::user()->isOrganisateur()) {
             abort(403, 'Accès non autorisé.');
         }
         
@@ -29,7 +29,7 @@ class QrScanController extends Controller
     public function processScan(Request $request)
     {
         // Vérifier que l'utilisateur est un organisateur ou un admin
-        if (!Auth::user()->isAdmin() && Auth::user()->role !== 'organizer') {
+        if (!Auth::user()->isAdmin() && !Auth::user()->isOrganisateur()) {
             return response()->json(['error' => 'Accès non autorisé'], 403);
         }
 
@@ -93,7 +93,7 @@ class QrScanController extends Controller
     public function markAsAttended(Request $request)
     {
         // Vérifier que l'utilisateur est un organisateur ou un admin
-        if (!Auth::user()->isAdmin() && Auth::user()->role !== 'organizer') {
+        if (!Auth::user()->isAdmin() && !Auth::user()->isOrganisateur()) {
             return response()->json(['error' => 'Accès non autorisé'], 403);
         }
 

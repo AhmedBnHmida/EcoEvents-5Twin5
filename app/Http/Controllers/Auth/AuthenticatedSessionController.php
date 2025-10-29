@@ -35,7 +35,7 @@ class AuthenticatedSessionController extends Controller
         }
         
         // Redirect other users to events page
-        return redirect()->intended(route('events.public.index'));
+        return redirect()->intended('/');
     }
 
     /**

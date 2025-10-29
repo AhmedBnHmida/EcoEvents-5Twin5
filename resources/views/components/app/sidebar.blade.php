@@ -76,14 +76,14 @@
                         <span>Scanner QR</span>
                     </a>
                 </li>
-
+<!--
                 <li class="nav-item mb-1">
                     <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('certificates.index') ? 'active' : '' }}" href="{{ route('certificates.index') }}">
                         <i class="fas fa-certificate me-3"></i>
                         <span>Certificats</span>
                     </a>
                 </li>
-
+-->
                 <!-- Feedback Section -->
                 <li class="nav-section-header  mt-n1"">
                     <span><i class="fas fa-comments me-2"></i>Retours & Évaluations</span>
@@ -164,12 +164,6 @@
                     <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('qrscan.show') ? 'active' : '' }}" href="{{ route('qrscan.show') }}">
                         <i class="fas fa-qrcode me-3"></i>
                         <span>Scanner QR</span>
-                    </a>
-                </li>
-                <li class="nav-item mb-1">
-                    <a class="nav-link modern-nav-link d-flex align-items-center {{ is_current_route('certificates.index') ? 'active' : '' }}" href="{{ route('certificates.index') }}">
-                        <i class="fas fa-certificate me-3"></i>
-                        <span>Certificats</span>
                     </a>
                 </li>
                 <li class="nav-item mb-1">

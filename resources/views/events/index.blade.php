@@ -291,8 +291,8 @@
                                             </td>
                                             <td>
                                                 @if($event->at_risk)
-                                                    <span class="badge badge-sm bg-gradient-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="This event needs improvement">
-                                                        <i class="fas fa-exclamation-triangle me-1"></i> At Risk
+                                                    <span class="badge badge-sm bg-gradient-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Cet événement présente des risques basés sur les retours négatifs">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i> À améliorer
                                                     </span>
                                                 @else
                                                     <span class="badge badge-sm bg-gradient-success">
